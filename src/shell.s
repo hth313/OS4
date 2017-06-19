@@ -5,7 +5,8 @@
 ;;;
 ;;; **********************************************************************
 
-              #include "mainframe.i"
+#include "mainframe.i"
+#include "core.h"
 
 
 ;;; **********************************************************************
@@ -308,6 +309,7 @@ shellHandle:  cxisa
 ;;;      Returns to (P+2) with
 ;;;          C[6:3] - pointer to shell
 ;;;          M - shell scan state
+;;;          ST= system buffer flags, Header[1:0]
 ;;; Uses: A, B.X, C, DADD, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -362,6 +364,7 @@ nextShell:    c=m                   ; C= shell scan state
 ;;;      Returns to (P+2) with
 ;;;          A.X - pointer to buffer header
 ;;;          A.M - number of shell registers - 1
+;;;          ST= system buffer flags, Header[1:0]
 ;;;          PT= 6
 ;;;          DADD= buffer header
 ;;; Uses: A, B.X, C, +1 sub level
@@ -372,6 +375,7 @@ nextShell:    c=m                   ; C= shell scan state
 shellSetup:   gosub   sysbuf
               rtn
               data=c                ; read buffer header
+              st=c
               rcr     4
               c=0     xs
               c=c-1   x
@@ -393,7 +397,7 @@ shellSetup:   gosub   sysbuf
               .public doDisplay
 doDisplay:    gosub   topShell
               rtn
-mayCall:      c=c+1   m      ; step to display routine
+mayCall:      c=c+1   m             ; step to display routine
               cxisa
               ?c#0    x             ; exists?
               rtn nc                ; no display routine
@@ -424,28 +428,29 @@ callPacked:   c=c+c   x
               .public keyHandler
 keyHandler:   cxisa                 ; read control word
               a=c     m             ; A[6:3]= shell pointer
-              rcr     2
-              st=c
-              ?s0=1                 ; app shell?
-              gonc    10$           ; no
-              ?s8=1                 ; have we already seen an app shell?
-              rtn c                 ; yes, skip this one
-              s8=1                  ; no, but now we have
+              c=c-1   xs
+              goc     10$           ; sys shell
+              c=c-1   xs
+              rtn nc                ; extension point, skip this one
+              ?st=1   Flag_NoApps   ; app shell, are we looking for one?
+              rtn c                 ; no, skip past it
+              st=1    Flag_NoApps   ; yes, do not for other apps than this
 10$:          c=0     x
               dadd=c
               c=regn  14            ; get flags
-              st=c
-              rcr     7
-              a=0     x
-              a=a+1   x
-              c=c&a
-              ?c#0    x             ; user mode?
-              goc     14$
-              ?s7=1                 ; alpha mode?
-              gonc    16$
 
-              a=a+1   m             ; alpha mode
+              rcr     7
+              cstex
+              ?s0=1                 ; user mode?
+              goc     14$           ; yes
+              cstex
+              rcr     7
+              cstex
+              ?s7=1                 ; alpha mode?
+              gonc    16$           ; no
+              a=a+1   m             ; yes
 14$:          a=a+1   m             ; user mode
 16$:          a=a+1   m             ; normal mode
               acex    m
+              cstex
               goto    mayCall

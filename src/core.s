@@ -91,7 +91,6 @@ lightWake:    ldi     0x2fd         ; PACH11
               gosub   topShell
               goto    5$            ; (P+1) no shell, ordinary keyboard logic
 
-              s8=0                  ; no application seen yet
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
                                     ; next shell

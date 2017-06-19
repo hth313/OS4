@@ -28,14 +28,15 @@
 ;;;    instructions to be assigned to keys.
 ;;;
 ;;; Buffer header:
-;;;   ID SZ KA BF SH 0000
+;;;   ID SZ KA BF SH 00ST
 ;;; where
 ;;;   ID - buffer ID
 ;;;   SZ - buffer size
 ;;;   KA - offset to first secondary KAR, 00 means no secondary KAR
 ;;;   BF - number of hosted buffers
 ;;;   SH - number of shell registers
-;;;   0000 - reserved for future
+;;;   00 - reserved for future
+;;;   ST - system buffer status flags, see core.h
 ;;;
 ;;; Shell stack register:
 ;;;   Two entries in each register, defined as follows
@@ -75,6 +76,7 @@
 ;;;     KK - the key used
 ;;;
 ;;; **********************************************************************
+
 
 
 ;;; **********************************************************************
@@ -136,7 +138,7 @@ chkbuf:       dadd=c                ; select chip 0
               goc     1$            ; yes, move to next register
               ?a#c    pt            ; no, must be a buffer, have we found
                                     ; the buffer we are searching for?
-              gonc    RTNP2         ; yes, return to (P+2)
+              gonc    relayRTNP2    ; yes, return to (P+2)
               rcr     10            ; wrong buffer, skip to next
               c=0     xs
               a=a+c   x
@@ -146,7 +148,6 @@ chkbuf:       dadd=c                ; select chip 0
 ;;; **********************************************************************
 ;;;
 ;;; findKAR2 - locate the first secondary KAR
-;;; RTNP2 - return to P+2
 ;;;
 ;;; findKAR2 can typically be used by routines that want to access all
 ;;;   key assignment registers. After doing the normaly ones, this
@@ -168,7 +169,8 @@ chkbuf:       dadd=c                ; select chip 0
 ;;;
 ;;; **********************************************************************
 
-              .public findKAR2, RTNP2
+              .public findKAR2
+              .extern RTNP2
 findKAR2:     gosub   sysbuf
               rtn                   ; no system buffer, return to P+1
               rcr     8             ; C[1:0] = secondary KAR offset
@@ -177,9 +179,7 @@ findKAR2:     gosub   sysbuf
               rtn nc                ; no secondary KARs, return to P+1
               a=a+c   x             ; A.X= address of first secondary KAR
                                     ; (this can give carry)
-RTNP2:        c=stk                 ; return to (P+2)
-              c=c+1   m
-              gotoc
+relayRTNP2:   golong  RTNP2         ; return to (P+2)
 
 
 ;;; **********************************************************************
@@ -210,7 +210,7 @@ stepKAR:      a=a+1   x             ; step to next KAR
               acex    x
               c=data                ; read it
               c=c+1   s             ; is it a KAR?
-              goc     RTNP2         ; yes
+              goc     relayRTNP2    ; yes
               rtn                   ; no
 
 

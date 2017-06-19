@@ -454,3 +454,62 @@ keyHandler:   cxisa                 ; read control word
               acex    m
               cstex
               goto    mayCall
+
+
+;;; **********************************************************************
+;;;
+;;; extensionHandler - invoke an extension
+;;;
+;;; In:  C[1:0] - generic extension code
+;;; Out:   Depends on extension behavior and if there is an active one.
+;;;        If there are no matching generic extension, returns to the
+;;;        caller.
+;;;        If there is a matching generic extension, it decides on what to
+;;;        do next and is extension defined.
+;;;        Typical behavior include one of the following:
+;;;        1. Return to extensionHandler using a normal 'rtn'. This is
+;;;           typical if it is some kind of notification or broadcast.
+;;;           In this case the shell stack is further searched for more
+;;;           matching generic extensions that will also get the chance
+;;;           to be called.
+;;;        2. As a single handler that bypasses further matches by returning
+;;;           to the orignal caller. This can be done using:
+;;;             spopnd
+;;;             rtn
+;;;           Which takes us back to the original caller. It is not possible
+;;;           for it to tell whether the call was handled by a generic
+;;;           extension, unless some told by the return value, for example
+;;;           using the N register that is not used by extensionHandler.
+;;;           Another alternative is to return to (P+2) if the call was
+;;;           handled (unhandled calls always return to (P+1)), this can
+;;;           be done using:
+;;;             golong dropRTNP2
+;;;        Argument/accumulator:
+;;;        You can pass information in for example N register to the
+;;;        handler(s). Handler may update that information or whatever
+;;;        is appropriate/useful. This is basically a protocol between
+;;;        the original caller and the handlers, and is completely up to
+;;;        the extension to define the protocol.
+;;; Note: An extension that returns to extensionHandler must preserve
+;;;       M and B.X and not leave PFAD active.
+;;; Uses: A, B.X, C, M, ST, DADD, active PT, +3 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code
+              .public extensionHandler
+extensionHandler:
+              st=c                  ; ST= extension code
+              gosub   topShell
+              rtn                   ; (P+1) no shells
+              ldi     0x200         ; (P+2) go ahead and look
+              c=st
+              bcex    x             ; B.X= extension code to look for
+10$:          cxisa                 ; read control word
+              a=c     x
+              a=a-b   x
+              ?a#0    x             ; same?
+              gsubnc  mayCall       ; yes, try to invoke it
+              gosub   nextShell     ; not handled here, skip to next
+              rtn                   ; (P+1) no more shells
+              goto    10$           ; (P+2) try the next one

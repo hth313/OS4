@@ -113,7 +113,47 @@ deepWake:     gosub   releaseShells
               golong  DSWKUP+2
 
 
-              .section errorHandlers
+
+;;; **********************************************************************
+;;;
+;;; In this section we store some smaller routines that we do not expect
+;;; ever need to be changed. We save a relay jump by doing this.
+;;;
+;;; **********************************************************************
+
+              .section fixedEntries
+
+;;; **********************************************************************
+;;;
+;;; RTNP2 - return to P+2
+;;; dropRTNP2 - drop stack and return to P+2
+;;;
+;;; These routines are useful for returning skipping past the instruction
+;;; just after the gosub.
+;;;
+;;; dropRTNP2 is meant to be used with generic extensions that wants to
+;;;  return back to the original caller (instead of exiting back to
+;;;  mainframe). It simply drops the return address (which points back to
+;;;  extensionHandler) and returns to (P+2) of the original generic
+;;;  extension caller.
+;;;
+;;; Uses: C[6:3]
+;;;
+;;; **********************************************************************
+
+              .public dropRTNP2, RTNP2
+dropRTNP2:    spopnd
+RTNP2:        c=stk
+              c=c+1   m
+              gotoc
+
+;;; **********************************************************************
+;;;
+;;; noRoom - show NO ROOM error
+;;; displayError, errMessl, errExit - error support routines
+;;;
+;;; **********************************************************************
+
               .public noRoom
 noRoom:       gosub   errMessl
               .messl  "NO ROOM"
@@ -129,6 +169,8 @@ errMessl:     gosub   LEFTJ
 errExit:      gosub   ERRSUB
               gosub   CLLCDE
               golong  MESSL
+
+
 
 
 ;;; **********************************************************************

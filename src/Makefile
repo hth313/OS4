@@ -1,5 +1,6 @@
 
-SRCS = core.s buffer.s shell.s mainframe.s
+SRCS = core.s buffer.s shell.s mainframe.s mainframe_cx.s keyboard.s \
+       secondaryFAT.s semiMerged.s xmem.s
 OBJS = $(SRCS:%.s=%.o)
 MOD = osext.mod
 
@@ -9,7 +10,7 @@ all: $(MOD)
 	asnut -g -l $<
 
 $(MOD): $(OBJS) linker.scm osext.moddesc
-	lnnut -g $(OBJS) -llinker.lst linker.scm osext.moddesc
+	lnnut -g $(OBJS) --list-file=linker.lst linker.scm osext.moddesc
 
 clean:
 	rm $(OBJS) $(MOD)

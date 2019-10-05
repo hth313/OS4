@@ -6,7 +6,9 @@
 ;;; **********************************************************************
 
 #include "mainframe.i"
-#include "core.h"
+
+#define IN_RATATOSK
+#include "ratatosk.h"
 
 
 ;;; **********************************************************************
@@ -19,25 +21,29 @@
 ;;;     gosub someRoutine
 ;;;
 ;;;          .align 4
-;;; myShell: .con    definitionBits
+;;; myShell: .con    kind
 ;;;          .con    .low12 displayRoutine
 ;;;          .con    .low12 standardKeys
 ;;;          .con    .low12 userKeys
 ;;;          .con    .low12 alphaKeys
+;;;          .con    .low12 appendName
 ;;;
-;;; definitionBits
-;;;   0 - Set if this is an application, this means that it is only active
+;;; kind
+;;;   0 - system shell, means that it is a system extension. A Shell that
+;;;       defines an alternative way to display numbers, like FIX-ALL would
+;;;        belong to this group. Will get activated even if not at top level
+;;;       of the stack if we scan down the stack as the top level Shell is
+;;;       only defining some partial behavior.
+;;;   1 - application shell, this means that it is only active
 ;;;       at top level. If found looking for a handler further down in the
 ;;;       stack, it is just skipped over.
-;;;       Cleared means that it is a system extension. A Shell that defines
-;;;       an alternative way to display numbers, like FIX-ALL would belong
-;;;       to this group. Will get activated even if not at top level of the
-;;;       stack if we scan down the stack as the top level Shell is only
-;;;       defining some partial behavior.
-;;;  routines - Need to be aligned 4, and 0 indicates means nothing special
-;;;             is defined. An integer or complex mode would define
-;;;             a standardKeys (probably set userKeys to the same), leave
-;;;             alphaKeys empty.
+;;;   2 - extension point
+;;; routines - Need to be aligned 4, and 0 indicates means nothing special
+;;;            is defined. An integer or complex mode would define
+;;;            a standardKeys (probably set userKeys to the same), leave
+;;;            alphaKeys empty.
+;;;
+;;;  Note: Leave other definitionBits to 0, they are for future expansion.
 ;;;
 ;;; **********************************************************************
 
@@ -47,7 +53,8 @@
 ;;; activateShell - activate a given Shell
 ;;;
 ;;; In: C.X - packed pointer to shell structure
-;;; Out: return to (P+2) if not enough free memory
+;;; Out: Returns to (P+1) if not enough free memory
+;;;      Returns to (P+2) on success
 ;;; Uses: A, B, C, M, G, S0, S1, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -56,17 +63,25 @@
               .public activateShell
               .extern getbuf, insertShell, noRoom
 activateShell:
+              c=stk                 ; get page
+              stk=c
+              csr     m
+              csr     m
+              csr     m             ; C[3]= page address
+              c=c+c   x             ; unpack pointer
+              c=c+c   x
+              rcr     -3            ; C[6:3]= pointer to shell
               gosub   shellHandle
               m=c                   ; M[6:0]= shell handle
               gosub   getbuf
-              goto    90$           ; no room
+              rtn                   ; no room
 
 ;;; Search shell stack for shell handle in M[6:0]
 ;;; General idea:
 ;;; 1. If this shell is already at the top position, we are done.
 ;;; 2. Scan downwards in stack looking for it.
 ;;; 3. If found, mark it as removed, goto 5.
-;;; 4. If not in stack and do not have any empty slot, push a new register
+;;; 4. If not in stack and there is no empty slot, push a new register
 ;;;    (2 empty slots) on top of stack.
 ;;; 5. Push the new element on top of stack letting previous elements ripple
 ;;;    down until we find an unused slot. We know there will be such slot as
@@ -77,10 +92,10 @@ activateShell:
               pt=     6
 
               b=a     x             ; B.X= buffer pointer
-              data=c                ; read buffer header
-              rcr     3
-              c=b     x
+              c=data                ; read buffer header
               rcr     1
+              c=b     x
+              rcr     3
               c=0     xs
               cmex                  ; M.X= number of stack registers
                                     ; M[13:11]= buffer header address
@@ -101,7 +116,7 @@ activateShell:
 12$:          ?a#c    wpt           ; is this the one we are looking for?
               goc     14$           ; no
               ?s1=1                 ; are we looking at the top entry?
-              rtn nc                ; yes, we are done
+              gonc    90$           ; yes, we are done
               c=0     pt            ; mark as unused
               data=c                ; write back
               goto    30$
@@ -132,25 +147,23 @@ activateShell:
               rcr     7
               data=c                ; write back
               ?a#0    pt            ; unused slot?
-              rtn nc                ; yes, done
+              gonc    90$           ; yes, done
               bcex    x             ; no, go to next register
               goto    32$
 
 38$:          data=c                ; write back
-              rtn                   ; done
-
-90$:          golong  noRoom        ; "NO ROOM" error exit
+              goto    90$           ; done
 
 40$:          ?s0=1                 ; did we encounter any empty slots?
               goc     30$           ; yes
-              acex
-              c=0     s             ; C= register value to insert
-              cmex
+              acex                  ; C[6:0]= shell value
+              c=0     s             ; mark upper half as unused
+              cmex                  ; M= shell register value to insert
               rcr     -3
               a=c     x             ; A.X= buffer header address
               gosub   insertShell   ; insert a shell register on top of stack
-              goto    90$           ; (P+1) no room
-              rtn                   ; (P+2) done
+              rtn                   ; (P+1) no room
+90$:          golong  RTNP2         ; (P+2) done
 
 
 ;;; **********************************************************************
@@ -167,7 +180,7 @@ activateShell:
 ;;;
 ;;; In: C.X - packed pointer to shell structure
 ;;; Out:
-;;; Uses: A, B.X, C, M, S0, active PT, +1 sub level
+;;; Uses: A, B.X, C, M, S0, DADD, active PT, +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -189,7 +202,7 @@ exitReclaim10:
               rcr     4
               c=0     xs            ; C.X= number of stack registers
               c=c-1   x             ; get 0 oriented counter
-              rtn c                 ; no shell registers
+              rtnc                  ; no shell registers
               cmex                  ; M.X= number of stack registers
               pt=     5             ; we will compare lower 6 nibbles
               acex                  ; A[5:0]= shell handle to deactivate
@@ -224,7 +237,7 @@ exitReclaim10:
 
 30$:          cmex
               c=c-1   x             ; decrement register counter
-              rtn c                 ; done
+              rtnc                  ; done
               cmex
               bcex    x
               goto    10$
@@ -237,14 +250,20 @@ exitReclaim10:
 ;;; This is done a wake up with the idea that modules that still want their
 ;;; Shells should reclaim them (using reclaimShell).
 ;;;
+;;; Out: Returns to (P+1) if no system buffer
+;;;      Returns to (P+2) if there is a system buffer with
+;;;          A.X= address of buffer header
+;;;
 ;;; **********************************************************************
 
               .section code
               .public releaseShells
 releaseShells:
               gosub   shellSetup
-              rtn
-10$:          a=a+1   x             ; step to next register
+              rtn                   ; (P+1) no system buffer
+              goto    20$           ; (P+2) system buffer, but no shells
+10$:          b=a     x             ; B.X= system buffer address
+              a=a+1   x             ; step to next register
               acex    x
               dadd=c
               acex    x
@@ -254,49 +273,39 @@ releaseShells:
               data=c
               a=a-1   m
               gonc    10$
-              rtn
+              abex    x             ; A.X= system buffer address
+20$:          golong  RTNP2         ; return to (P+2)
 
 
 ;;; **********************************************************************
 ;;;
 ;;; shellHandle - look up a packed shell address and turn it into a handle
 ;;;
-;;; In:  C[6:3] - packed pointer to shell
+;;; In:  C[6:3] - pointer to shell descriptor
 ;;; Out: C[6:0] - full shell handle
-;;;      C[6:3] - address of shell
+;;;      C[6:3] - address of shell descriptor
 ;;;      C[2] - status nibble (sys/app)
 ;;;      C[1:0] - XROM ID of shell
-;;; Uses: A, C, G, active PT=4
+;;; Uses: A, C, active PT=5
 ;;;
 ;;; **********************************************************************
 
               .section code
-shellHandle:  cxisa
-              c=c+c   x             ; shell low offset * 4
-              c=c+c   x
-              a=c                   ; A[6:3]= (P+2)
-                                    ; A[2:0]= low 12 bits of shell address
-
+shellHandle:  cxisa                 ; read definition bits
+              a=c                   ; A[6:3]= shell descriptor address
+              asl     x
+              asl     x             ; A[2]= status nibble (of definition bits)
               pt=     5             ; point to first address of page
               c=0     wpt
-              cxisa                 ; read XROM ID
-              rcr     -4            ; C[5:4]= XROM ID
-              pt=     4
-              g=c                   ; G= XROM ID
-
-              rcr     3             ; C[3]= page for (P+2)/shell
-              acex    x             ; C[3:0]= shell address
-              rcr     -3            ; C[6:3]= shell address
-              cxisa                 ; C[2]= packed kind nibble
-              c=c+1   xs            ; C[2]= unpacked kind nibble
-              pt=     0
-              c=g                   ; C[1:0]= XROM ID
-                                    ; C[6:0]= shell handle
+              cxisa                 ; C[1:0]= XROM ID
+              acex    m             ; C[6:3]= shell descriptor address
+              acex    xs            ; C[2]= status nibble (of definition bits)
               rtn
 
 
 ;;; **********************************************************************
 ;;;
+;;; topAppShell - find the topmost app shell
 ;;; topShell - find the topmost shell
 ;;; nextShell - find next shell
 ;;;
@@ -307,52 +316,96 @@ shellHandle:  cxisa
 ;;; In:  Nothing
 ;;; Out: Returns to (P+1) if no shells
 ;;;      Returns to (P+2) with
-;;;          C[6:3] - pointer to shell
+;;;          A[6:3] - pointer to shell
 ;;;          M - shell scan state
 ;;;          ST= system buffer flags, Header[1:0]
-;;; Uses: A, B.X, C, DADD, active PT, +2 sub levels
+;;; Uses: A, B.X, C, DADD, S8, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
               .section code
-              .public topShell, nextShell
-              .extern RTNP2
-topShell:     gosub   shellSetup
-              rtn
-              a=0     s             ; first slot
+              .public topAppShell, topShell, nextShell
+              .extern RTNP2, RTNP3
+topAppShell:  s8=1
+              goto    ts05
+topShell:     s8=0
+ts05:         gosub   shellSetup
+              rtn                   ; no system buffer
+              rtn                   ; no shells (though there was a buffer)
+              ?st=1   Flag_NoApps   ; running without apps?
+              gonc    ts08          ; no
+              ?s8=1                 ; are we looking for an app?
+              rtnc                  ; yes, so we cannot find anything
+
+ts08:         a=0     s             ; first slot
 ts10:         a=a+1   x
               acex    x
               dadd=c
               acex    x
               c=data
-              ?c#0    pt
-              goc     ts25
-ts14:         ?c#0    s
-              goc     ts20
+              ?c#0    pt            ; first slot in use?
+              goc     ts25          ; yes
+ts14:         ?c#0    s             ; second slot in use?
+              goc     ts20          ; yes
 ts16:         a=a-1   m
               gonc    ts10
-              rtn
+              rtn                   ; no shell found
 
 ts20:         rcr     7
               a=a+1   s             ; second slot
-ts25:         rcr     -3
-              acex
-              m=c
-              acex
-              golong  RTNP2
+ts25:         ?s8=1                 ; looking for app shell?
+              gonc    ts30          ; no, any will do, accept
+              c=c-1   xs            ; is it an app shell?
+              c=c-1   xs
+              gonc    ts08          ; no
 
-nextShell:    c=m                   ; C= shell scan state
+;;; * use this one
+ts30:         acex                  ; A[6:3]= pointer to shell
+              m=c                   ; M= shell scan state
+              golong  RTNP2         ; found, return to (P+2)
+
+nextShell:    s8=0                  ; looking for any shell
+              c=m                   ; C= shell scan state
               pt=     6
               ?c#0    s             ; next is in upper part?
               goc     10$           ; no, need a new register
-              dadd=c                ; select same register
-              a=c
+              dadd=c                ; yes, select same register
+              a=c                   ; A= shell scan state
               c=data
-              goto    ts14
+              goto    ts14          ; go looking at second slot
 
-10$:          c=0     s
+10$:          a=c
+              a=0     s             ; first slot
+              goto    ts16          ; loop again
+
+;;; **********************************************************************
+;;;
+;;; disableThisShell - end current shell
+;;;
+;;; Assuming that we are scanning the shell stack, disable the current
+;;; shell. Intended to be used when a transient App encounters a default
+;;; key that also means that it should end.
+;;;
+;;; In: M - shell scan state
+;;; Uses: A, C, DADD, PT=6
+;;;
+;;; **********************************************************************
+
+              .section code
+              .public disableThisShell
+disableThisShell:
+              c=m
               a=c
-              goto    ts16
+              dadd=c
+              c=data
+              ?a#0    s
+              goc     10$
+              pt=     6
+              c=0     pt
+              goto    20$
+10$:          c=0     s
+20$:          data=c
+              rtn
 
 
 ;;; **********************************************************************
@@ -360,8 +413,10 @@ nextShell:    c=m                   ; C= shell scan state
 ;;; shellSetup - prepare for scanning shell stack
 ;;;
 ;;; In:  Nothing
-;;; Out: Returns to (P+1) if no shells
-;;;      Returns to (P+2) with
+;;; Out: Returns to (P_1) if no system buffer
+;;;      Returns to (P+2) if no shells with
+;;;          A.X - pointer to buffer header
+;;;      Returns to (P+3) with
 ;;;          A.X - pointer to buffer header
 ;;;          A.M - number of shell registers - 1
 ;;;          ST= system buffer flags, Header[1:0]
@@ -373,36 +428,40 @@ nextShell:    c=m                   ; C= shell scan state
 
               .section code
 shellSetup:   gosub   sysbuf
-              rtn
+              rtn                   ; no buffer, return to (P+1)
               data=c                ; read buffer header
               st=c
               rcr     4
               c=0     xs
               c=c-1   x
-              rtn c                 ; no shell registers
+              golc    RTNP2         ; no shell registers, return to (P+2)
               c=0     m
               rcr     -3
               a=c     m
               pt=     6
-              golong  RTNP2
+              golong  RTNP3         ; there are shells, return to (P+3)
 
 
 ;;; **********************************************************************
 ;;;
 ;;; doDisplay - let the active display routine alter the display
 ;;;
+;;; This entry is used by core to update the display in case it is
+;;; showing normal X contents when it should be showing what the
+;;; active shell wants it to.
+;;;
 ;;; **********************************************************************
 
               .section code
               .public doDisplay
-doDisplay:    gosub   topShell
+doDisplay:    gosub   topAppShell
               rtn
 mayCall:      c=c+1   m             ; step to display routine
               cxisa
               ?c#0    x             ; exists?
-              rtn nc                ; no display routine
+              rtnnc                 ; no display routine
 
-callPacked:   c=c+c   x
+gotoPacked:   c=c+c   x
               c=c+c   x
               a=c     x
               rcr     3
@@ -431,18 +490,20 @@ keyHandler:   cxisa                 ; read control word
               c=c-1   xs
               goc     10$           ; sys shell
               c=c-1   xs
-              rtn nc                ; extension point, skip this one
+              rtnnc                 ; extension point, skip this one
               ?st=1   Flag_NoApps   ; app shell, are we looking for one?
-              rtn c                 ; no, skip past it
-              st=1    Flag_NoApps   ; yes, do not for other apps than this
+              rtnc                  ; no, skip past it
+              st=1    Flag_NoApps   ; yes, do not look for any further apps
 10$:          c=0     x
               dadd=c
               c=regn  14            ; get flags
 
               rcr     7
               cstex
+              a=0     s
               ?s0=1                 ; user mode?
               goc     14$           ; yes
+              a=a+1   s             ; A.S= non-zero, not user mode
               cstex
               rcr     7
               cstex
@@ -454,6 +515,48 @@ keyHandler:   cxisa                 ; read control word
               acex    m
               cstex
               goto    mayCall
+
+
+;;; **********************************************************************
+;;;
+;;; shellDisplay - show active shell display and set message flag
+;;;
+;;; This routine is meant to be called when a shell aware module wants
+;;; to show the X register before returning to mainframe. We will look
+;;; at the active application shell, do its display routine if mode is
+;;; appropriate and set message flag to avoid having the normal show X
+;;; routine update display, only to have it overwritten soon after.
+;;; After calling this routine, jump back to a suitable NFR* routine
+;;; which probably is NFRC.
+;;;
+;;; In: Nothing, do not care about DADD or PFAD
+;;; Out: Nothing
+;;; Uses: Worst case everything, +3 sub levels
+;;;
+;;; **********************************************************************
+
+              .public shellDisplay
+shellDisplay: ?s13=1                ; running?
+              rtnc                  ; yes, done
+              gosub   LDSST0        ; load SS0
+              ?s3=1                 ; program mode?
+              rtnc                  ; yes, no display override
+              ?s7=1                 ; alpha mode?
+              rtnc                  ; yes, no display override
+              gosub   topAppShell
+              rtn                   ; (P+1) no app shell
+              c=c+1   m             ; (P+2) point to display routine
+              cxisa
+              ?c#0    x             ; does it have a display routine?
+              rtnnc                 ; no
+              acex                  ; yes, A[6:3]= display routine
+              gosub   LDSST0        ; load SS0
+              s5=1                  ; set message flag
+              acex
+              c=st
+              regn=c  14
+              acex                  ; C[6:3]= display routine
+              goto    gotoPacked    ; update display
 
 
 ;;; **********************************************************************
@@ -513,3 +616,26 @@ extensionHandler:
               gosub   nextShell     ; not handled here, skip to next
               rtn                   ; (P+1) no more shells
               goto    10$           ; (P+2) try the next one
+
+
+;;; **********************************************************************
+;;;
+;;; shellName - append the name of the current shell to LCD
+;;;
+;;; Using the shell scan state, shift in the name of the active shell
+;;; from the right into the LCD.
+;;; This works the same way as MESSL, but the string comes from the shell.
+;;;
+;;; In: C[6:3] - pointer to shell
+;;; Out: LCD selected
+;;; Uses: A.M, C, +1 sub level
+;;;
+;;; **********************************************************************
+
+              .public shellName
+              .extern unpack5
+shellName:    gosub   unpack5
+              nop                   ; (P+1) igonored, we assume there is a
+                                    ;       defined name
+              gosub   ENLCD
+              golong  MESSL+1

@@ -13,7 +13,7 @@
 ;;; The system buffer keeps track of the following:
 ;;;
 ;;; 1. Shell stack, which describes alternative key handler and display
-;;;    routines. These are kept in a stack. A Shell can only appear once
+;;;    routines, in a stacked fashion. A Shell can only appear once
 ;;;    in the stack. See below for details.
 ;;;
 ;;; 2. Hosted I/O buffers. These are buffers held inside the system buffer.
@@ -28,28 +28,27 @@
 ;;;    instructions to be assigned to keys.
 ;;;
 ;;; Buffer header:
-;;;   ID SZ KA BF SH 00ST
+;;;   ID SZ KA BF SH DF ST
 ;;; where
 ;;;   ID - buffer ID
 ;;;   SZ - buffer size
 ;;;   KA - offset to first secondary KAR, 00 means no secondary KAR
 ;;;   BF - number of hosted buffers
 ;;;   SH - number of shell registers
-;;;   00 - reserved for future
-;;;   ST - system buffer status flags, see core.h
+;;;   DF - Default postfix byte during semi-merged argument entry.
+;;;   ST - system buffer status flags, see ratatosk.h
 ;;;
 ;;; Shell stack register:
 ;;;   Two entries in each register, defined as follows
-;;;     F XR ADDR
+;;;     ADDR F XR
 ;;; where
-;;;   F - a status flag, 0 - unclaimed
-;;;                      1 - in use
-;;;   XR - XROM# of the module owning the entry, or 00 for an unused
-;;;        entry.
+;;;   F - a status nibble (sys/app)
+;;;   XR - XROM# of the module owning the entry
 ;;;   ADDR - The address within the module page that defines the Shell
-;;;          structure.
-;;;  Note: Once allocated, we allow at least one empty Shell stack register
-;;;        to stay behind unused. This is because it anticipated that we may
+;;;          structure. If the top nibble here is 0, it means that it
+;;;          is an unused entry, all other bits are no-care.
+;;;  Note: Once allocated, we allow at least one empty Shell stack register to
+;;;        stay behind unused. This is because it is anticipated that we may
 ;;;        push something onto the stack again. In other words, we are not
 ;;;        eager to reclaim memory as soon as a single register becomes free.
 ;;;
@@ -61,7 +60,7 @@
 ;;;         c=c+c s
 ;;;         goc   unused entry
 ;;;    Or when scanning for a buffer, compare C[13:12] (as an invalid buffer
-;;;    will have the highest bit set and should not match any valid buffer ID.
+;;;    will have the highest bit set and shall not match any valid buffer ID.
 ;;;
 ;;; Secondary assignments:
 ;;;   These defines key assignments of secondary FAT entries. They are defined
@@ -70,9 +69,12 @@
 ;;;   where
 ;;;     F0 - Is the usual KAR marker, which will not cause problems as it is
 ;;;          held inside a buffer.
-;;;     AABB - The function, XR is the XROM# 1-31, the upper 3 bits should be
-;;;            0 for future use (perhaps for supporting multiple prefix XROMs
-;;;            for an additional 1792 secondary instructions).
+;;;     XRSC - The function, XR is the XROM# 1-31 left shifted 3 steps to
+;;;            align it with the highest bits. The lower 11 bits is the
+;;;            index in the secondary FATs. Primary FAT instructions use
+;;;            the normal assignment mechanism.
+;;;            This allows for selecting any of the first 2048 secondary
+;;;            FAT entries for a key.
 ;;;     KK - the key used
 ;;;
 ;;; **********************************************************************
@@ -88,6 +90,8 @@
 ;;; If found, return to (P+2) with:
 ;;;   A.X = address of buffer start register
 ;;;   DADD = first address of buffer
+;;;   C[13] = Reg[13] of buffer header incremented
+;;;   C[12:0] = buffer header
 ;;; Uses: A, C, B.X, active PT=12, DADD, +0 sub levels
 ;;;
 ;;; Note: For chkbuf, buffer number in C[0] and C[2:1] must be zero!!!
@@ -125,13 +129,13 @@ chkbuf:       dadd=c                ; select chip 0
 1$:           a=a+1   x             ; start of search loop
 2$:           c=b     x             ; C.X= chain head .END.
               ?a<c    x             ; have we reached chainhead?
-              rtn nc                ; yes, return to (P+1), not found
+              rtnnc                 ; yes, return to (P+1), not found
               acex    x             ; no, select and load register
               dadd=c
               acex    x
               c=data                ; read next register
               ?c#0                  ; if it is empty, then we reached end
-              rtn nc                ; of buffer area, return to not found
+              rtnnc                 ; of buffer area, return to not found
                                     ; location
               c=c+1   s             ; is it a key assignment register
                                     ; (KAR)?
@@ -176,9 +180,9 @@ findKAR2:     gosub   sysbuf
               rcr     8             ; C[1:0] = secondary KAR offset
               c=0     xs
               ?c#0    x
-              rtn nc                ; no secondary KARs, return to P+1
+              rtnnc                 ; no secondary KARs, return to P+1
               a=a+c   x             ; A.X= address of first secondary KAR
-                                    ; (this can give carry)
+                                    ; (assume this can not give carry)
 relayRTNP2:   golong  RTNP2         ; return to (P+2)
 
 
@@ -204,7 +208,7 @@ relayRTNP2:   golong  RTNP2         ; return to (P+2)
 stepKAR:      a=a+1   x             ; step to next KAR
               c=b     x             ; C.X= chain head .END.
               ?a<c    x             ; have we reached chainhead?
-              rtn nc                ; yes
+              rtnnc                 ; yes
               acex    x             ; no, select next register
               dadd=c
               acex    x
@@ -245,7 +249,7 @@ getbuf:       gosub   sysbuf
               a=c     x
               ldi     2             ; ensure at least 2 free registers
               ?a<c    x
-              rtn c                 ; no room, return to (P+1)
+              rtnc                  ; no room, return to (P+1)
               c=b     x
               dadd=c                ; select header
               a=c                   ; A.X= buffer start address
@@ -265,6 +269,8 @@ getbuf:       gosub   sysbuf
 ;;;
 ;;; In: A.X= buffer header address
 ;;;     M= contents to write to the new register
+;;; If no room for inserting a register, return to (P+1)
+;;; If register was inserted, return to (P+2) with:
 ;;; Out: A.X= buffer header address
 ;;;      B.X= the location of the newly added space
 ;;; Uses: A, B, C, G, DADD, active PT set to 10, +1 sub level
@@ -277,7 +283,7 @@ insertShell:  ldi     1
               pt=     0
               g=c
               gosub   openSpace
-              goto    90$           ; (P+1) no room
+              rtn                   ; (P+1) no room
               c=b     x             ; (P+2) C.X= newly created space
               dadd=c
               c=m                   ; get register contents to write
@@ -288,16 +294,14 @@ insertShell:  ldi     1
               c=data                ; C= buffer header
               rcr     4
               c=c+1   x             ; increase number of shell registers
-              rcr     2             ; C[1:0]= offset to secondary KAR
+              rcr     4             ; C[1:0]= offset to secondary KAR
               pt=     1
               ?c#0    wpt           ; do we host secondary KARs?
               gonc    10$           ; no
               c=c+1   x             ; yes, bump offset
-10$:          rcr     -6            ; re-align C
+10$:          rcr     -8            ; re-align C
               data=c                ; write back updated header
-              rtn
-
-90$:          golong  noRoom
+              golong  RTNP2         ; all good, return to (P+2)
 
 
 ;;; **********************************************************************
@@ -320,6 +324,7 @@ insertShell:  ldi     1
 openSpace:    b=a     x             ; B.X= buffer header
               a=a+c   x             ; A.X= where we want to open space
               c=0
+              dadd=c
               pt=     3
               c=g
               a=c     m             ; A.M= counter
@@ -353,7 +358,7 @@ openSpace:    b=a     x             ; B.X= buffer header
               dadd=c
               c=data                ; load buffer header
               c=a+c   m             ; increase size of buffer
-              rtn c                 ; return to (P+1) if buffer size overflows
+              rtnc                  ; return to (P+1) if buffer size overflows
                                     ; We know that buffer is F, so an overflow
                                     ; carry will ripple to outside of M field.
 

@@ -117,9 +117,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gonc    40$           ; no
 
               bcex                  ; yes, save adr in B
-              n=c
-              gosub   jumpC2        ; clear digit entry
-                                    ; must preserve: B, N and M!!!
+              c=n
+              gosub   appClearDigitEntry ; clear digit entry flag
               bcex
               golong  PARS60        ; do auto assigned user language label
 
@@ -155,26 +154,25 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               ?c#0    x             ; something there?
               gonc    30$           ; no, try another keyboard
               spopnd                ; we will handle the key, no going back now
-              c=c-1   xs            ; built-in function?
-              goc     100$          ; yes
+              c=c-1   xs            ; XROM override?
+              goc     50$           ; yes
               c=c-1   xs            ; digit entry?
               goc     110$          ; yes
-              m=c                   ; M.M= table address (for secondary below)
-                                    ; M.X= table value
-              c=c-1   xs            ; end digit entry?
-              goc     50$           ; no
-              c=n                   ; yes
+              c=c-1   xs            ; built-in, ends digit entry?
+              gonc    45$           ; no
+              c=n                   ;
               gosub   jumpC2        ; end digit entry
-50$:          c=m                   ; restore from M
-              c=0     xs            ; decode XROM
+45$:          c=m                   ; restore keycode
+              golong  PARS56
+
+50$:          c=0     xs            ; decode XROM
               a=c     x
               ldi     64
               ?a<c    x             ; local XROM function?
               gonc    150$          ; no, need to look at secondaries
 
-              rcr     3             ; yes, local XROM
-              c=0     x             ; point to XROM ID
-              rcr     -3
+              pt=     5             ; yes, local XROM
+              c=0     wpt           ; point to XROM ID
               cxisa                 ; C.X= XROM ID
               c=c+c   x             ; divide by 4
               c=c+c   x
@@ -188,7 +186,11 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     -2            ; C[3:2]= upper byte
               abex    x
               c=c+a   x             ; C[3:0]= complete 2 byte XROM
+              cnex                  ; N[3:0]= complete 2 byte XROM
+              gosub   appClearDigitEntry ; XROM ends digit entry
+              c=n
 58$:          golong  RAK70
+
 
 60$:          gosub   sysbuf        ; assigned key
               goto    70$           ; (P+1) ordinary key assignment
@@ -203,7 +205,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 ;;; that do not clear digit entry, but that should be handled by having 000 and
 ;;; falling back to default keyboard, not by coming here.
 100$:         cnex                  ; N=KC, get table pointer
-              gosub   jumpC2        ; end digit entry
+              gosub   appClearDigitEntry ; clear digit entry flag
               c=n                   ; restore key code
               c=c-1   x             ; adjust function code, it is offset by
                                     ; one to allow for 000 meaning pass through
@@ -223,7 +225,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               cstex
               ?s1=1                 ; catalog flag set?
               goc     114$          ; yes
-112$:         acex    x
+112$:         c=n                   ; C[6:3]= keyboard descriptor table
+              acex    x
               c=0     xs            ; C[2:0]= key value
                                     ;   0FF = backspace
               golong  jumpC1        ; go and handle digit
@@ -264,3 +267,30 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 
 160$:                               ; C.X= extended FAT offset
                                     ; C[6:3]= pointing somewhere in ROM page
+
+
+
+;;; **********************************************************************
+;;;
+;;; clearSystemDigitEntry - reset the system digit entry flag
+;;;
+;;; Uses: C, enables chip 0
+;;; **********************************************************************
+
+              .public clearSystemDigitEntry
+              .section code
+appClearDigitEntry:
+              gosub  jumpC2         ; tell app tor clear digit entry
+                                    ; must preserve: B, N and M!!!
+;;; * fall into clearSystemDigitEntry
+clearSystemDigitEntry:
+              c=0
+              dadd=c
+              c=regn  14
+              rcr     2
+              cstex
+              s2=0
+              cstex
+              rcr     -2
+              regn=c  14
+              rtn

@@ -57,7 +57,7 @@ NXBYT:        .equlab 0x4f26
 noRoom:       .equlab 0x4f28
 errorMessage: .equlab 0x4f2a
 errorExit:    .equlab 0x4f2c
-
+clearSystemDigitEntry: .equlab 0x4f2e
 #endif
 
 ;;; **********************************************************************
@@ -66,9 +66,9 @@ errorExit:    .equlab 0x4f2c
 ;;;
 ;;; **********************************************************************
 
-#define AppShell              0x000
-#define SysShell              0x100
-#define GenericExtension      0x200
+#define SysShell              0
+#define AppShell              1
+#define GenericExtension      2
 
 
 ;;; **********************************************************************

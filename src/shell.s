@@ -429,7 +429,7 @@ disableThisShell:
               .section code
 shellSetup:   gosub   sysbuf
               rtn                   ; no buffer, return to (P+1)
-              data=c                ; read buffer header
+              c=data                ; read buffer header
               st=c
               rcr     4
               c=0     xs
@@ -463,9 +463,9 @@ mayCall:      c=c+1   m             ; step to display routine
 
 gotoPacked:   c=c+c   x
               c=c+c   x
-              a=c     x
-              rcr     3
-              acex    x
+              csr     m
+              csr     m
+              csr     m
               rcr     -3
               gotoc
 
@@ -476,7 +476,7 @@ gotoPacked:   c=c+c   x
 ;;;
 ;;; !!!! Does not return if the key is handled.
 ;;;
-;;; In: C[6:3] - pointer to shell
+;;; In: A[6:3] - pointer to shell
 ;;;     S8 - set if we have already seen an application shell,
 ;;;          cleared otherwise. Should be cleared before making
 ;;;          the first of possibly successive calls to keyHandler.
@@ -485,11 +485,12 @@ gotoPacked:   c=c+c   x
 ;;; **********************************************************************
 
               .public keyHandler
-keyHandler:   cxisa                 ; read control word
+keyHandler:   acex    m
+              cxisa                 ; read control word
               a=c     m             ; A[6:3]= shell pointer
-              c=c-1   xs
+              c=c-1   x
               goc     10$           ; sys shell
-              c=c-1   xs
+              c=c-1   x
               rtnnc                 ; extension point, skip this one
               ?st=1   Flag_NoApps   ; app shell, are we looking for one?
               rtnc                  ; no, skip past it
@@ -545,17 +546,17 @@ shellDisplay: ?s13=1                ; running?
               rtnc                  ; yes, no display override
               gosub   topAppShell
               rtn                   ; (P+1) no app shell
-              c=c+1   m             ; (P+2) point to display routine
+              a=a+1   m             ; (P+2) point to display routine
+              acex    m
               cxisa
               ?c#0    x             ; does it have a display routine?
               rtnnc                 ; no
-              acex                  ; yes, A[6:3]= display routine
+              acex                  ; yes, A[6,2:0]= packed display routine
               gosub   LDSST0        ; load SS0
               s5=1                  ; set message flag
-              acex
               c=st
               regn=c  14
-              acex                  ; C[6:3]= display routine
+              acex                  ; C[6,2:0]= display routine
               goto    gotoPacked    ; update display
 
 
@@ -607,6 +608,7 @@ extensionHandler:
               rtn                   ; (P+1) no shells
               ldi     0x200         ; (P+2) go ahead and look
               c=st
+              acex    m             ; C[6:3]= pointer to shell descriptor
               bcex    x             ; B.X= extension code to look for
 10$:          cxisa                 ; read control word
               a=c     x

@@ -59,7 +59,7 @@ lightWake:    ldi     0x2fd         ; PACH11
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              chkkb
+              chk kb
               goc     bufferScan    ; key is down, find active handler
 
 3$:           ldi     8             ; I/O service
@@ -141,7 +141,6 @@ deepWake:     gosub   releaseShells
 fastDigitEntry:
 bufferScan:   c=c+c   xs
               c=c+c   xs
-              goc     toWKUP20      ; data entry in progress
               c=c+c   xs
               goc     toWKUP20      ; partial key in progress
 
@@ -150,7 +149,7 @@ bufferScan:   c=c+c   xs
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
               gosub   topShell
-              goto    20$           ; (P+1) no shell, ordinary keyboard logic
+              goto    toWKUP20      ; (P+1) no shell, ordinary keyboard logic
 
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
@@ -409,6 +408,7 @@ versionCheck: a=c     x
               .extern findKAR2, stepKAR
               .extern topAppShell, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
+              .extern clearSystemDigitEntry
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -433,3 +433,4 @@ versionCheck: a=c     x
               golong  noRoom
               golong  errorMessl
               golong  errorExit
+              golong  clearSystemDigitEntry

@@ -264,7 +264,9 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               data=c                ; read buffer header
               st=c                  ; ST= system buffer flags
               acex    x
-              n=c                   ; N.X= system buffer header address
+              pt=     0
+              cnex                  ; N.X= system buffer header address
+              g=c                   ; G= potential entered postfix argument
               ?s13=1                ; running?
               goc     3$            ; yes
               c=0     x
@@ -279,7 +281,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
 3$:           gosub   NXBYTP        ; examine argument byte
               b=a                   ; save address
               a=c     x             ; save operand byte
-              st=0    Flag_Argument   ; argument not known yet
+              st=0    Flag_Argument ; argument not known yet
 
 ;;; Entry point for executing from keyboard, in which case Flag_Argument
 ;;; must be set and the argument is in A[1:0]
@@ -290,7 +292,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               stk=c
               ?st=1   Flag_Argument   ; argument already known (before coming here)?
               gonc    2$            ; no
-              c=n                   ; yes, move argument to C[1:0]
+              c=g                   ; yes, move argument to C[1:0]
               goto    8$
 
 91$:          goto    9$            ; relay

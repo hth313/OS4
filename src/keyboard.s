@@ -43,14 +43,14 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               pt=     5
               a=c     wpt           ; A[6:3] = keyboard descriptor
               c=keys
-              rcr     5
-              ldi     0x2e4
-              c=c+c   xs            ; C.X= 0x4e4
+              rcr     5             ; KC to C[13:12]
+              ldi     0x2a4
+              c=c+c   xs            ; C.X= 0x4a4
               rcr     10
               pt=     3
               gotoc
 
-              .section keycode      ; place at 0x4e40 using linker
+              .section keycode      ; place at 0x4a40 using linker
               nop                   ; causes col 0 to map
                                     ; onto column 1
               lc      0             ; 1
@@ -62,7 +62,9 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               goto    10$           ; 7
               lc      3             ; 8
               goto    20$           ; 9
-
+              nop                   ; A (not used)
+              nop                   ; B (not used)
+              lc      4             ; C
 20$:          rcr     1
               a=c     x
               ?s4=1                 ; shiftset?

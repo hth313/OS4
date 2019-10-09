@@ -609,9 +609,9 @@ extensionHandler:
               rtn                   ; (P+1) no shells
               ldi     0x200         ; (P+2) go ahead and look
               c=st
-              acex    m             ; C[6:3]= pointer to shell descriptor
               bcex    x             ; B.X= extension code to look for
-10$:          cxisa                 ; read control word
+10$:          acex    m             ; C[6:3]= pointer to shell descriptor
+              cxisa                 ; read control word
               a=c     x
               a=a-b   x
               ?a#0    x             ; same?

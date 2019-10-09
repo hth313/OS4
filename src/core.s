@@ -149,7 +149,7 @@ bufferScan:   c=c+c   xs
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
               gosub   topShell
-              goto    toWKUP20      ; (P+1) no shell, ordinary keyboard logic
+              goto    20$           ; (P+1) no shell, ordinary keyboard logic
 
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to

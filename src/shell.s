@@ -65,12 +65,6 @@
 activateShell:
               c=stk                 ; get page
               stk=c
-              csr     m
-              csr     m
-              csr     m             ; C[3]= page address
-              c=c+c   x             ; unpack pointer
-              c=c+c   x
-              rcr     -3            ; C[6:3]= pointer to shell
               gosub   shellHandle
               m=c                   ; M[6:0]= shell handle
               gosub   getbuf
@@ -194,18 +188,20 @@ exitShell:    s0=0
 reclaimShell: s0=1
 
 exitReclaim10:
+              c=stk                 ; get page
+              stk=c
               gosub   shellHandle
               m=c
               gosub   sysbuf
               rtn                   ; no shell buffer, quick exit
-              data=c                ; read buffer header
+              c=data                ; read buffer header
               rcr     4
               c=0     xs            ; C.X= number of stack registers
               c=c-1   x             ; get 0 oriented counter
               rtnc                  ; no shell registers
               cmex                  ; M.X= number of stack registers
-              pt=     5             ; we will compare lower 6 nibbles
-              acex                  ; A[5:0]= shell handle to deactivate
+              pt=     6             ; we will compare lower 7 nibbles
+              acex                  ; A[6:0]= shell handle to deactivate
                                     ; C.X= buffer header address
 
 10$:          c=c+1   x             ; point to next shell register
@@ -281,7 +277,8 @@ releaseShells:
 ;;;
 ;;; shellHandle - look up a packed shell address and turn it into a handle
 ;;;
-;;; In:  C[6:3] - pointer to shell descriptor
+;;; In:  C[6] - page of shell descriptor
+;;;      C[2:] - packed page address of shell descriptor
 ;;; Out: C[6:0] - full shell handle
 ;;;      C[6:3] - address of shell descriptor
 ;;;      C[2] - status nibble (sys/app)
@@ -291,7 +288,14 @@ releaseShells:
 ;;; **********************************************************************
 
               .section code
-shellHandle:  cxisa                 ; read definition bits
+shellHandle:
+              csr     m
+              csr     m
+              csr     m             ; C[3]= page address
+              c=c+c   x             ; unpack pointer
+              c=c+c   x
+              rcr     -3            ; C[6:3]= pointer to shell
+              cxisa                 ; read definition bits
               a=c                   ; A[6:3]= shell descriptor address
               asl     x
               asl     x             ; A[2]= status nibble (of definition bits)

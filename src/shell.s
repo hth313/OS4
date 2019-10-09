@@ -456,6 +456,7 @@ shellSetup:   gosub   sysbuf
               .public doDisplay
 doDisplay:    gosub   topAppShell
               rtn
+              acex    m
 mayCall:      c=c+1   m             ; step to display routine
               cxisa
               ?c#0    x             ; exists?

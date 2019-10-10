@@ -229,7 +229,12 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               cstex
               ?s1=1                 ; catalog flag set?
               goc     114$          ; yes
-112$:         c=n                   ; C[6:3]= keyboard descriptor table
+112$:         c=regn  14            ; set message flag as we are doing some kind
+              cstex                 ;  of digit entry, so we assume a custom display
+              s5=1
+              cstex
+              regn=c  14
+              c=n                   ; C[6:3]= keyboard descriptor table
               acex    x
               c=0     xs            ; C[2:0]= key value
                                     ;   0FF = backspace

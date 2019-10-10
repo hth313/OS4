@@ -160,12 +160,12 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               goc     50$           ; yes
               c=c-1   xs            ; digit entry?
               goc     110$          ; yes
-              n=c                   ; save function code
               c=c-1   xs            ; built-in, ends digit entry?
               gonc    45$           ; no
-              gosub   jumpC2        ; end digit entry
-45$:          c=n                   ; restore function code
-              golong  PARS56
+              cnex                  ; save function code
+              gosub   appClearDigitEntry
+              c=n                   ; restore function code
+45$:          golong  PARS56
 
 50$:          c=0     xs            ; decode XROM
               a=c     x

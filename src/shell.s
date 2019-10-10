@@ -195,13 +195,19 @@ exitReclaim10:
               gosub   sysbuf
               rtn                   ; no shell buffer, quick exit
               c=data                ; read buffer header
+              pt=     13            ; reclaim system buffer
+              lc      1             ; (do not increment, it may make it wrap)
+              data=c
               rcr     4
               c=0     xs            ; C.X= number of stack registers
               c=c-1   x             ; get 0 oriented counter
               rtnc                  ; no shell registers
               cmex                  ; M.X= number of stack registers
-              pt=     6             ; we will compare lower 7 nibbles
-              acex                  ; A[6:0]= shell handle to deactivate
+                                    ; C[6]= page address of ROM
+              pt=     5             ; we will compare lower 6 nibbles
+                                    ; to match when reclaiming
+              acex                  ; A[5:0]= shell handle to (de)activate
+                                    ; A[6]= current page of the owning ROM
                                     ; C.X= buffer header address
 
 10$:          c=c+1   x             ; point to next shell register
@@ -210,13 +216,13 @@ exitReclaim10:
               c=data
               ?a#c    wpt           ; shell in lower part?
               goc     20$           ; no
+              pt=     6
               ?s0=1                 ; reclaim?
               goc     14$           ; yes
               c=0     pt            ; no, deactivate it
 12$:          data=c                ; write back
               rtn                   ; done
-14$:          pt=     6
-              acex    pt            ; reclaim it
+14$:          acex    pt            ; reclaim it
               goto    12$
 
 20$:          rcr     7             ; inspect upper part
@@ -258,7 +264,7 @@ releaseShells:
               gosub   shellSetup
               rtn                   ; (P+1) no system buffer
               goto    20$           ; (P+2) system buffer, but no shells
-10$:          b=a     x             ; B.X= system buffer address
+10$:          b=a     x             ; (P+3) B.X= system buffer address
               a=a+1   x             ; step to next register
               acex    x
               dadd=c

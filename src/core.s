@@ -62,12 +62,7 @@ lightWake:    ldi     0x2fd         ; PACH11
               chk kb
               goc     bufferScan    ; key is down, find active handler
 
-3$:           ldi     8             ; I/O service
-              gosub   ROMCHK        ; needs chip 0,SS0,hex,P selected
-              ?s2=1                 ; I/O flag?
-              goc     3$            ; yes, keep going
-
-;;; No key or I/O to process, inspect various flags that should prevent
+;;; No key down, inspect various flags that should prevent
 ;;; us from showing an alternative display.
               ?s5=1                 ; message flag?
               goc     LocalMEMCHK   ; yes, leave display alone
@@ -99,6 +94,14 @@ LocalMEMCHK:  c=0     x
               rcr     6
               ldi     169           ; put back warm start constant
               gosub   0x0212        ; join forces with MEMCHK
+
+;;; Keep processing I/O and key down before going to light sleep
+3$:           chk kb                ; check key down while doing I/O
+              goc     bufferScan
+              ldi     8             ; I/O service
+              gosub   ROMCHK        ; needs chip 0,SS0,hex,P selected
+              ?s2=1                 ; I/O flag?
+              goc     3$            ; yes, keep going
 
               golong  0x18c         ; go to light sleep
 

@@ -31,7 +31,9 @@ Text1:        .equ    0xf1
               .section code
               .public doPRGM
               .extern sysbuf, LocalMEMCHK, noSysBuf
-doPRGM:       gosub   sysbuf
+doPRGM:       ?s12=1                ; PRIVATE ?
+              rtnc                  ; yes
+              gosub   sysbuf
               goto    900$          ; (P+1) no system buffer
               c=data                ; (P+2) read buffer header
               st=c
@@ -61,7 +63,7 @@ doPRGM:       gosub   sysbuf
 4$:           ?s10=1                ; ROM?
               goc     10$           ; yes, no need to change it
 
-              ?st=1   Flag_Argument   ; check if inserting prompt
+              ?st=1   Flag_Argument ; check if inserting prompt
               gonc    10$           ; no
 
 ;;; Now change byte from $99 to $f1!!
@@ -109,6 +111,7 @@ doPRGM:       gosub   sysbuf
               abex
               gosub   INCAD
               gosub   GTBYT         ; read next byte
+              abex
               asl     x             ; A[2] = low nibble of XROM opcode
               asl     x
               acex    xs            ; C[2:0]= lower 1 & akf bytes of XROM function code

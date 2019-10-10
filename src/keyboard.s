@@ -127,10 +127,12 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 30$:          acex    s             ; no key behavior defined
               c=c+c   s             ; is this a transient App that ends on
                                     ;  undefined key?
-              rtnnc                 ; no
+              gonc    35$           ; no
               c=n                   ; yes, terminate it
               gosub   jumpC4        ; call the transient termination vector
               golong  disableThisShell
+35$:          c=n                   ; use system replacement
+              golong  appClearDigitEntry ; clear app digit first
 
 40$:          c=regn  14            ; key not reassigned
               cstex                 ; bring up SS0

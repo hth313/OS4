@@ -124,7 +124,9 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               bcex
               golong  PARS60        ; do auto assigned user language label
 
-30$:          acex    s             ; no key behavior defined
+30$:          c=n                   ; no key behavior defined
+              cxisa                 ; read descriptor word
+              rcr     -1
               c=c+c   s             ; is this a transient App that ends on
                                     ;  undefined key?
               gonc    35$           ; no
@@ -136,8 +138,6 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 
 40$:          c=regn  14            ; key not reassigned
               cstex                 ; bring up SS0
-              rcr     1
-              a=c     s             ; A.S= keyboard flag nibble 0
               c=n
               csr     x
               a=c     x             ; A[1:0]= keycode

@@ -71,6 +71,13 @@ clearSystemDigitEntry: .equlab 0x4f2e
 #define GenericExtension      2
 
 
+#define KeyFlagTransientApp  7         ; Set if this is a transient application
+                                       ; that terminates on a 000 (pass-through)
+                                       ; key. Typically something like CAT can
+                                       ; use it to define a few keys that are
+                                       ; handled, but if another (undefined)
+                                       ; key is pressed, the shell is terminated.
+
 ;;; **********************************************************************
 ;;;
 ;;; System buffer status flags. These flags are held in the buffer
@@ -84,12 +91,6 @@ Flag_NoApps:       .equ  0             ; Set if all application shells are
                                        ; application). System shells still
                                        ; have priority and are active.
 Flag_Message:      .equ  1             ; Application message flag
-Flag_TransientApp: .equ  2             ; Set if this is a transient application
-                                       ; that terminates on a 000 (pass-through)
-                                       ; key. Typically something like CAT can
-                                       ; use it to define a few keys that are
-                                       ; handled, but if another (undefined)
-                                       ; key is pressed, the shell is terminated.
 Flag_Argument:     .equ 3              ; Semi-merged argument entry in progress.
 Flag_Pause         .equ 4              ; Our own pause flag.
 

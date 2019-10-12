@@ -17,7 +17,7 @@
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              .extern sysbuf, doDisplay, doPRGM
+              .extern sysbuf, doDisplay, doPRGM, disableOrphanShells
 
               .section Header4
               rst kb                ; these three instructions
@@ -103,6 +103,7 @@ LocalMEMCHK:  c=0     x
               ?s2=1                 ; I/O flag?
               goc     3$            ; yes, keep going
 
+              gosub   disableOrphanShells
               golong  0x18c         ; go to light sleep
 
 toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed
@@ -125,6 +126,12 @@ deepWake:     gosub   releaseShells
               cstex
               st=0    Flag_Argument ; no argument handling going on
               st=0    Flag_Pause    ; no pause
+              st=1    Flag_OrphanShells
+                                    ; set Flag_OrphanShells flag to signal that
+                                    ;  we need to check for orphaned shells
+                                    ;  when power on processing is done
+                                    ;  (releaseShells above has already marked
+                                    ;   it properly)
               cstex
               data=c
 10$:          golong  DSWKUP+2

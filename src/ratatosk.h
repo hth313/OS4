@@ -91,6 +91,7 @@ Flag_NoApps:       .equ  0             ; Set if all application shells are
                                        ; application). System shells still
                                        ; have priority and are active.
 Flag_Message:      .equ  1             ; Application message flag
+Flag_OrphanShells: .equ  2             ; Set when we should release orphan shells.
 Flag_Argument:     .equ 3              ; Semi-merged argument entry in progress.
 Flag_Pause         .equ 4              ; Our own pause flag.
 

@@ -222,18 +222,22 @@ exitReclaim10:
               c=0     pt            ; no, deactivate it
 12$:          data=c                ; write back
               rtn                   ; done
-14$:          acex    pt            ; reclaim it
+14$:          ?c#0    pt            ; reclaim it, was it active before?
+              rtnnc                 ; no
+              acex    pt            ; yes, reclaim and activate it
               goto    12$
 
 20$:          rcr     7             ; inspect upper part
               ?a#c    wpt           ; shell in upper part?
               goc     30$           ; no
               pt=     6
-              ?s0=1                 ; yes. reclaim?
+              ?s0=1                 ; yes, reclaim?
               goc     24$           ; yes
               c=0     pt            ; no, deactivate it
               goto    26$
-24$:          acex    pt            ; reclaim it
+24$:          ?c#0    pt            ; reclaim it, was it active before?
+              rtnnc                 ; no
+              acex    pt
 26$:          rcr     7             ; realign
               goto    12$
 
@@ -251,6 +255,9 @@ exitReclaim10:
 ;;;
 ;;; This is done a wake up with the idea that modules that still want their
 ;;; Shells should reclaim them (using reclaimShell).
+;;; We set the high nibble to 1 of non-zero, thereby marking it as a
+;;; released previously active shell. Any shell that was 0 (disabled)
+;;; are left as-is, they can be re-used freely.
 ;;;
 ;;; Out: Returns to (P+1) if no system buffer
 ;;;      Returns to (P+2) if there is a system buffer with
@@ -264,15 +271,21 @@ releaseShells:
               gosub   shellSetup
               rtn                   ; (P+1) no system buffer
               goto    20$           ; (P+2) system buffer, but no shells
-10$:          b=a     x             ; (P+3) B.X= system buffer address
+10$:          b=a     x             ; B.X= system buffer address
               a=a+1   x             ; step to next register
               acex    x
               dadd=c
               acex    x
               c=data
-              c=0     s             ; release both Shell slots
+              ?c#0    s             ; high active?
+              gonc    12$           ; no
+              c=0     s             ; mark as released
+              c=c+1   s
+12$:          ?c#0    pt            ; low active?
+              gonc    14$           ; no
               c=0     pt
-              data=c
+              c=c+1   pt
+14$:          data=c
               a=a-1   m
               gonc    10$
               abex    x             ; A.X= system buffer address
@@ -645,6 +658,7 @@ extensionHandler:
 ;;;
 ;;; **********************************************************************
 
+              .section code
               .public shellName
               .extern unpack5
 shellName:    gosub   unpack5
@@ -652,3 +666,57 @@ shellName:    gosub   unpack5
                                     ;       defined name
               gosub   ENLCD
               golong  MESSL+1
+
+
+;;; **********************************************************************
+;;;
+;;; disableOrphanShells - remove orphaned shells
+;;;
+;;; This routine is supposed to be called after a normal power on.
+;;; At the moment this is done before going to light sleep and a flag
+;;; Flag_OrphanShells is used to signal whether it is needed or not.
+;;; Any shell that was active before the most recent power down and
+;;; that has not been reclaimed are marked as unused.
+;;;
+;;; **********************************************************************
+
+              .section code
+              .public disableOrphanShells
+disableOrphanShells:
+              gosub   sysbuf
+              rtn                   ; (P+1) no buffer
+              st=c
+              ?st=1   Flag_OrphanShells
+              goc     10$           ; yes
+5$:           golong  ENCP00        ; no, enable chip 0 and return
+10$:          c=data                ; read in buffer header
+              st=0    Flag_OrphanShells
+              c=st
+              data=c                ; reset Flag_OrphanShells
+              rcr     4
+              c=0     xs
+              bcex    x             ; B.X= shell counter
+
+              pt=     6             ; set up for '1' testing of shell headers
+              a=0     s
+              a=a+1   s
+              a=0     pt
+              a=a+1   pt
+
+20$:          bcex    x
+              c=c-1   x
+              goc     5$            ; no more shell registers
+              bcex    x
+              a=a+1   x             ; step to next shell register
+              acex    x
+              dadd=c
+              acex    x
+              c=data
+              ?a#c    pt            ; disabled or active?
+              goc     25$           ; yes
+              c=0     pt            ; orphan, disable it
+25$:          ?a#c    s             ; disabled or active?
+              goc     30$           ; yes
+              c=0     s             ; orphan, disable it
+30$:          data=c                ; write back
+              goto    20$

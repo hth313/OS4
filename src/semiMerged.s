@@ -32,7 +32,7 @@ Text1:        .equ    0xf1
               .public doPRGM
               .extern sysbuf, LocalMEMCHK, noSysBuf
 doPRGM:       ?s12=1                ; PRIVATE ?
-              rtnc                  ; yes
+              goc     900$          ; yes
               gosub   sysbuf
               goto    900$          ; (P+1) no system buffer
               c=data                ; (P+2) read buffer header

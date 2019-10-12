@@ -419,7 +419,7 @@ versionCheck: a=c     x
               .extern findKAR2, stepKAR
               .extern topAppShell, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
-              .extern clearSystemDigitEntry
+              .extern clearSystemDigitEntry, reclaimSystemBuffer
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -445,3 +445,4 @@ versionCheck: a=c     x
               golong  errorMessl
               golong  errorExit
               golong  clearSystemDigitEntry
+              golong  reclaimSystemBuffer

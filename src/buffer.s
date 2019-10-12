@@ -221,6 +221,29 @@ stepKAR:      a=a+1   x             ; step to next KAR
 
 ;;; **********************************************************************
 ;;;
+;;; reclaimSystemBuffer - ensure the system buffers stays at power on
+;;;
+;;; This entry is intended for modules that uses the functionality
+;;; provided by the system buffer, but does not use any shell.
+;;; In that case, call this routine from the deep wake-up polling
+;;; point to reclaim the system buffer.
+;;;
+;;; Uses: C, +1 sub level, DADD
+;;; **********************************************************************
+
+              .public reclaimSystemBuffer
+reclaimSystemBuffer:
+              gosub   sysbuf
+              rtn
+              c=data
+              c=0     s
+              c=c+1   s
+              data=c
+              rtn
+
+
+;;; **********************************************************************
+;;;
 ;;; getbuf - get a buffer
 ;;;
 ;;; Ensure that we have a buffer. Buffer is only created if there is room for

@@ -521,24 +521,22 @@ keyHandler:   acex    m
               st=1    Flag_NoApps   ; yes, do not look for any further apps
 10$:          c=0     x
               dadd=c
+              a=0     s             ; assume not user mode
               c=regn  14            ; get flags
-
-              rcr     7
-              cstex
-              a=0     s
-              ?s0=1                 ; user mode?
-              goc     14$           ; yes
-              a=a+1   s             ; A.S= non-zero, not user mode
-              cstex
-              rcr     7
               cstex
               ?s7=1                 ; alpha mode?
-              gonc    16$           ; no
-              a=a+1   m             ; yes
+              goc     20$           ; yes
+              rcr     7
+              cstex
+              ?s0=1                 ; user mode?
+              goc     14$           ; yes
+              a=a+1   s             ; no, set A.S= non-zero
+              goto    16$           ; normal mode
+
+20$:          a=a+1   m             ; alpha mode
 14$:          a=a+1   m             ; user mode
 16$:          a=a+1   m             ; normal mode
               acex    m
-              cstex
               goto    mayCall
 
 

@@ -267,7 +267,7 @@ noSysBuf0:    spopnd
 
 argument:     gosub   sysbuf        ; ensure we have the system buffer
               goto    noSysBuf0     ; (P+1) no buf
-              data=c                ; read buffer header
+              c=data                ; read buffer header
               st=c                  ; ST= system buffer flags
               acex    x
               pt=     0

@@ -271,8 +271,8 @@ releaseShells:
               gosub   shellSetup
               rtn                   ; (P+1) no system buffer
               goto    20$           ; (P+2) system buffer, but no shells
-10$:          b=a     x             ; B.X= system buffer address
-              a=a+1   x             ; step to next register
+              b=a     x             ; B.X= system buffer address
+10$:          a=a+1   x             ; step to next register
               acex    x
               dadd=c
               acex    x
@@ -687,7 +687,8 @@ disableOrphanShells:
               ?st=1   Flag_OrphanShells
               goc     10$           ; yes
 5$:           golong  ENCP00        ; no, enable chip 0 and return
-10$:          c=data                ; read in buffer header
+
+10$:          c=data                ; load buffer header
               st=0    Flag_OrphanShells
               c=st
               data=c                ; reset Flag_OrphanShells

@@ -300,9 +300,10 @@ errorExit:    gosub   ERRSUB
 ;;;
 ;;; **********************************************************************
 
-              .public dropRTNP2, RTNP2
+              .public dropRTNP2, RTNP2, jumpP2
 dropRTNP2:    spopnd
 RTNP2:        c=stk
+jumpP2:
 RTNP20:       c=c+1   m
               gotoc
 

@@ -30,7 +30,7 @@ Text1:        .equ    0xf1
 
               .section code
               .public doPRGM
-              .extern sysbuf, LocalMEMCHK, noSysBuf
+              .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP2
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
               gosub   sysbuf
@@ -111,10 +111,14 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               abex
               gosub   INCAD
               gosub   GTBYT         ; read next byte
-              abex
+              acex                  ; A[1:0]= byte
+                                    ; C[3:0]= address
+              m=c                   ; M[3:0]= address
+              acex                  ; C[1:0]= byte
+              abex                  ; A[0]= low nibble of XROM opcode
               asl     x             ; A[2] = low nibble of XROM opcode
               asl     x
-              acex    xs            ; C[2:0]= lower 1 & akf bytes of XROM function code
+              acex    xs            ; C[2:0]= lower 1 & half bytes of XROM function code
               gosub   GTRMAD
 90000$:       goto    9000$         ; could not find it
               ?s3=1
@@ -191,9 +195,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               c=c+1   m
               cxisa
               ?a#c    x
-              goc     900000$       ; not xargument
-              c=c+1   m             ; point to its display handler
-              gotoc                 ; go and do it
+              gsubnc  jumpP2        ; do display handler
+              goto    900000$
 
 ;;; **********************************************************************
 ;;;

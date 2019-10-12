@@ -90,8 +90,9 @@
 ;;; If found, return to (P+2) with:
 ;;;   A.X = address of buffer start register
 ;;;   DADD = first address of buffer
-;;;   C[13] = Reg[13] of buffer header incremented
-;;;   C[12:0] = buffer header
+;;;   C[13] part of buffer header incremented
+;;;   C[12:7] = part of buffer header
+;;;   C[2:0] = part of buffer header
 ;;; Uses: A, C, B.X, active PT=12, DADD, +0 sub levels
 ;;;
 ;;; Note: For chkbuf, buffer number in C[0] and C[2:1] must be zero!!!
@@ -199,7 +200,7 @@ relayRTNP2:   golong  RTNP2         ; return to (P+2)
 ;;;           C[13] - 0
 ;;;           B.X - address of chain head
 ;;;           DADD - next KAR
-;;; Uses: C, +0 sub levels
+;;; Uses: C, +0 sub levels, DADD
 ;;;
 ;;; **********************************************************************
 
@@ -231,7 +232,7 @@ stepKAR:      a=a+1   x             ; step to next KAR
 ;;; If found, return to (P+2) with:
 ;;;   A.X = address of buffer start register
 ;;;   DADD = first address of buffer
-;;; Uses: A, C, B.X, active PT=12, DADD, +1 sub levels
+;;; Uses: A, C, B.X, active PT=12, DADD, +1 sub level
 ;;;
 ;;; **********************************************************************
 

@@ -280,7 +280,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               c=regn  14
               cstex
               ?s4=1                 ; single step?
-              gonc    91$           ; no
+              gonc    9$            ; no
               cstex                 ; ST= system buffer flags
 
 ;;; We are executing the instruction from program memory
@@ -300,8 +300,6 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               gonc    2$            ; no
               c=g                   ; yes, move argument to C[1:0]
               goto    8$
-
-91$:          goto    9$            ; relay
 
 2$:           ldi     Text1
               ?a#c    x             ; argument?
@@ -327,8 +325,6 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               c=0
               dadd=c                ; select chip 0
               rtn
-
-51$:          goto    50$           ; relay
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -357,7 +353,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
 13$:          cstex
               data=c                ; save back toggled flag
               ?st=1   Flag_Argument ; (inspecting previous value of flag)
-              goc     51$           ; with Flag_Argument set indicating found
+              goc     50$           ; with Flag_Argument set indicating found
               a=c
               c=stk
               cxisa                 ; C[1:0] = default argument

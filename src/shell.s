@@ -342,6 +342,7 @@ shellHandle:
 ;;;          A[6:3] - pointer to shell
 ;;;          M - shell scan state
 ;;;          ST= system buffer flags, Header[1:0]
+;;;          B.X= address of system buffer
 ;;; Uses: A, B.X, C, DADD, S8, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -355,6 +356,7 @@ topShell:     s8=0
 ts05:         gosub   shellSetup
               rtn                   ; no system buffer
               rtn                   ; no shells (though there was a buffer)
+              b=a     x
               ?st=1   Flag_NoApps   ; running without apps?
               gonc    ts08          ; no
               ?s8=1                 ; are we looking for an app?
@@ -467,35 +469,6 @@ shellSetup:   gosub   sysbuf
 
 ;;; **********************************************************************
 ;;;
-;;; doDisplay - let the active display routine alter the display
-;;;
-;;; This entry is used by core to update the display in case it is
-;;; showing normal X contents when it should be showing what the
-;;; active shell wants it to.
-;;;
-;;; **********************************************************************
-
-              .section code
-              .public doDisplay
-doDisplay:    gosub   topAppShell
-              rtn
-              acex    m
-mayCall:      c=c+1   m             ; step to display routine
-              cxisa
-              ?c#0    x             ; exists?
-              rtnnc                 ; no display routine
-
-gotoPacked:   c=c+c   x
-              c=c+c   x
-              csr     m
-              csr     m
-              csr     m
-              rcr     -3
-              gotoc
-
-
-;;; **********************************************************************
-;;;
 ;;; keyHandler - invoke a key handler
 ;;;
 ;;; !!!! Does not return if the key is handled.
@@ -508,6 +481,7 @@ gotoPacked:   c=c+c   x
 ;;;
 ;;; **********************************************************************
 
+              .section code
               .public keyHandler
 keyHandler:   acex    m
               cxisa                 ; read control word
@@ -537,12 +511,45 @@ keyHandler:   acex    m
 14$:          a=a+1   m             ; user mode
 16$:          a=a+1   m             ; normal mode
               acex    m
-              goto    mayCall
+              goto    mayCall1
 
 
 ;;; **********************************************************************
 ;;;
-;;; shellDisplay - show active shell display and set message flag
+;;; mayCall1 - step ahead and call if pointer exists
+;;; mayCall  - call if pointer exists
+;;; gotoPacked - call a packed pointer
+;;;
+;;; mayCall:
+;;; In: C[6:3] - pointer to some packed page pointer of some kind
+;;;
+;;; gotoPacked:
+;;; In: C[6] - page
+;;;     C[2:0] - packed page pointer
+;;;
+;;; mayCall fetch a routine pointer from memory and calls it if defined.
+;;; gotoPacked is for calling a packed pointer.
+;;;
+;;; **********************************************************************
+
+              .section code
+mayCall1:     c=c+1   m             ; step to display routine
+mayCall:      cxisa
+              ?c#0    x             ; exists?
+              rtnnc                 ; no display routine
+
+gotoPacked:   c=c+c   x
+              c=c+c   x
+              csr     m
+              csr     m
+              csr     m
+              rcr     -3
+              gotoc
+
+
+;;; **********************************************************************
+;;;
+;;; shellDisplay - show active shell display and set message flags
 ;;;
 ;;; This routine is meant to be called when a shell aware module wants
 ;;; to show the X register before returning to mainframe. We will look
@@ -558,7 +565,7 @@ keyHandler:   acex    m
 ;;;
 ;;; **********************************************************************
 
-              .public shellDisplay
+              .public shellDisplay, doDisplay
 shellDisplay: ?s13=1                ; running?
               rtnc                  ; yes, done
               gosub   LDSST0        ; load SS0
@@ -566,7 +573,7 @@ shellDisplay: ?s13=1                ; running?
               rtnc                  ; yes, no display override
               ?s7=1                 ; alpha mode?
               rtnc                  ; yes, no display override
-              gosub   topAppShell
+doDisplay:    gosub   topAppShell
               rtn                   ; (P+1) no app shell
               a=a+1   m             ; (P+2) point to display routine
               acex    m
@@ -574,6 +581,13 @@ shellDisplay: ?s13=1                ; running?
               ?c#0    x             ; does it have a display routine?
               rtnnc                 ; no
               acex                  ; yes, A[6,2:0]= packed display routine
+              c=b     x             ; C.X= address of system shell
+              dadd=c
+              c=data                ; set display override flag
+              cstex
+              st=1    Flag_DisplayOverride
+              cstex
+              data=c
               gosub   LDSST0        ; load SS0
               s5=1                  ; set message flag
               c=st
@@ -636,7 +650,7 @@ extensionHandler:
               a=c     x
               a=a-b   x
               ?a#0    x             ; same?
-              gsubnc  mayCall       ; yes, try to invoke it
+              gsubnc  mayCall1      ; yes, try to invoke it
               gosub   nextShell     ; not handled here, skip to next
               rtn                   ; (P+1) no more shells
               goto    10$           ; (P+2) try the next one

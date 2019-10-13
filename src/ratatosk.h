@@ -72,7 +72,7 @@ reclaimSystemBuffer .equlab 0x4f30
 #define GenericExtension      2
 
 
-#define KeyFlagTransientApp  7         ; Set if this is a transient application
+#define KeyFlagTransientApp   7        ; Set if this is a transient application
                                        ; that terminates on a 000 (pass-through)
                                        ; key. Typically something like CAT can
                                        ; use it to define a few keys that are
@@ -86,15 +86,15 @@ reclaimSystemBuffer .equlab 0x4f30
 ;;;
 ;;; **********************************************************************
 
-Flag_NoApps:       .equ  0             ; Set if all application shells are
+Flag_NoApps:         .equ  0           ; Set if all application shells are
                                        ; disabled, essentially meaning that
                                        ; we have default behavior (no active
                                        ; application). System shells still
                                        ; have priority and are active.
-Flag_Message:      .equ  1             ; Application message flag
-Flag_OrphanShells: .equ  2             ; Set when we should release orphan shells.
-Flag_Argument:     .equ 3              ; Semi-merged argument entry in progress.
-Flag_Pause         .equ 4              ; Our own pause flag.
-
+Flag_DisplayOverride .equ  1           ; Set when message flag really means that
+                                       ; we override the display.
+Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shells.
+Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
+Flag_Pause           .equ  4           ; Our own pause flag.
 
 #endif // RATATOSK_H

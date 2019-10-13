@@ -132,6 +132,7 @@ deepWake:     gosub   releaseShells
                                     ;  when power on processing is done
                                     ;  (releaseShells above has already marked
                                     ;   it properly)
+              st=0    Flag_DisplayOverride
               cstex
               data=c
 10$:          golong  DSWKUP+2
@@ -160,6 +161,16 @@ bufferScan:   c=c+c   xs
               golc    OFF           ; yes
               gosub   topShell
               goto    20$           ; (P+1) no shell, ordinary keyboard logic
+
+              c=b     x             ; (P+2) C.X= buffer header address
+              dadd=c
+              c=data
+              pt=     0
+              g=c                   ; G= previous flags
+              cstex                 ; reset display override flag
+              st=0    Flag_DisplayOverride
+              cstex
+              data=c
 
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to

@@ -1,5 +1,8 @@
 #include "mainframe.i"
 
+#define IN_RATATOSK
+#include "ratatosk.h"
+
 PARS60:       .equlab 0xcb4
 
 ;;; **********************************************************************
@@ -173,7 +176,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               a=c     x
               ldi     64
               ?a<c    x             ; local XROM function?
-              gonc    150$          ; no, need to look at secondaries
+              golnc   150$          ; no, need to look at secondaries
 
               pt=     5             ; yes, local XROM
               c=0     wpt           ; point to XROM ID
@@ -194,7 +197,6 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   appClearDigitEntry ; XROM ends digit entry
               c=n
 58$:          golong  RAK70
-
 
 60$:          gosub   sysbuf        ; assigned key
               goto    70$           ; (P+1) ordinary key assignment
@@ -219,9 +221,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
                                     ; have on a key)
               golong PARS56
 
-110$:         pt=     0
-              g=c                   ; G= digit
-              a=c     x             ; A[1:0]= digit
+;;; Handle digit entry and backspace.
+110$:         a=c     x             ; A[1:0]= digit
               c=c+1   x             ; check for backspace
               gonc    112$          ; not backspace
               c=regn  14            ; backspace, check if we are showing CAT
@@ -229,13 +230,47 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               cstex
               ?s1=1                 ; catalog flag set?
               goc     114$          ; yes
-112$:         c=regn  14            ; set message flag as we are doing some kind
-              cstex                 ;  of digit entry, so we assume a custom display
-              s5=1
+              c=regn  14
+              st=c
+              ?s5=1                 ; message flag
+              gonc    111$          ; no
+              s5=0                  ; clear message flag
+              c=st
+              regn=c  14
+              pt=     0
+              c=g                   ; C[1:0] - previous flags in system buffer
+              st=c
+              ?st=1   Flag_DisplayOverride
+              gonc    117$          ; clear a shown message
+              goto    112$
+111$:         ?s3=1                 ; program mode?
+              gonc    112$          ; no
+              rcr     2
               cstex
+              ?s2=1                 ; digit entry?
+              goc     112$          ; yes
+              cstex                 ; bring up SS0
+              ldi     11            ; program mode delete
+              golong  PARS56
+
+112$:         acex    x             ; C[1:0]= digit
+              pt=     0
+              g=c                   ; G= digit
+              gosub   sysbuf
+              goto    113$          ; (P+1) should not happen
+              c=data                ; (P+2) set display override
+              cstex
+              st=1    Flag_DisplayOverride
+              cstex
+              data=c
+
+113$:         gosub LDSST0          ; set message flag as we are doing some kind
+              s5=1                  ;  of digit entry, we assume a custom display
+              c=st
               regn=c  14
               c=n                   ; C[6:3]= keyboard descriptor table
-              acex    x
+              pt=     0
+              c=g
               c=0     xs            ; C[2:0]= key value
                                     ;   0FF = backspace
               golong  jumpC1        ; go and handle digit
@@ -248,7 +283,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               s5=0                  ; clear message flag
               cstex
               regn=c  14
-              golong  NFRKB
+117$:         golong  NFRKB
 
 ;;; Key needs a secondary. The entry is basically an offset to it which
 ;;; means it is located somewhere after the normal key table.
@@ -270,7 +305,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     2             ; no, a 2-byte instruction
               acex    x
               rcr     -2            ; C[3:0]= complete 2-byte instruction
-              goto    58$
+              golong  RAK70
 
 
 

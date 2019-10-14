@@ -59,6 +59,7 @@ errorMessage: .equlab 0x4f2a
 errorExit:    .equlab 0x4f2c
 clearSystemDigitEntry: .equlab 0x4f2e
 reclaimSystemBuffer .equlab 0x4f30
+displayDone:  .equlab 0x4f32
 #endif
 
 ;;; **********************************************************************

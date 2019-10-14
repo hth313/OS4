@@ -590,6 +590,33 @@ doDisplay:    gosub   topAppShell
               acex                  ; yes, A[6,2:0]= packed display routine
               c=b     x             ; C.X= address of system shell
               dadd=c
+              gosub   setDisplayFlags
+              acex                  ; C[6,2:0]= display routine
+              goto    gotoPacked    ; update display
+
+
+;;; **********************************************************************
+;;;
+;;; displayDone - set flags indicating display is done
+;;;
+;;; You normally do not need to call this routine. It is meant to be used
+;;; in certain cases when you have done the display early and do not
+;;; want to have default display update the normal way.
+;;; One situation where this is useful is for a command which purpose is
+;;; to show an alternative display, like showing the 'X' value in an
+;;; alternative way to default.
+;;;
+;;; Out: chip 0 selected
+;;;      C= flag register of SS0
+;;; Uses: C, DADD
+;;;
+;;; **********************************************************************
+
+              .section code
+              .public displayDone
+displayDone:  gosub   sysbuf
+              rtn
+setDisplayFlags:
               c=data                ; set display override flag
               cstex
               st=1    Flag_DisplayOverride
@@ -599,8 +626,7 @@ doDisplay:    gosub   topAppShell
               s5=1                  ; set message flag
               c=st
               regn=c  14
-              acex                  ; C[6,2:0]= display routine
-              goto    gotoPacked    ; update display
+              rtn
 
 
 ;;; **********************************************************************

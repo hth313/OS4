@@ -434,6 +434,7 @@ versionCheck: a=c     x
               .extern topAppShell, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
+              .extern displayDone
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -460,3 +461,4 @@ versionCheck: a=c     x
               golong  errorExit
               golong  clearSystemDigitEntry
               golong  reclaimSystemBuffer
+              golong  displayDone

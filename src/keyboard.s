@@ -225,12 +225,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 110$:         a=c     x             ; A[1:0]= digit
               c=c+1   x             ; check for backspace
               gonc    112$          ; not backspace
-              c=regn  14            ; backspace, check if we are showing CAT
-              rcr     6
-              cstex
-              ?s1=1                 ; catalog flag set?
-              goc     114$          ; yes
-              c=regn  14
+              c=regn  14            ; backspace
               st=c
               ?s5=1                 ; message flag
               gonc    111$          ; no
@@ -241,7 +236,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=g                   ; C[1:0] - previous flags in system buffer
               st=c
               ?st=1   Flag_DisplayOverride
-              gonc    117$          ; clear a shown message
+              golnc   NFRKB         ; clear a shown message
               goto    112$
 111$:         ?s3=1                 ; program mode?
               gonc    112$          ; no
@@ -274,16 +269,6 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=0     xs            ; C[2:0]= key value
                                     ;   0FF = backspace
               golong  jumpC1        ; go and handle digit
-
-;;; Showing catalog, clear catalog and message flag, then drop out of here.
-114$:         s1=0                  ; clear catalog flag
-              cstex
-              rcr     -6
-              cstex
-              s5=0                  ; clear message flag
-              cstex
-              regn=c  14
-117$:         golong  NFRKB
 
 ;;; Key needs a secondary. The entry is basically an offset to it which
 ;;; means it is located somewhere after the normal key table.

@@ -155,8 +155,12 @@ bufferScan:   c=c+c   xs
               c=c+c   xs
               c=c+c   xs
               goc     toWKUP20      ; partial key in progress
+              rcr     6             ; check for CATalog flag
+              cstex
+              ?s1=1                 ; catalog flag set?
+              goc     40$           ; yes, check what key it really is
 
-              pt=     3
+10$:          pt=     3
               c=keys
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
@@ -174,6 +178,36 @@ bufferScan:   c=c+c   xs
 30$:          gosub   resetFlags
 20$:          gosub   LDSST0        ; bring up SS0
               goto    toWKUP20
+
+;;; Should really check for reassigned keys here as that is done by the OS!
+;;; However, we settle for assuming that we just use default behavior for
+;;; now.
+40$:          ldi     0x13          ; keycode for the ENTER key
+              a=c     x
+              c=keys
+              acex    x
+              ?a#c    x
+              goc     42$           ; not enter
+              c=regn  8             ; enter only active in CAT 2!!
+              c=c-1   s             ; hack hack, but that is how it is...
+              c=c-1   s
+              c=c-1   s
+              goc     20$           ; CAT 2, go and do it
+              goto    10$
+42$:          gosub   45$
+              .con    0x12          ; SHIFT
+              .con    0xc2          ; SST
+              .con    0xc3          ; <-
+              .con    0x87          ; R/S
+              .con    0
+45$:          c=stk
+46$:          cxisa
+              ?c#0    x
+              gonc    10$           ; end of scan, not a catalog key
+              ?a#c    x
+              gonc    20$           ; should be handled by CAT
+              c=c+1   m
+              goto    46$
 
 resetFlags:   c=b     x
               dadd=c

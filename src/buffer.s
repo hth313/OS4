@@ -36,7 +36,7 @@
 ;;;   BF - number of hosted buffers
 ;;;   SH - number of shell registers
 ;;;   DF - Default postfix byte during semi-merged argument entry.
-;;;   ST - system buffer status flags, see ratatosk.h
+;;;   ST - system buffer status flags, see OS4.h
 ;;;
 ;;; Shell stack register:
 ;;;   Two entries in each register, defined as follows

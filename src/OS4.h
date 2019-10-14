@@ -1,12 +1,11 @@
 ;;; -*- mode: gas;-*-
-#ifndef RATATOSK_H
-#define RATATOSK_H
+#ifndef OS4_H
+#define OS4_H
 
 ;;; **********************************************************************
 ;;;
-;;; The current version of Ratatosk. This can be used as input to
-;;; versionCheck to make sure that the installed Ratatosk is at least
-;;; the expected version.
+;;; The current version of OS4. This can be used as input to versionCheck
+;;; to make sure that the installed OS4 is at least the expected version.
 ;;;
 ;;; The version number is 3 nibbled (12 bits), the first nibble is the
 ;;; major version, which tells whether the overall structure is the same.
@@ -17,12 +16,12 @@
 ;;;
 ;;; **********************************************************************
 
-#define RatatoskVersion  0
+#define OS4Version  0
 
 
 ;;; **********************************************************************
 ;;;
-;;; Ratatosk exports
+;;; OS4 exports
 ;;;
 ;;; **********************************************************************
 
@@ -33,7 +32,7 @@
 #define FirstGosub(x)   ((((x) << 2) & (255 << 2)) | 1)
 #define SecondGosub(x)  (((x) >> 6) & (255 << 2))
 
-#ifndef IN_RATATOSK
+#ifndef IN_OS4
 activateShell: .equlab 0x4f00
 exitShell:    .equlab 0x4f02
 reclaimShell: .equlab 0x4f04
@@ -73,6 +72,8 @@ displayDone:  .equlab 0x4f32
 #define GenericExtension      2
 
 
+#define KeyFlagSparseTable    6        ; Set if the keyboard table is a linear
+                                       ; search rather than a lookup.
 #define KeyFlagTransientApp   7        ; Set if this is a transient application
                                        ; that terminates on a 000 (pass-through)
                                        ; key. Typically something like CAT can
@@ -98,4 +99,4 @@ Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shell
 Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
 Flag_Pause           .equ  4           ; Our own pause flag.
 
-#endif // RATATOSK_H
+#endif // OS4_H

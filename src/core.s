@@ -7,8 +7,8 @@
 
 #include "mainframe.i"
 
-#define IN_RATATOSK
-#include "ratatosk.h"
+#define IN_OS4
+#include "OS4.h"
 
 
 ;;; ----------------------------------------------------------------------
@@ -422,7 +422,7 @@ unpack0:      cxisa
 
 ;;; **********************************************************************
 ;;;
-;;; versionCheck - check the version expected by Ratatosk
+;;; versionCheck - check the version expected by OS4
 ;;;
 ;;; In: C.X = Version number, where the first nibble is the main version
 ;;;           number that must match. The lower 8 bits are the minor
@@ -436,13 +436,13 @@ unpack0:      cxisa
 ;;; **********************************************************************
 
 versionCheck: a=c     x
-              ldi     RatatoskVersion + 1
+              ldi     OS4Version + 1
               ?a#c    xs            ; main version good?
               goc     10$           ; no
               a=a-c   x             ; check minor version
               goc     RTNP2         ; OK
 10$:          gosub   errorMessl
-              .messl  "OLD RTSK"
+              .messl  "OLD OS4"
               goto    errorExit
 
 

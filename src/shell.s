@@ -7,8 +7,8 @@
 
 #include "mainframe.i"
 
-#define IN_RATATOSK
-#include "ratatosk.h"
+#define IN_OS4
+#include "OS4.h"
 
 
 ;;; **********************************************************************

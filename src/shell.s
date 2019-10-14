@@ -686,8 +686,9 @@ extensionHandler:
               ?a#0    x             ; same?
               gsubnc  mayCall1      ; yes, try to invoke it
               gosub   nextShell     ; not handled here, skip to next
-              rtn                   ; (P+1) no more shells
-              goto    10$           ; (P+2) try the next one
+              rtn                   ; (P+1) no more shells, no buffer
+              rtn                   ; (P+2) no more shells
+              goto    10$           ; (P+3) try the next one
 
 
 ;;; **********************************************************************

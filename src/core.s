@@ -166,8 +166,9 @@ bufferScan:   c=c+c   xs
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
                                     ; next shell
-              goto    20$           ; (P+1) out of shells
-              goto    14$           ; (P+2) inspect next shell
+              goto    20$           ; (P+1) no buffer, out of shells
+              goto    20$           ; (P+2) out of shells
+              goto    14$           ; (P+3) inspect next shell
 
 30$:          gosub   resetFlags
 20$:          gosub   LDSST0        ; bring up SS0

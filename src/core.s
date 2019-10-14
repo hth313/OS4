@@ -498,3 +498,7 @@ versionCheck: a=c     x
               golong  clearSystemDigitEntry
               golong  reclaimSystemBuffer
               golong  displayDone
+
+;;; Reserved tail identification. We only use a checksum at the moment.
+              .section TailOS4
+              .con    0             ; to be replaced by checksum

@@ -292,13 +292,12 @@ noSysBuf:     gosub   errorMessl
               .public displayError, errorMessl, errorExit
 displayError: gosub   MESSL
               .messl  " ERR"
-errorMessl:   gosub   LEFTJ
-              s8=     1
-              gosub   MSG105
-              golong  ERR110
-errorExit:    gosub   ERRSUB
+errorMessl:   gosub   ERRSUB
               gosub   CLLCDE
               golong  MESSL
+errorExit:    gosub   LEFTJ
+              gosub   MSG105
+              golong  ERR110
 
 ;;; **********************************************************************
 ;;;

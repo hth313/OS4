@@ -97,7 +97,7 @@ LocalMEMCHK:  c=0     x
 
 ;;; Keep processing I/O and key down before going to light sleep
 3$:           chk kb                ; check key down while doing I/O
-              goc     bufferScan
+              goc     bufferScan0
               ldi     8             ; I/O service
               gosub   ROMCHK        ; needs chip 0,SS0,hex,P selected
               ?s2=1                 ; I/O flag?
@@ -149,6 +149,7 @@ deepWake:     gosub   releaseShells
 ;;; ----------------------------------------------------------------------
 
               .extern topShell, nextShell, keyHandler
+bufferScan0:  gosub   LDSST0
 fastDigitEntry:
 bufferScan:   c=c+c   xs
               c=c+c   xs

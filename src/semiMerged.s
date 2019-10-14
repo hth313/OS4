@@ -263,6 +263,13 @@ RightJustify:
               .section code
               .public argument
 noSysBuf0:    spopnd
+              gosub   LDSST0        ; need to reset partial key flag
+              rcr     2             ;  as not done by ordinary error handlers
+              cstex
+              s1=0
+              cstex
+              rcr     -2
+              regn=c  14
               golong  noSysBuf
 
 argument:     gosub   sysbuf        ; ensure we have the system buffer

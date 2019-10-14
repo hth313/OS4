@@ -160,27 +160,31 @@ bufferScan:   c=c+c   xs
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
               gosub   topShell
-              goto    20$           ; (P+1) no shell, ordinary keyboard logic
-
-              c=b     x             ; (P+2) C.X= buffer header address
-              dadd=c
-              c=data
-              pt=     0
-              g=c                   ; G= previous flags
-              cstex                 ; reset display override flag
-              st=0    Flag_DisplayOverride
-              cstex
-              data=c
-
+              goto    20$           ; (P+1) no buffer, ordinary keyboard logic
+              goto    30$           ; (P+2) no shell, ordinary keyboard logic
+              gosub   resetFlags    ; (P+3)
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
                                     ; next shell
               goto    20$           ; (P+1) out of shells
               goto    14$           ; (P+2) inspect next shell
 
+30$:          gosub   resetFlags
 20$:          gosub   LDSST0        ; bring up SS0
               goto    toWKUP20
 
+resetFlags:   c=b     x
+              dadd=c
+              c=data
+              pt=     0
+              g=c                   ; G= previous flags
+              cstex
+              st=0    Flag_DisplayOverride
+              st=0    Flag_Argument
+              st=0    Flag_Pause
+              cstex
+              data=c
+              rtn
 
 ;;; **********************************************************************
 ;;;

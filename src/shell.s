@@ -337,8 +337,10 @@ shellHandle:
 ;;; nextShell.
 ;;;
 ;;; In:  Nothing
-;;; Out: Returns to (P+1) if no shells
-;;;      Returns to (P+2) with
+;;; Out: Returns to (P+1) if no buffer
+;;;      Returns to (P+2) if no shells (active)
+;;;          B.X - buffer address
+;;;      Returns to (P+3) with
 ;;;          A[6:3] - pointer to shell
 ;;;          M - shell scan state
 ;;;          ST= system buffer flags, Header[1:0]
@@ -354,13 +356,13 @@ topAppShell:  s8=1
               goto    ts05
 topShell:     s8=0
 ts05:         gosub   shellSetup
-              rtn                   ; no system buffer
-              rtn                   ; no shells (though there was a buffer)
-              b=a     x
+              rtn                   ; (P+1) no system buffer
+              goto    noActiveShell ; (P+2) no shells (though there was a buffer)
+              b=a     x             ; (P+3)
               ?st=1   Flag_NoApps   ; running without apps?
               gonc    ts08          ; no
               ?s8=1                 ; are we looking for an app?
-              rtnc                  ; yes, so we cannot find anything
+              goc     toRTNP2       ; yes, so we cannot find anything
 
 ts08:         a=0     s             ; first slot
 ts10:         a=a+1   x
@@ -374,7 +376,10 @@ ts14:         ?c#0    s             ; second slot in use?
               goc     ts20          ; yes
 ts16:         a=a-1   m
               gonc    ts10
-              rtn                   ; no shell found
+              goto    toRTNP2
+noActiveShell:
+              b=a     x
+toRTNP2:      golong  RTNP2         ; no shell found
 
 ts20:         rcr     7
               a=a+1   s             ; second slot
@@ -387,7 +392,7 @@ ts25:         ?s8=1                 ; looking for app shell?
 ;;; * use this one
 ts30:         acex                  ; A[6:3]= pointer to shell
               m=c                   ; M= shell scan state
-              golong  RTNP2         ; found, return to (P+2)
+              golong  RTNP3         ; found, return to (P+3)
 
 nextShell:    s8=0                  ; looking for any shell
               c=m                   ; C= shell scan state
@@ -402,6 +407,7 @@ nextShell:    s8=0                  ; looking for any shell
 10$:          a=c
               a=0     s             ; first slot
               goto    ts16          ; loop again
+
 
 ;;; **********************************************************************
 ;;;
@@ -574,8 +580,9 @@ shellDisplay: ?s13=1                ; running?
               ?s7=1                 ; alpha mode?
               rtnc                  ; yes, no display override
 doDisplay:    gosub   topAppShell
-              rtn                   ; (P+1) no app shell
-              a=a+1   m             ; (P+2) point to display routine
+              rtn                   ; (P+1) no app shell (no buffer)
+              rtn                   ; (P+2) no app shell (with buffer)
+              a=a+1   m             ; (P+3) point to display routine
               acex    m
               cxisa
               ?c#0    x             ; does it have a display routine?
@@ -641,8 +648,9 @@ doDisplay:    gosub   topAppShell
 extensionHandler:
               st=c                  ; ST= extension code
               gosub   topShell
-              rtn                   ; (P+1) no shells
-              ldi     0x200         ; (P+2) go ahead and look
+              rtn                   ; (P+1) no shells (no buffer)
+              rtn                   ; (P+2) no shells (with buffer)
+              ldi     0x200         ; (P+3) go ahead and look
               c=st
               bcex    x             ; B.X= extension code to look for
 10$:          acex    m             ; C[6:3]= pointer to shell descriptor

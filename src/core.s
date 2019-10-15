@@ -468,7 +468,7 @@ versionCheck: a=c     x
               .extern activateShell, exitShell, reclaimShell
               .extern chkbuf, getbuf, openSpace
               .extern findKAR2, stepKAR
-              .extern topAppShell, shellDisplay, logoutXMem, shellName
+              .extern topExtension, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
               .extern displayDone
@@ -484,7 +484,7 @@ versionCheck: a=c     x
               golong  shellDisplay  ; 0x4f10
               golong  logoutXMem    ; 0x4f12
               golong  topShell      ; 0x4f14
-              golong  topAppShell   ; 0x4f16
+              golong  topExtension  ; 0x4f16
               golong  nextShell     ; 0x4f18
               golong  shellName     ; 0x4f1a
               golong  keyKeyboard   ; 0x4f1c

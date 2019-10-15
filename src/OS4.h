@@ -44,7 +44,7 @@ stepKAR:      .equlab 0x4f0e
 shellDisplay: .equlab 0x4f10
 logoutXMem:   .equlab 0x4f12
 topShell:     .equlab 0x4f14
-topAppShell:  .equlab 0x4f16
+topExtension: .equlab 0x4f16
 nextShell:    .equlab 0x4f18
 shellName:    .equlab 0x4f1a
 keyKeyboard:  .equlab 0x4f1c

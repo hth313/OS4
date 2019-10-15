@@ -328,9 +328,9 @@ shellHandle:
 
 ;;; **********************************************************************
 ;;;
-;;; topAppShell - find the topmost app shell
-;;; topShell - find the topmost shell
-;;; nextShell - find next shell
+;;; topExtension - find first extension point
+;;; topShell - find first shell
+;;; nextShell - find next shell (or extension point)
 ;;;
 ;;; topShell can be used to locate first active shell.
 ;;; The following active shells can be found by successive calls to
@@ -345,25 +345,24 @@ shellHandle:
 ;;;          M - shell scan state
 ;;;          ST= system buffer flags, Header[1:0]
 ;;;          B.X= address of system buffer
-;;; Uses: A, B.X, C, DADD, S8, active PT, +2 sub levels
+;;; Uses: A, B.X, C, M, DADD, S8, S9, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
               .section code
-              .public topAppShell, topShell, nextShell
+              .public topExtension, topShell, nextShell
               .extern RTNP2, RTNP3
-topAppShell:  s8=1
+topExtension: s8=1
               goto    ts05
 topShell:     s8=0
 ts05:         gosub   shellSetup
               rtn                   ; (P+1) no system buffer
-              goto    noActiveShell ; (P+2) no shells (though there was a buffer)
+              goto    noActiveShell ; (P+2) no shells (though there is a buffer)
               b=a     x             ; (P+3)
               s9=0                  ; no app seen so far
               ?st=1   Flag_NoApps   ; running without apps?
               gonc    ts08          ; no
-              ?s8=1                 ; are we looking for an app?
-              goc     toRTNP2       ; yes, so we cannot find anything
+              s9=1                  ; yes, do not accept any app
 
 ts08:         a=0     s             ; at first slot
               a=a+1   x
@@ -378,35 +377,43 @@ ts14:         ?c#0    s             ; second slot in use?
 ts16:         a=a-1   m
               gonc    ts08
               goto    toRTNP2
-noActiveShell:
-              b=a     x
-toRTNP2:      golong  RTNP2         ; no shell found
-
-ts18:         ?a#0    s             ; skipping past one, are we at upper?
-              goc     ts40          ; yes, continue with next register
-              goto    ts14          ; no, look at upper
 
 ts20:         rcr     7
               a=a+1   s             ; second slot
 ts25:         cxisa                 ; fetch descriptor
-              c=c-1   x             ; is it an app shell?
-              c=c-1   x
-              gonc    ts27          ; no
-              ?s9=1                 ; have we already visited an app?
-              goc     ts18          ; yes, skip this one
-              s9=1                  ; now we are visiting the first app
-              goto    ts30
-ts27:         ?s8=1                 ; not an app, are we looking only
-                                    ;   for an  app shell?
-              goc     ts18          ; yes, pass this one
+              c=c-1   x             ; system shell?
+              goc     tsSys         ; yes
+              c=c-1   x             ; app shell?
+              goc     tsApp         ; yes
+
+tsExt:        ?s8=1                 ; extension, is that what we are looking for?
+              goc    tsAccept       ; yes, accept
+
+tsSkip:       ?a#0    s             ; skipping past one, are we at upper?
+              goc     ts40          ; yes, continue with next register
+              goto    ts14          ; no, look at upper
+
+tsApp:        ?s8=1                 ; app, are we looking for an extension?
+              goc     tsSkip        ; yes, skip
+              ?s9=1                 ; have we already seen an app?
+              goc     tsSkip        ; yes, skip
+              s9=1                  ; now we have seen an app
+              goto    tsAccept
+
+tsSys:        ?s8=1                 ; app, are we looking for an extension?
+              goc     tsSkip        ; yes, skip
 
 ;;; * use this one
-ts30:         acex                  ; A[6:3]= pointer to shell
+tsAccept:     acex                  ; A[6:3]= pointer to shell
+                                    ; A[13]= slot state
               m=c                   ; M= shell scan state
               golong  RTNP3         ; found, return to (P+3)
 
-nextShell:    s8=0                  ; looking for any shell
-              c=m                   ; C= shell scan state
+noActiveShell:
+              b=a     x
+toRTNP2:      golong  RTNP2         ; no shell found
+
+nextShell:    c=m                   ; C= shell scan state
               pt=     6
               ?c#0    s             ; next is in upper part?
               goc     10$           ; no, need a new register
@@ -500,25 +507,12 @@ shellSetup:   gosub   sysbuf
 
               .section code
               .public keyHandler
-keyHandler:   acex    m
-              cxisa                 ; read control word
-              a=c     m             ; A[6:3]= shell pointer
-              c=c-1   x
-              goc     10$           ; sys shell
-              c=c-1   x
-              rtnnc                 ; extension point, skip this one
-              ?st=1   Flag_NoApps   ; app shell, are we looking for one?
-              rtnc                  ; no, skip past it
-              st=1    Flag_NoApps   ; yes, do not look for any further apps
-10$:          c=0     x
-              dadd=c
-              a=0     s             ; assume not user mode
-              c=regn  14            ; get flags
-              cstex
+keyHandler:   a=0     s             ; assume not user mode
+              gosub   LDSST0
               ?s7=1                 ; alpha mode?
               goc     20$           ; yes
               rcr     7
-              cstex
+              st=c
               ?s0=1                 ; user mode?
               goc     14$           ; yes
               a=a+1   s             ; no, set A.S= non-zero
@@ -590,7 +584,7 @@ shellDisplay: ?s13=1                ; running?
               rtnc                  ; yes, no display override
               ?s7=1                 ; alpha mode?
               rtnc                  ; yes, no display override
-doDisplay:    gosub   topAppShell
+doDisplay:    gosub   topShell
               rtn                   ; (P+1) no app shell (no buffer)
               rtn                   ; (P+2) no app shell (with buffer)
               a=a+1   m             ; (P+3) point to display routine
@@ -646,7 +640,7 @@ setDisplayFlags:
 ;;;
 ;;; In:  C[1:0] - generic extension code
 ;;; Out:   Depends on extension behavior and if there is an active one.
-;;;        If there are no matching generic extension, returns to the
+;;;        If there is no matching generic extension, returns to the
 ;;;        caller.
 ;;;        If there is a matching generic extension, it decides on what to
 ;;;        do next and is extension defined.
@@ -675,7 +669,7 @@ setDisplayFlags:
 ;;;        the original caller and the handlers, and is completely up to
 ;;;        the extension to define the protocol.
 ;;; Note: An extension that returns to extensionHandler must preserve
-;;;       M and B.X and not leave PFAD active.
+;;;       M, S9 and B.X and not leave PFAD active.
 ;;; Uses: A, B.X, C, M, ST, DADD, active PT, +3 sub levels
 ;;;
 ;;; **********************************************************************
@@ -684,7 +678,7 @@ setDisplayFlags:
               .public extensionHandler
 extensionHandler:
               st=c                  ; ST= extension code
-              gosub   topShell
+              gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)
               rtn                   ; (P+2) no shells (with buffer)
               ldi     0x200         ; (P+3) go ahead and look
@@ -696,6 +690,7 @@ extensionHandler:
               a=a-b   x
               ?a#0    x             ; same?
               gsubnc  mayCall1      ; yes, try to invoke it
+              s8=1                  ; say we are still looking for extensions
               gosub   nextShell     ; not handled here, skip to next
               rtn                   ; (P+1) no more shells, no buffer
               rtn                   ; (P+2) no more shells

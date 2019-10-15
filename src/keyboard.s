@@ -32,7 +32,7 @@ PARS60:       .equlab 0xcb4
 
               .section code
               .public keyKeyboard
-              .extern sysbuf, jumpC1, jumpC2, jumpC4
+              .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
@@ -309,7 +309,12 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               .public clearSystemDigitEntry
               .section code
 appClearDigitEntry:
-              gosub  jumpC2         ; tell app tor clear digit entry
+              c=c+1   m
+              c=c+1   m
+              cxisa
+              ?c#0    x
+              rtnnc                 ; does not define any digit entry
+              gosub   jumpPacked    ; tell app tor clear digit entry
                                     ; must preserve: B, N and M!!!
 ;;; * fall into clearSystemDigitEntry
 clearSystemDigitEntry:

@@ -261,6 +261,7 @@ resetFlags:   c=b     x
 ;;; **********************************************************************
 
               .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5
+              .public jumpPacked
 jumpC5:       c=c+1   m
 jumpC4:       c=c+1   m
 jumpC3:       c=c+1   m
@@ -269,7 +270,7 @@ jumpC1:       c=c+1   m
 jumpC0:       cxisa
               ?c#0    x
               rtnnc
-jump10:       c=c+c   x
+jumpPacked:   c=c+c   x
               c=c+c   x
               csr     m
               csr     m
@@ -307,12 +308,12 @@ jump10:       c=c+c   x
 
 golAlign4:    c=stk
               cxisa
-              goto    jump10
+              goto    jumpPacked
 gosubAlign4:  c=stk
               cxisa
               c=c+1   m
               stk=c
-              goto    jump10
+              goto    jumpPacked
 
 ;;; **********************************************************************
 ;;;

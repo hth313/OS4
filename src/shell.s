@@ -359,13 +359,14 @@ ts05:         gosub   shellSetup
               rtn                   ; (P+1) no system buffer
               goto    noActiveShell ; (P+2) no shells (though there was a buffer)
               b=a     x             ; (P+3)
+              s9=0                  ; no app seen so far
               ?st=1   Flag_NoApps   ; running without apps?
               gonc    ts08          ; no
               ?s8=1                 ; are we looking for an app?
               goc     toRTNP2       ; yes, so we cannot find anything
 
-ts08:         a=0     s             ; first slot
-ts10:         a=a+1   x
+ts08:         a=0     s             ; at first slot
+              a=a+1   x
               acex    x
               dadd=c
               acex    x
@@ -375,19 +376,29 @@ ts10:         a=a+1   x
 ts14:         ?c#0    s             ; second slot in use?
               goc     ts20          ; yes
 ts16:         a=a-1   m
-              gonc    ts10
+              gonc    ts08
               goto    toRTNP2
 noActiveShell:
               b=a     x
 toRTNP2:      golong  RTNP2         ; no shell found
 
+ts18:         ?a#0    s             ; skipping past one, are we at upper?
+              goc     ts40          ; yes, continue with next register
+              goto    ts14          ; no, look at upper
+
 ts20:         rcr     7
               a=a+1   s             ; second slot
-ts25:         ?s8=1                 ; looking for app shell?
-              gonc    ts30          ; no, any will do, accept
-              c=c-1   xs            ; is it an app shell?
-              c=c-1   xs
-              gonc    ts08          ; no
+ts25:         cxisa                 ; fetch descriptor
+              c=c-1   x             ; is it an app shell?
+              c=c-1   x
+              gonc    ts27          ; no
+              ?s9=1                 ; have we already visited an app?
+              goc     ts18          ; yes, skip this one
+              s9=1                  ; now we are visiting the first app
+              goto    ts30
+ts27:         ?s8=1                 ; not an app, are we looking only
+                                    ;   for an  app shell?
+              goc     ts18          ; yes, pass this one
 
 ;;; * use this one
 ts30:         acex                  ; A[6:3]= pointer to shell
@@ -405,7 +416,7 @@ nextShell:    s8=0                  ; looking for any shell
               goto    ts14          ; go looking at second slot
 
 10$:          a=c
-              a=0     s             ; first slot
+ts40:         a=0     s             ; first slot
               goto    ts16          ; loop again
 
 

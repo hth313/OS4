@@ -72,14 +72,14 @@ displayDone:  .equlab 0x4f32
 #define GenericExtension      2
 
 
-#define KeyFlagSparseTable    6        ; Set if the keyboard table is a linear
-                                       ; search rather than a lookup.
-#define KeyFlagTransientApp   7        ; Set if this is a transient application
-                                       ; that terminates on a 000 (pass-through)
-                                       ; key. Typically something like CAT can
-                                       ; use it to define a few keys that are
-                                       ; handled, but if another (undefined)
-                                       ; key is pressed, the shell is terminated.
+#define KeyFlagSparseTable    6        // Set if the keyboard table iso a linear
+                                       // search rather than a lookup.
+#define KeyFlagTransientApp   7        // Set if this is a transient application
+                                       // that terminates on a 000 (pass-through)
+                                       // key. Typically something like CAT can
+                                       // use it to define a few keys that are
+                                       // handled, but if another (undefined)
+                                       // key is pressed, the shell is terminated.
 
 ;;; **********************************************************************
 ;;;

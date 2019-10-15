@@ -132,6 +132,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     -1
               c=c+c   s             ; is this a transient App that ends on
                                     ;  undefined key?
+                                    ; (KeyFlagTransientApp, assumed to be 7)
               gonc    35$           ; no
               c=n                   ; yes, terminate it
               gosub   jumpC4        ; call the transient termination vector
@@ -146,9 +147,34 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               a=c     x             ; A[1:0]= keycode
                                     ; A[2]= 0
                                     ; C[6:3]= keyboard descriptor
+              cxisa                 ; read keyboard flags
               c=c+1   m             ; step to keyboard table pointer
               c=c+1   m
               c=c+1   m
+              cstex                 ; ST= keyboard flags
+              ?st=1   KeyFlagSparseTable
+              gonc    44$
+              cstex                 ; restore SS0
+              cxisa                 ; C= packed page pointer to keyboard
+              csr     m
+              csr     m
+              csr     m
+              c=c+c   x
+              c=c+c   x
+              rcr     -3            ; C[6:3]= keyboard table
+
+42$:          cxisa                 ; search table for key
+              c=c+1   m             ; step to its key definition
+              ?c#0    xs
+              goc     30$           ; key not defined, try another keyboard
+              ?a#c    x
+              gonc    43$           ; key found
+              c=c+1   m             ; step to next entry
+              goto    42$
+43$:          cxisa                 ; read key definition
+              goto    48$
+
+44$:          cstex                 ; restore SS0
               cxisa
               c=c+c   x
               c=c+c   x
@@ -160,7 +186,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               cxisa                 ; fetch key table entry
               ?c#0    x             ; something there?
               gonc    30$           ; no, try another keyboard
-              spopnd                ; we will handle the key, no going back now
+48$:          spopnd                ; we will handle the key, no going back now
               c=c-1   xs            ; XROM override?
               goc     50$           ; yes
               c=c-1   xs            ; digit entry?

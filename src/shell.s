@@ -677,20 +677,32 @@ setDisplayFlags:
               .section code
               .public extensionHandler
 extensionHandler:
-              st=c                  ; ST= extension code
+              pt=     0
+              g=c                   ; G= extension code
               gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)
               rtn                   ; (P+2) no shells (with buffer)
-              ldi     0x200         ; (P+3) go ahead and look
-              c=st
+              pt=     0
+              c=g                   ; (P+3) go ahead and look
+              c=0     xs
               bcex    x             ; B.X= extension code to look for
 10$:          acex    m             ; C[6:3]= pointer to shell descriptor
-              cxisa                 ; read control word
+12$:          cxisa                 ; read control word
+              ?c#0    x             ; end of list?
+              gonc    50$           ; yes
+              c=c+1   m             ; step to handler
               a=c     x
               a=a-b   x
               ?a#0    x             ; same?
-              gsubnc  mayCall1      ; yes, try to invoke it
-              s8=1                  ; say we are still looking for extensions
+              gonc    20$           ; yes
+              c=c+1   m             ; no, keep looking in same extension shell
+              goto    12$
+
+20$:          gosub   mayCall       ; invoke it
+                                    ; got control back, try to pass it to
+                                    ;  other modules too
+
+50$:          s8=1                  ; say we are still looking for extensions
               gosub   nextShell     ; not handled here, skip to next
               rtn                   ; (P+1) no more shells, no buffer
               rtn                   ; (P+2) no more shells

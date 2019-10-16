@@ -84,6 +84,16 @@ extensionHandler .equlab 0x4f34
 
 ;;; **********************************************************************
 ;;;
+;;; Defined extensions.
+;;;
+;;; **********************************************************************
+
+// Invoke a CAT, N.X is the catalog number.
+#define ExtensionCAT    (GenericExtension + 0)
+
+
+;;; **********************************************************************
+;;;
 ;;; System buffer status flags. These flags are held in the buffer
 ;;; header.
 ;;;

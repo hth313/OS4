@@ -60,6 +60,7 @@ clearSystemDigitEntry: .equlab 0x4f2e
 reclaimSystemBuffer .equlab 0x4f30
 displayDone:  .equlab 0x4f32
 extensionHandler .equlab 0x4f34
+keyDispatch:  .equlab 0x4f36
 #endif
 
 ;;; **********************************************************************

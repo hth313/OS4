@@ -471,7 +471,7 @@ versionCheck: a=c     x
               .extern topExtension, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
-              .extern displayDone, extensionHandler
+              .extern displayDone, extensionHandler, keyDispatch
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -500,6 +500,7 @@ versionCheck: a=c     x
               golong  reclaimSystemBuffer ; 0x4f30
               golong  displayDone   ; 0x4f32
               golong  extensionHandler ; 0x4f34
+              golong  keyDispatch
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

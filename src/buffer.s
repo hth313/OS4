@@ -103,15 +103,10 @@
 ;;;
 ;;; Typical execution time (here) is:
 ;;;
-;;;   13 + KARs * 12 + otherBufs * 17 + 16 if found
+;;;   13 + KARs * 11 + otherBufs * 16 + 16 if found
 ;;;
-;;; So for 8 assignments and skipping 2 buffers, it would take 111 cycles
-;;; or 16ms on a standard HP-41. A 50x NEWT would be about 10 times faster
-;;; as it needs to access status register 13 once, then each KAR and one
-;;; for each buffer header.
-;;;
-;;; Does not call any subroutines (must not, because it can be called
-;;; during partial key sequences).
+;;; So for 8 assignments and skipping 2 buffers, it would take 105 cycles
+;;; or 16ms on a standard HP-41.
 ;;;
 ;;; **********************************************************************
 
@@ -128,8 +123,7 @@ chkbuf:       dadd=c                ; select chip 0
               bcex    x             ; B.X= chain head address
 
 1$:           a=a+1   x             ; start of search loop
-2$:           c=b     x             ; C.X= chain head .END.
-              ?a<c    x             ; have we reached chainhead?
+2$:           ?a<b    x             ; have we reached chainhead?
               rtnnc                 ; yes, return to (P+1), not found
               acex    x             ; no, select and load register
               dadd=c

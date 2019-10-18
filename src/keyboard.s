@@ -377,8 +377,7 @@ clearSystemDigitEntry:
 
               .section code
               .public keyDispatch
-keyDispatch:  acex    x
-              c=0     m
+keyDispatch:  c=0     m
               rcr     11
               a=c     m
               c=keys                ; read key

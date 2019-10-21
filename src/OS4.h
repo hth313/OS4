@@ -70,9 +70,10 @@ shrinkBuffer: .equlab 0x4f38
 ;;;
 ;;; **********************************************************************
 
-#define SysShell              0
-#define AppShell              1
-#define GenericExtension      2
+#define SysShell              8
+#define AppShell              4
+#define TransAppShell         (AppShell | 2)
+#define GenericExtension      0
 
 
 #define KeyFlagSparseTable    6        // Set if the keyboard table iso a linear
@@ -90,8 +91,10 @@ shrinkBuffer: .equlab 0x4f38
 ;;;
 ;;; **********************************************************************
 
+#define ExtensionListEnd  0
+
 // Invoke a CAT, N.X is the catalog number.
-#define ExtensionCAT    (GenericExtension + 0)
+#define ExtensionCAT      1
 
 
 ;;; **********************************************************************

@@ -29,21 +29,33 @@
 ;;;          .con    .low12 appendName
 ;;;
 ;;; kind
-;;;   0 - system shell, means that it is a system extension. A Shell that
-;;;       defines an alternative way to display numbers, like FIX-ALL would
-;;;        belong to this group. Will get activated even if not at top level
-;;;       of the stack if we scan down the stack as the top level Shell is
-;;;       only defining some partial behavior.
-;;;   1 - application shell, this means that it is only active
+;;;   SysShell - system shell, means that it is a system extension.
+;;;       A Shell that defines an alternative way to display numbers, like
+;;;       FIX-ALL would belong to this group. Will get activated even if not
+;;;       at top level of the stack if we scan down the stack as the top level
+;;;       Shell is only defining some partial behavior.
+;;;   AppShell - application shell, this means that it is only active
 ;;;       at top level. If found looking for a handler further down in the
 ;;;       stack, it is just skipped over.
-;;;   2 - extension point
+;;;   TransAppShell - transient application shell
+;;;       Like an AppShell, but there can only be one and it will typically
+;;;       be the top one. It is meant for temporary actions, such as a
+;;;       catalog extension. Such can allow for certain keys and other keys
+;;;       is meant to automatically terminate it and perform that action
+;;;       instead.
+;;;   GenericExtension - extension point
+;;;       These use a different table which basically is a linear search
+;;;       list:
+;;;          .con    GenericExtension
+;;;          .con    ExtensionXXX
+;;;          .con    .low12 xxxHandler
+;;;          [...]
+;;;          .con    ExtensionListEnd
+;;;
 ;;; routines - Need to be aligned 4, and 0 indicates means nothing special
 ;;;            is defined. An integer or complex mode would define
 ;;;            a standardKeys (probably set userKeys to the same), leave
 ;;;            alphaKeys empty.
-;;;
-;;;  Note: Leave other definitionBits to 0, they are for future expansion.
 ;;;
 ;;; **********************************************************************
 
@@ -380,10 +392,9 @@ ts16:         a=a-1   m
 
 ts20:         rcr     7
               a=a+1   s             ; second slot
-ts25:         cxisa                 ; fetch descriptor
-              c=c-1   x             ; system shell?
+ts25:         c=c+c   xs            ; system shell?
               goc     tsSys         ; yes
-              c=c-1   x             ; app shell?
+              c=c+c   xs            ; app shell?
               goc     tsApp         ; yes
 
 tsExt:        ?s8=1                 ; extension, is that what we are looking for?
@@ -686,6 +697,7 @@ extensionHandler:
               c=0     xs
               bcex    x             ; B.X= extension code to look for
 10$:          acex    m             ; C[6:3]= pointer to shell descriptor
+              c=c+1   m             ; step past 'GenericExtension' kind word
 12$:          cxisa                 ; read control word
               ?c#0    x             ; end of list?
               gonc    50$           ; yes

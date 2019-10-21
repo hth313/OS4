@@ -146,6 +146,42 @@ chkbuf:       dadd=c                ; select chip 0
 
 ;;; **********************************************************************
 ;;;
+;;; ensureBuffer - find or create an empty buffer
+;;; ensureSysBuf - same for system buffer
+;;;
+;;; Like chkbuf, but will create the buffer with only a header if it
+;;; does not previously exist.
+;;;
+;;; In: C.X - buffer ID
+;;; If not found, return to (P+1)
+;;; If found, return to (P+2) with:
+;;;   A.X = address of buffer start register
+;;;   DADD = first address of buffer
+;;;   C[13] part of buffer header incremented
+;;;   C[12:7] = part of buffer header
+;;;   C[2:0] = part of buffer header
+;;; Uses: A, C, B.X, PT, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .public ensureBuffer, ensureSysBuf
+ensureSysBuf: ldi     15
+ensureBuffer: gosub   chkbuf
+              goto    10$           ; (P+1) need to create it
+              goto    relayRTNP2    ; (P+2) already exists
+10$:          ?a<b    x             ; have we reched chainhead?
+              rtnnc                 ; yes, we are out of spaace
+              c=0                   ; build buffer header
+              c=c+1   s             ; 100000000...
+              acex    pt            ; 1b0000000... (where b is buffer number)
+              pt=     10
+              lc      1             ; 1b0100000...
+              data=c
+              goto    relayRTNP2
+
+
+;;; **********************************************************************
+;;;
 ;;; findKAR2 - locate the first secondary KAR
 ;;;
 ;;; findKAR2 can typically be used by routines that want to access all
@@ -234,51 +270,6 @@ reclaimSystemBuffer:
               c=c+1   s
               data=c
               rtn
-
-
-;;; **********************************************************************
-;;;
-;;; getbuf - get a buffer
-;;;
-;;; Ensure that we have a buffer. Buffer is only created if there is room for
-;;; two registers, but we actually only write a single header register.
-;;; The reason is that in order to store anything, we need to have at least
-;;; 2 registers, so there is no point of creating anything otherwise.
-;;;
-;;; If not found, return to (P+1)
-;;; If found, return to (P+2) with:
-;;;   A.X = address of buffer start register
-;;;   DADD = first address of buffer
-;;; Uses: A, C, B.X, active PT=12, DADD, +1 sub level
-;;;
-;;; **********************************************************************
-
-              .section code
-              .public getbuf
-
-getbuf:       gosub   sysbuf
-              goto    10$           ; need to create buffer
-5$:           golong  RTNP2         ; buffer exists
-
-10$:          b=a     x             ; B.X= first free register
-              c=0     x
-              dadd=c                ; select chip 0
-              gosub   MEMLFT
-              a=c     x
-              ldi     2             ; ensure at least 2 free registers
-              ?a<c    x
-              rtnc                  ; no room, return to (P+1)
-              c=b     x
-              dadd=c                ; select header
-              a=c                   ; A.X= buffer start address
-              c=0                   ; header= 1F010000000000
-              pt=     13
-              lc      1
-              lc      15            ; buffer 15
-              lc      0
-              lc      1
-              data=c
-              goto    5$
 
 
 ;;; **********************************************************************

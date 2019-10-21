@@ -37,7 +37,7 @@ activateShell: .equlab 0x4f00
 exitShell:    .equlab 0x4f02
 reclaimShell: .equlab 0x4f04
 chkbuf:       .equlab 0x4f06
-getbuf:       .equlab 0x4f08
+ensureBuffer: .equlab 0x4f08
 openSpace:    .equlab 0x4f0a
 findKAR2:     .equlab 0x4f0c
 stepKAR:      .equlab 0x4f0e

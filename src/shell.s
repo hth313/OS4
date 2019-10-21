@@ -61,13 +61,13 @@
 
               .section code
               .public activateShell
-              .extern getbuf, insertShell, noRoom
+              .extern ensureSysBuf, insertShell, noRoom
 activateShell:
               c=stk                 ; get page
               stk=c
               gosub   shellHandle
               m=c                   ; M[6:0]= shell handle
-              gosub   getbuf
+              gosub   ensureSysBuf
               rtn                   ; no room
 
 ;;; Search shell stack for shell handle in M[6:0]

@@ -466,7 +466,7 @@ versionCheck: a=c     x
 
               .section entry
               .extern activateShell, exitShell, reclaimShell
-              .extern chkbuf, getbuf, openSpace
+              .extern chkbuf, ensureBuffer, openSpace
               .extern findKAR2, stepKAR
               .extern topExtension, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
@@ -477,7 +477,7 @@ versionCheck: a=c     x
               golong  exitShell     ; 0x4f02
               golong  reclaimShell  ; 0x4f04
               golong  chkbuf        ; 0x4f06
-              golong  getbuf        ; 0x4f08
+              golong  ensureBuffer  ; 0x4f08
               golong  openSpace     ; 0x4f0a
               golong  findKAR2      ; 0x4f0c
               golong  stepKAR       ; 0x4f0e

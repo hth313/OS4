@@ -758,14 +758,15 @@ shellName:    gosub   unpack5
 
               .section code, reorder
               .public disableOrphanShells
-              .extern shrinkBuffer
+              .extern shrinkBuffer, clearScratch
 disableOrphanShells:
               gosub   sysbuf
               rtn                   ; (P+1) no buffer
               st=c
               ?st=1   Flag_OrphanShells
               goc     10$           ; yes
-5$:           golong  ENCP00        ; no, enable chip 0 and return
+5$:           gosub   clearScratch
+              golong  ENCP00        ; no, enable chip 0 and return
 
 10$:          c=data                ; load buffer header
               st=0    Flag_OrphanShells

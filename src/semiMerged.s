@@ -28,7 +28,7 @@ Text1:        .equ    0xf1
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public doPRGM
               .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP2
 doPRGM:       ?s12=1                ; PRIVATE ?
@@ -260,7 +260,7 @@ RightJustify:
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              .section code
+              .section code, reorder
               .public argument
 noSysBuf0:    spopnd
               gosub   LDSST0        ; need to reset partial key flag

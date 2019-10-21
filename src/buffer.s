@@ -110,7 +110,7 @@
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public sysbuf, chkbuf
 sysbuf:       ldi     15
 chkbuf:       dadd=c                ; select chip 0
@@ -286,7 +286,7 @@ reclaimSystemBuffer:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public insertShell
 insertShell:  ldi     1
               pt=     0

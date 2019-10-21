@@ -30,7 +30,7 @@ PARS60:       .equlab 0xcb4
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public keyKeyboard
               .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell
@@ -333,7 +333,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 ;;; **********************************************************************
 
               .public clearSystemDigitEntry
-              .section code
+              .section code, reorder
 appClearDigitEntry:
               c=c+1   m
               c=c+1   m
@@ -375,7 +375,7 @@ clearSystemDigitEntry:
 ;;;
 ;;; ************************************************************
 
-              .section code
+              .section code, reorder
               .public keyDispatch
 keyDispatch:  c=0     m
               rcr     11

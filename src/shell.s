@@ -59,7 +59,7 @@
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public activateShell
               .extern ensureSysBuf, insertShell, noRoom
 activateShell:
@@ -178,7 +178,7 @@ activateShell:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public exitShell, reclaimShell
               .extern sysbuf
 
@@ -265,7 +265,7 @@ exitReclaim10:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public releaseShells
 releaseShells:
               gosub   shellSetup
@@ -306,7 +306,7 @@ releaseShells:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
 shellHandle:
               csr     m
               csr     m
@@ -349,7 +349,7 @@ shellHandle:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public topExtension, topShell, nextShell
               .extern RTNP2, RTNP3
 topExtension: s8=1
@@ -440,7 +440,7 @@ ts40:         a=0     s             ; first slot
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public disableThisShell
 disableThisShell:
               c=m
@@ -475,7 +475,7 @@ disableThisShell:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
 shellSetup:   gosub   sysbuf
               rtn                   ; no buffer, return to (P+1)
               c=data                ; read buffer header
@@ -543,7 +543,6 @@ keyHandler:   a=0     s             ; assume not user mode
 ;;;
 ;;; **********************************************************************
 
-              .section code
 mayCall1:     c=c+1   m             ; step to display routine
 mayCall:      cxisa
               ?c#0    x             ; exists?
@@ -617,7 +616,7 @@ doDisplay:    gosub   topShell
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public displayDone
 displayDone:  gosub   sysbuf
               rtn
@@ -674,7 +673,7 @@ setDisplayFlags:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public extensionHandler
 extensionHandler:
               pt=     0
@@ -723,7 +722,7 @@ extensionHandler:
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public shellName
               .extern unpack5
 shellName:    gosub   unpack5
@@ -745,7 +744,7 @@ shellName:    gosub   unpack5
 ;;;
 ;;; **********************************************************************
 
-              .section code
+              .section code, reorder
               .public disableOrphanShells
               .extern shrinkBuffer
 disableOrphanShells:

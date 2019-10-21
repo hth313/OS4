@@ -28,12 +28,13 @@
 ;;;    instructions to be assigned to keys.
 ;;;
 ;;; Buffer header:
-;;;   ID SZ KA BF SH DF ST
+;;;   ID SZ KA 'SC:BF' SH DF ST
 ;;; where
 ;;;   ID - buffer ID
 ;;;   SZ - buffer size
 ;;;   KA - offset to first secondary KAR, 00 means no secondary KAR
-;;;   BF - number of hosted buffers
+;;;   BF - number of hosted buffers (single digit, 0-15 buffers possible)
+;;;   SC - number of transient application scratch registers
 ;;;   SH - number of shell registers
 ;;;   DF - Default postfix byte during semi-merged argument entry.
 ;;;   ST - system buffer status flags, see OS4.h
@@ -315,6 +316,52 @@ insertShell:  ldi     1
 
 ;;; **********************************************************************
 ;;;
+;;; allocScratch - allocate (ensure) a given scratch size
+;;;
+;;; Allocate the scratch register area meant for transient applications.
+;;; If the area is currently allocated it is assumed to be a left-over
+;;; from a previous scratch register allocation and we will free that
+;;; one first if not of the requested size.
+;;;
+;;; In: C[0] = size of scratch area (1-15)
+;;; Out: Returns to P+1 if it is not possible to grow the buffer
+;;;      Returns to P+2 if successful
+;;;      B.X= the location of the newly added space
+;;;      A.X= buffer header address
+;;;      DADD= buffer header address
+;;; Uses: A, B, C, G, DADD, active PT set to 10, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .public allocScratch
+              .section code, reorder
+allocScratch: rcr     -7
+              a=c
+              rcr     8
+              bcex    s             ; B.S= # of registers to allocate
+              gosub   ensureSysBuf
+              rtn                   ; (P+1) no room
+              c=data                ; read buffer header
+              pt=     7
+              ?c#0    pt
+              gonc    10$           ; no previous allocation
+              ?a#c    pt            ; same allocation?
+              gonc    10$           ; yes
+              gosub   clearScratch1 ; no, clear old one
+10$:          c=b                   ; C[13] = size to allocate
+              c=0     x
+              rcr     -1
+              pt=     0
+              g=c                   ; G= size to allocate
+              c=data                ; read buffer header
+              rcr     4
+              c=0     xs
+              c=c+1   x             ; C.X= offset to scratch area to be
+
+;;; !!! Fall into growBuffer !!!
+
+;;; **********************************************************************
+;;;
 ;;; growBuffer - add space to buffer
 ;;;
 ;;; Open up some register space inside a buffer. Newly allocated registers
@@ -337,7 +384,6 @@ insertShell:  ldi     1
 ;;; **********************************************************************
 
               .public growBuffer
-              .section code, reorder
 growBuffer:   gosub buffer1
 
 ;;; Ensure there is available space and step down the read pointer.
@@ -405,6 +451,46 @@ growBuffer:   gosub buffer1
 
 ;;; **********************************************************************
 ;;;
+;;; clearScratch - remove transient application scratch area
+;;; requestTransientAppScratch - allocate a transient scratch area
+;;;
+;;; A transient application can set up a transient scratch area typically
+;;; to store its state. This works because there can only be one active
+;;; transient application and making one active means
+;;;
+;;; In: Nothing
+;;; Out: A.X= buffer header address
+;;;      DADD= buffer header address
+;;; Uses: A, B[12:0], C, M, G, DADD, active PT set to 0, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .public clearScratch
+              .section code, reorder
+clearScratch:
+              gosub   sysbuf
+              rtn                   ; (P+1) no system buffer
+              c=data                ; (P+2) read buffer header
+              pt=     7
+              ?c#0    pt            ; is something allocated?
+              rtnnc                 ; no, we are done
+
+clearScratch1:
+              a=c
+              lc      0             ; clear SC in buffer header
+              data=c                ; write back
+              acex
+              rcr     4             ; C[1:0]= number of shell registers
+              c=0     xs            ; C.X= number of shell registers
+              c=c+1   x             ; C.X= index of scratch area
+              pt=     4
+              lc      0             ; C[3:4]= size of scratch area
+              g=c                   ; G= size of scratch area
+
+;;; !!! Fall into shrinkBuffer !!!
+
+;;; **********************************************************************
+;;;
 ;;; shrinkBuffer - remove registers from a buffer
 ;;;
 ;;; Remove a given number of registers from a buffer (at a given offset).
@@ -417,12 +503,11 @@ growBuffer:   gosub buffer1
 ;;;     G= number of registers to remove
 ;;; Out: A.X= buffer header address
 ;;;      DADD= buffer header address
-;;; Uses: A, B, C, M, G, DADD, active PT set to 0, +1 sub levels
+;;; Uses: A, B[12:0], C, M, G, DADD, active PT set to 0, +1 sub levels
 ;;;
 ;;; **********************************************************************
 
               .public shrinkBuffer
-              .section code, reorder
 shrinkBuffer: gosub   buffer1
               gosub   buffer2
               acex    m
@@ -484,4 +569,29 @@ buffer2:      c=0     m
               rcr     3             ; C.X= buffer header address
               dadd=c
               c=data                ; load buffer header
+              rtn
+
+
+;;; **********************************************************************
+;;;
+;;; scratchArea - get pointer to transient application scratch area
+;;;
+;;; Convert buffer pointer to a scratch area pointer. It is only sensible
+;;;
+;;; In: Nothing
+;;; Out: A.X - pointer to scratch area
+;;;      C[3] - size of scratch area (0-15 registers)
+;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public scratchArea
+scratchArea:  gosub   sysbuf
+              rtn                   ; (P+1) no system buffer
+              c=data
+              rcr     4
+              c=0     xs
+              c=c+1   x
+              a=a+c   x
               rtn

@@ -472,7 +472,7 @@ versionCheck: a=c     x
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
               .extern displayDone, extensionHandler, keyDispatch
-              .extern shrinkBuffer
+              .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -503,6 +503,9 @@ versionCheck: a=c     x
               golong  extensionHandler ; 0x4f34
               golong  keyDispatch   ; 0x4f36
               golong  shrinkBuffer  ; 0x4f38
+              golong  allocScratch  ; 0x4f3a
+              golong  clearScratch  ; 0x4f3c
+              golong  scratchArea   ; 0x4f3e
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

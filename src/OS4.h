@@ -62,6 +62,9 @@ displayDone:  .equlab 0x4f32
 extensionHandler .equlab 0x4f34
 keyDispatch:  .equlab 0x4f36
 shrinkBuffer: .equlab 0x4f38
+allocScratch: .equlab 0x4f3a
+clearScratch: .equlab 0x4f3c
+scratchArea   .equlab 0x4f3e
 #endif
 
 ;;; **********************************************************************

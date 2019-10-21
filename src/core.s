@@ -466,19 +466,20 @@ versionCheck: a=c     x
 
               .section entry
               .extern activateShell, exitShell, reclaimShell
-              .extern chkbuf, ensureBuffer, openSpace
+              .extern chkbuf, ensureBuffer, growBuffer
               .extern findKAR2, stepKAR
               .extern topExtension, shellDisplay, logoutXMem, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
               .extern displayDone, extensionHandler, keyDispatch
+              .extern shrinkBuffer
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
               golong  reclaimShell  ; 0x4f04
               golong  chkbuf        ; 0x4f06
               golong  ensureBuffer  ; 0x4f08
-              golong  openSpace     ; 0x4f0a
+              golong  growBuffer    ; 0x4f0a
               golong  findKAR2      ; 0x4f0c
               golong  stepKAR       ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
@@ -500,7 +501,8 @@ versionCheck: a=c     x
               golong  reclaimSystemBuffer ; 0x4f30
               golong  displayDone   ; 0x4f32
               golong  extensionHandler ; 0x4f34
-              golong  keyDispatch
+              golong  keyDispatch   ; 0x4f36
+              golong  shrinkBuffer  ; 0x4f38
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

@@ -291,7 +291,7 @@ reclaimSystemBuffer:
 insertShell:  ldi     1
               pt=     0
               g=c
-              gosub   openSpace
+              gosub   growBuffer
               rtn                   ; (P+1) no room
               c=b     x             ; (P+2) C.X= newly created space
               dadd=c
@@ -315,7 +315,14 @@ insertShell:  ldi     1
 
 ;;; **********************************************************************
 ;;;
-;;; openSpace - add space to buffer
+;;; growBuffer - add space to buffer
+;;;
+;;; Open up some register space inside a buffer. Newly allocated registers
+;;; are filled with F000000000000 for two reasons. First to ensure that
+;;; if we add space at the top of a buffer, it has to be non-zero, which
+;;; relieves the "burden" from the caller. Second, it helps with debugging
+;;; as new registers have a known static value rather than garbage that may
+;;; look like active data in the buffer.
 ;;;
 ;;; In: A.X= buffer header address
 ;;;     C.X= offset where to add registers
@@ -324,26 +331,14 @@ insertShell:  ldi     1
 ;;;      Returns to P+2 if successful
 ;;;      B.X= the location of the newly added space
 ;;;      A.X= buffer header address
-;;; Uses: A, B, C, G, DADD, active PT set to 10, +0 sub levels
+;;;      DADD= buffer header address
+;;; Uses: A, B, C, G, DADD, active PT set to 10, +1 sub levels
 ;;;
 ;;; **********************************************************************
 
-              .public openSpace
-              .section code
-openSpace:    b=a     x             ; B.X= buffer header
-              a=a+c   x             ; A.X= where we want to open space
-              c=0
-              dadd=c
-              pt=     3
-              c=g
-              a=c     m             ; A.M= counter
-
-              c=regn  13
-              acex    x             ; A.X= free memory pointer (at .END. now)
-              bcex    x             ; B.X= where to open space
-              rcr     -3
-              bcex    m             ; B[5:3]= buffer header pointer
-
+              .public growBuffer
+              .section code, reorder
+growBuffer:   gosub buffer1
 
 ;;; Ensure there is available space and step down the read pointer.
 4$:           a=a-1   x             ; step to next register
@@ -357,15 +352,7 @@ openSpace:    b=a     x             ; B.X= buffer header
               gonc    4$
               rtn                   ; return to (P+1), not enough space
 
-10$:          c=0     m
-              pt=     10
-              c=g
-              a=c     m             ; A[11:10]= number of registers to add
-                                    ; rest of A.M is zero
-              c=b     m
-              rcr     3             ; C.X= buffer header address
-              dadd=c
-              c=data                ; load buffer header
+10$:          gosub buffer2
               c=a+c   m             ; increase size of buffer
               rtnc                  ; return to (P+1) if buffer size overflows
                                     ; We know that buffer is F, so an overflow
@@ -383,7 +370,7 @@ openSpace:    b=a     x             ; B.X= buffer header
               dadd=c
               acex    x
               a=a-1   x
-              c=data                ; C= register contents to move
+              c=data                ; C= register data to move
               acex
               rcr     3
               c=c-1   x             ; C.X= destination pointer
@@ -394,7 +381,107 @@ openSpace:    b=a     x             ; B.X= buffer header
               ?a<b    x             ; are we done?
               gonc    15$           ; no
 
+              pt=     0             ; fill the opened area with F0000...
+              c=g
+              c=0     xs
+              a=c     x             ; A.X= number of registers opened
+              goto    25$
+20$:          bcex    x
+              dadd=c
+              c=c+1   x
+              bcex    x
+              c=0
+              c=c-1   s             ; C= F0000....
+              data=c
+25$:          a=a-1   x
+              gonc    20$
+
               c=b     m
               rcr     3
-              a=c     x             ; A.X= buffer header
+              dadd=c
+              a=c     x             ; A.X= buffer header address
               golong  RTNP2         ; done, return to (P+2)
+
+
+;;; **********************************************************************
+;;;
+;;; shrinkBuffer - remove registers from a buffer
+;;;
+;;; Remove a given number of registers from a buffer (at a given offset).
+;;; There are no error checking here, you better know that you have a
+;;; buffer that can drop this number of registers. Garbage or incorrect
+;;; input will forsure corrupt the memory!
+;;;
+;;; In: A.X= buffer header address
+;;;     C.X= offset of first register to remove
+;;;     G= number of registers to remove
+;;; Out: A.X= buffer header address
+;;;      DADD= buffer header address
+;;; Uses: A, B, C, M, G, DADD, active PT set to 0, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .public shrinkBuffer
+              .section code, reorder
+shrinkBuffer: gosub   buffer1
+              gosub   buffer2
+              acex    m
+              c=a-c   m             ; adjust buffer size
+              data=c                ; write back updated buffer header
+
+              abex    x             ; A.X= first register to remove
+                                    ; B.X= chain head
+              pt=     0
+              c=g
+              c=0     xs            ; C.X= number of registers to remove
+              c=a+c   x             ; C.X= read copy pointer
+              acex    x             ; A.X= read copy pointer
+              m=c                   ; M.X= write copy pointer
+
+10$:          acex    x
+              dadd=c
+              acex    x
+              a=a+1   x
+              c=data                ; read register to copy
+              cmex
+              dadd=c
+              c=c+1   x
+              cmex
+              data=c                ; write it
+              ?a<b    x             ; reached chain head?
+              goc     10$           ; not yet
+              c=b     m
+              rcr     3
+              dadd=c
+              a=c     x             ; A.X= buffer header address
+              rtn
+
+;;; Support routine for growBuffer/shrinkBuffer
+              .section code, reorder
+buffer1:      b=a     x             ; B.X= buffer header address
+              a=a+c   x             ; A.X= where we want to open space
+              c=0
+              dadd=c
+              pt=     3
+              c=g
+              a=c     m             ; A.M= counter
+
+              c=regn  13
+              acex    x             ; A.X= chain head (pointer to .END.)
+              bcex    x             ; B.X= where to open space
+              rcr     -3
+              bcex    m             ; B[5:3]= buffer header address
+              rtn
+
+;;; Support routine for growBuffer/shrinkBuffer
+              .section code, reorder
+buffer2:      c=0     m
+              pt=     10
+              c=g
+              a=c     m             ; A[11:10]= number of registers to adjust
+                                    ; rest of A.M is zero
+              c=b     m
+              rcr     3             ; C.X= buffer header address
+              dadd=c
+              c=data                ; load buffer header
+              rtn

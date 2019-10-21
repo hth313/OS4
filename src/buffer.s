@@ -93,7 +93,7 @@
 ;;;   C[13] part of buffer header incremented
 ;;;   C[12:7] = part of buffer header
 ;;;   C[2:0] = part of buffer header
-;;; Uses: A, C, B.X, active PT=12, DADD, +0 sub levels
+;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +0 sub levels
 ;;;
 ;;; Note: For chkbuf, buffer number in C[0] and C[2:1] must be zero!!!
 ;;;       Use 'ldi' or 'c=0 x' to ensure that.
@@ -117,7 +117,7 @@ chkbuf:       dadd=c                ; select chip 0
               pt=     12
               rcr     2
               ldi     0xc0 - 1
-              a=c                   ; A[12] = desired buffer,
+              a=c     pt            ; A[12] = desired buffer,
                                     ; A.X = start address - 1
               c=regn  c
               bcex    x             ; B.X= chain head address

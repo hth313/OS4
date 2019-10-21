@@ -747,6 +747,7 @@ shellName:    gosub   unpack5
 
               .section code
               .public disableOrphanShells
+              .extern shrinkBuffer
 disableOrphanShells:
               gosub   sysbuf
               rtn                   ; (P+1) no buffer
@@ -771,7 +772,7 @@ disableOrphanShells:
 
 20$:          bcex    x
               c=c-1   x
-              goc     5$            ; no more shell registers
+              goc     40$           ; no more shell registers
               bcex    x
               a=a+1   x             ; step to next shell register
               acex    x
@@ -786,3 +787,58 @@ disableOrphanShells:
               c=0     s             ; orphan, disable it
 30$:          data=c                ; write back
               goto    20$
+
+
+;;; Prune unused shell registers. This is written in a somewhat inefficient
+;;; way (we do not take advantage of that we may be able to delete multiple
+;;; registers in one shrinkBuffer operation), but it is not expected to
+;;; happen all that often and is done once at power on.
+40$:          gosub   sysbuf
+50$:          goto    5$            ; (P+1) should not happen (also relay)
+41$:          c=data                ; read buffer header
+              rcr     3
+              c=0     m
+              rcr     -2
+              acex    x             ; C.M= number of shell registers (counter)
+                                    ; C.X= buffer header
+                                    ; (goes to N in the loop below)
+              pt=     6
+              goto    65$
+
+60$:          n=c                   ; main loop to prune unused registers
+              acex    x
+              c=c+1   x
+              dadd=c                ; select next shell register
+              acex    x
+              c=data
+
+              ?c#0    pt
+              goc     62$           ; in use
+              ?c#0    s
+              goc     62$           ; in use
+
+              ldi     1             ; G= 1 (we remove one register at a time)
+              pt=     0
+              g=c
+
+              c=n
+              dadd=c                ; select buffer header
+              bcex    x             ; B.X= buffer header address
+              a=a-b   x             ; A.X= offset to register to go
+              c=b     x
+              acex    x             ; A.X= buffer header
+                                    ; C.X= offset to register to go
+              c=data                ; decrement shell counter in buffer header
+              rcr     4
+              c=c-1   x
+              rcr     -4
+              data=c
+
+              gosub   shrinkBuffer  ; remove this single shell register
+                                    ; (this handles buffer size too)
+              goto    41$           ; start over
+
+62$:          c=n
+65$:          c=c-1   m             ; decrement shell counter
+              gonc    60$           ; loop again
+              goto    50$           ; done

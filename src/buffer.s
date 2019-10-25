@@ -104,9 +104,9 @@
 ;;;
 ;;; Typical execution time (here) is:
 ;;;
-;;;   13 + KARs * 11 + otherBufs * 16 + 16 if found
+;;;   14 + KARs * 11 + otherBufs * 16 + 16 if found
 ;;;
-;;; So for 8 assignments and skipping 2 buffers, it would take 105 cycles
+;;; So for 8 assignments and skipping 2 buffers, it would take 106 cycles
 ;;; or 16ms on a standard HP-41.
 ;;;
 ;;; **********************************************************************
@@ -119,7 +119,8 @@ chkbuf:       dadd=c                ; select chip 0
               rcr     2
               ldi     0xc0 - 1
               a=c     pt            ; A[12] = desired buffer,
-                                    ; A.X = start address - 1
+              a=c     x             ; A.X = start address - 1
+                                    ; (avoid clobbering whole A)
               c=regn  c
               bcex    x             ; B.X= chain head address
 

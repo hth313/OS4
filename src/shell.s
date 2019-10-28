@@ -67,20 +67,19 @@
 ;;; In: C.X - packed pointer to shell structure
 ;;; Out: Returns to (P+1) if not enough free memory
 ;;;      Returns to (P+2) on success
-;;; Uses: A, B, C, M, G, S0, S1, active PT, +2 sub levels
+;;; Uses: A, B, C, M, G, ST, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
               .public activateShell
-              .extern ensureSysBuf, insertShell, noRoom
+              .extern ensureSysBuf, insertShellB, insertShellC, noRoom
 activateShell:
               c=stk                 ; get page
               stk=c
               gosub   shellHandle
-              m=c                   ; M[6:0]= shell handle
               gosub   ensureSysBuf
-              rtn                   ; no room
+              rtn                   ; (P+1) no room
 
 ;;; Search shell stack for shell handle in M[6:0]
 ;;; General idea:
@@ -92,84 +91,250 @@ activateShell:
 ;;; 5. Push the new element on top of stack letting previous elements ripple
 ;;;    down until we find an unused slot. We know there will be such slot as
 ;;;    we ensured it in the previous steps.
+;;;
+;;; Invariants:
+;;; - A transient application shell is always at the top. Pushing some kind
+;;;   of application on top of it will always deactivate it.
+;;; - Application shells always appear on top of system shells and extensions.
 
               s0=     0             ; empty slots not seen
-              s1=     0             ; looking at first entry
+              s3=     0             ; looking at first entry
+              s4=     0             ; no transient application released
               pt=     6
 
               b=a     x             ; B.X= buffer pointer
               c=data                ; read buffer header
-              rcr     1
+              ?c#0    s             ; is buffer marked for removal?
+              goc     5$            ; no
+              c=c+1   s             ; yes, assume this call is from a power on
+                                    ;   poll vector
+              data=c                ; reclaim buffer
+5$:           rcr     1
               c=b     x
               rcr     3
               c=0     xs
               cmex                  ; M.X= number of stack registers
                                     ; M[13:11]= buffer header address
-              a=c                   ; A[6:0]= shell handle to push
+              a=c     wpt           ; A[6:0]= shell handle to push
 
-10$:          c=m                   ; C.X= stack registers left
+              c=0     pt            ; prepare for testing shell reclaims
+              c=c+1   pt
+              bcex    pt            ; B[6]= 1
+              abex    pt            ; swap, to fit loop back
+10$:          abex    pt
+              c=m                   ; C.X= stack registers left
               c=c-1   x
-              goc     40$           ; no more stack registers
+              golc    40$           ; no more stack registers
               m=c                   ; put back updated counter
               bcex    x
               c=c+1   x
               dadd=c                ; select next stack register
               bcex    x
               c=data                ; read stack register
-              ?c#0    pt            ; unused slot?
+              ?s3=1                 ; at top entry?
+              goc     11$           ; no
+              ?s2=1                 ; yes, are we about to push an application
+                                    ;  shell (ordinary or transient)?
+              gonc    11$           ; no
+              c=c+c   xs            ; is the top one a transient shell?
+              c=c+c   xs
+              c=c+c   xs
+              gonc    9$            ; no
+
+              c=0     pt            ; yes, auto deactivate it
+                                    ;   (should be no harm to leave the
+                                    ;    currupted xs field as we are going to
+                                    ;    write it over in a moment)
+              s4=     1             ; remember we dropped a transient application
+              goto    15$           ; we have seen an empty slot now
+9$:           c=data                ; refetch the stack register
+11$:          ?c#0    pt            ; unused slot?
               goc     12$           ; no
-              s0=     1             ; yes, remember we have seen an empty slot
+15$:          s0=     1             ; yes, remember we have seen an empty slot
 12$:          ?a#c    wpt           ; is this the one we are looking for?
               goc     14$           ; no
-              ?s1=1                 ; are we looking at the top entry?
+13$:          ?s3=1                 ; are we looking at the top entry?
               gonc    90$           ; yes, we are done
               c=0     pt            ; mark as unused
-              data=c                ; write back
-              goto    30$
-14$:          s1=     1             ; we are now looking further down the stack
+              goto    22$
+14$:          abex    pt            ; A[6]= 1
+              ?a#c    wpt           ; the right shell, but in reclaim mode?
+              goc     17$           ; no
+              bcex    pt            ; yes, set the right page
+              data=c                ; reclaim it
+              bcex    pt            ; restore register state
+              abex    pt
+              goto    13$
+
+17$:          abex    pt
+              s3=     1             ; we are now looking further down the stack
               rcr     7             ; look at second stack slot in register
               ?c#0    pt            ; unused slot?
               goc     16$           ; no
               s0=     1             ; yes, remember we have seen an empty slot
 16$:          ?a#c    wpt           ; is this the one we are looking for?
-              goc     10$           ; no, continue with next register
-              c=0     pt            ; yes, mark as empty
-              rcr     7
-              data=c
+              gonc    20$           ; yes
 
-              ;;  push handle on top of stack
+              abex    pt            ; A[6]= 1
+              ?a#c    wpt           ; the right shell, but in reclaim mode?
+              goc     10$           ; no
+              abex    pt            ; yes, restore registers
+20$:          c=0     pt            ; mark as empty
+              rcr     7
+22$:          s0=     1             ; we have seen empty registers
+              data=c                ; write back
+
+40$:          ?s2=1                 ; are we pushing an application?
+              gonc    100$          ; no
+              ?s0=1                 ; yes, did we encounter any empty slots?
+              goc     30$           ; yes
+              c=0                   ; C[13:7]= 0
+              acex    wpt           ; C[6:0]= shell value
+              cmex                  ; M= shell register value to insert
+              rcr     -3
+              a=c     x             ; A.X= buffer header address
+              ldi     1             ; C.X= offset to insert at (in buffer)
+              gosub   insertShellC  ; insert a shell register on top of stack
+              rtn                   ; (P+1) no room
+                                    ; (P+2)
+80$:          ?s4=1                 ; did we drop a transient application?
+              gsubc   clearScratch  ; yes, also clear its scratch area
+90$:          golong  RTNP2
+
+;;; push app handle on top of stack
 30$:          c=m
               rcr     11            ; C.X= buffer header
 
 32$:          c=c+1   x             ; C.X= advance to next shell stack register
               dadd=c
               bcex    x             ; B.X= shell stack pointer
-              c=data
+34$:          c=data
               acex    wpt           ; write pending handle to slot
               ?a#0    pt            ; unused slot?
               gonc    38$           ; yes, done
-              rcr     7             ; do upper half
+36$:          rcr     7             ; do upper half
               acex    wpt
               rcr     7
               data=c                ; write back
               ?a#0    pt            ; unused slot?
-              gonc    90$           ; yes, done
+              gonc    80$           ; yes
               bcex    x             ; no, go to next register
               goto    32$
 
 38$:          data=c                ; write back
-              goto    90$           ; done
+              goto    80$           ; done
 
-40$:          ?s0=1                 ; did we encounter any empty slots?
-              goc     30$           ; yes
-              acex                  ; C[6:0]= shell value
-              c=0     s             ; mark upper half as unused
-              cmex                  ; M= shell register value to insert
+;;; It is expected that system shells and extensions are inserted by plug-in
+;;; modules and not moved around so much. This is in contrast to applications
+;;; that are activated and left.
+;;; Thus, we locate the first shell slot after the last application shell
+;;; (active or not) we insert it there (if empty), or add a new register and
+;;; ensure the being inserted shell goes in as first behind the application
+;;; shell. It will either be in that inserted register, or it goes with the
+;;; last application shell.  The one that was there before goes to the new
+;;; register.
+;;; When we insert a single non-application in a register, we put it in the
+;;; upper slot to make easy room for a following bening pushed (or apps being
+;;; pushed down).
+100$:         c=m
+              rcr     11            ; C.X= buffer header
+              dadd=c
+              bcex    x             ; B.X= shell pointer (to be)
+              c=data
+              rcr     3
+              c=0     m
+              rcr     -2            ; C.M= number of shell registers
+              bcex    x             ; C.X= shell pointer - 1
+              pt=     9
+              goto    110$
+105$:         dadd=c                ; select next shell register
+              bcex                  ; B= counters
+              c=data                ; read next shell register
+              c=c+c   xs            ; is lower half an app?
+              c=c+c   xs
+              gonc    120$          ; no
+              c=c+c   pt            ; yes, is upper half and app?
+              c=c+c   pt
+              gonc    130$          ; no
+              bcex                  ; yes, keep looking
+110$:         c=c+1   x             ; point to next shell register
+              c=c-1   m             ; count down remaining ones
+              gonc    105$
+              bcex    x             ; only apps in the shell stack (or empty)
+                                    ; B.X= where we will insert the register
+                                    ;       (pointing one past now)
+122$:         acex                  ; C[0:6]= descriptor
+              rcr     7             ; C[13:7]= descriptor
+              pt=     6
+              c=0     wpt           ; C[0:6]= 0
+              cmex                  ; M= descriptor to write
+                                    ; C[13:11]= buffer pointer
+              rcr     11
+              a=c     x             ; A.X= buffer header
+              gosub  insertShellB
+              rtn                   ; (P+1) failed
+              goto    80$           ; (P+2)
+
+120$:         s5=0
+              gosub   unusedSlot
+              goto    122$          ; (P+1) no slots, need new register
+              goto    34$           ; (P+2) write it here and ripple
+
+130$:         s5=1
+              gosub   unusedSlot
+              goto    132$          ; (P+1) no slots
+              c=data                ; (P+2) there are slots
+              goto    36$           ; write it to upper slot and ripple
+
+;;; In this situation we need to split the register as it is occupied
+;;; by a non-app and an app.
+132$:         rcr     7             ; insert new shell here
+              acex    wpt           ; A[6:0]= active one to push down
+              rcr     7
+              data=c                ; write back
+              bcex    x             ; step ahead register
+              c=c+1   x
+              bcex    x
+              goto    122$          ; insert a new shell register
+
+;;; Support routine to check downwards for an empty shell slot.
+;;; The idea is that if such exists, we can write a shell descriptor to it and
+;;; ripple the shells down one position until we hit the empty slot.
+;;; For that to work we need to know that such slot actually exists,
+;;; which is the motivation for this routine.
+unusedSlot:   pt=     6
+              c=b     x             ; C.X= current shell pointer
               rcr     -3
-              a=c     x             ; A.X= buffer header address
-              gosub   insertShell   ; insert a shell register on top of stack
-              rtn                   ; (P+1) no room
-90$:          golong  RTNP2         ; (P+2) done
+              stk=c                 ; save that pointer on stack
+              c=data
+              ?s5=1                 ; skip first low part check?
+              goc     15$           ; yes
+              bcex                  ; no
+10$:          bcex
+              c=data
+              ?c#0    pt            ; lower part unused?
+              gonc    50$           ; yes
+
+15$:          ?c#0    s             ; upper part unused?
+              gonc    50$           ; yes
+
+              bcex
+              c=c+1   x             ; point to next register
+              dadd=c                ; select it
+              c=c-1   m
+              gonc    10$
+
+              c=stk                 ; nothing found
+              rcr     3
+              dadd=c
+              bcex    x             ; restore original B.X
+              rtn
+
+50$:          c=stk
+              rcr     3
+              dadd=c
+              bcex    x             ; restore original B.X
+              golong  RTNP2
 
 
 ;;; **********************************************************************
@@ -181,12 +346,13 @@ activateShell:
 ;;; We do not reclaim any memory here, it is assumed that it may be a
 ;;; good idea to keep one or two empty slots around. Reclaiming any
 ;;; buffer memory is a different mechanism.
+;;; Transient application will have any scratch area removed.
 ;;;
 ;;; reclaimShell marks a shell to activate it.
 ;;;
 ;;; In: C.X - packed pointer to shell structure
 ;;; Out:
-;;; Uses: A, B.X, C, M, S0, DADD, active PT, +1 sub level
+;;; Uses: A, B.X, C, M, ST, S8, DADD, active PT, +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -194,16 +360,15 @@ activateShell:
               .public exitShell, reclaimShell
               .extern sysbuf
 
-exitShell:    s0=0
+exitShell:    s8=0
               goto exitReclaim10
 
-reclaimShell: s0=1
+reclaimShell: s8=1
 
 exitReclaim10:
               c=stk                 ; get page
               stk=c
               gosub   shellHandle
-              m=c
               gosub   sysbuf
               rtn                   ; no shell buffer, quick exit
               c=data                ; read buffer header
@@ -229,10 +394,12 @@ exitReclaim10:
               ?a#c    wpt           ; shell in lower part?
               goc     20$           ; no
               pt=     6
-              ?s0=1                 ; reclaim?
+              ?s8=1                 ; reclaim?
               goc     14$           ; yes
               c=0     pt            ; no, deactivate it
 12$:          data=c                ; write back
+90$:          ?s1=1                 ; if we are deactivaing a transient app
+              gsubc   clearScratch  ;  also drop scratch area
               rtn                   ; done
 14$:          ?c#0    pt            ; reclaim it, was it active before?
               rtnnc                 ; no
@@ -243,7 +410,7 @@ exitReclaim10:
               ?a#c    wpt           ; shell in upper part?
               goc     30$           ; no
               pt=     6
-              ?s0=1                 ; yes, reclaim?
+              ?s8=1                 ; yes, reclaim?
               goc     24$           ; yes
               c=0     pt            ; no, deactivate it
               goto    26$
@@ -255,7 +422,7 @@ exitReclaim10:
 
 30$:          cmex
               c=c-1   x             ; decrement register counter
-              rtnc                  ; done
+              goc     90$           ; done
               cmex
               bcex    x
               goto    10$
@@ -310,17 +477,18 @@ releaseShells:
 ;;;
 ;;; In:  C[6] - page of shell descriptor
 ;;;      C[2:] - packed page address of shell descriptor
-;;; Out: C[6:0] - full shell handle
-;;;      C[6:3] - address of shell descriptor
-;;;      C[2] - status nibble (sys/app)
-;;;      C[1:0] - XROM ID of shell
-;;; Uses: A, C, active PT=5
+;;; Out: M[6:0] - full shell handle
+;;;      M[6:3] - address of shell descriptor
+;;;      M[2] - status nibble (sys/app)
+;;;      M[1:0] - XROM ID of shell
+;;;      S1 - set if this is a transient application shell
+;;;      S2 - set if this is an application shell (of some kind)
+;;; Uses: A, C, M, ST, active PT=5
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
-shellHandle:
-              csr     m
+shellHandle:  csr     m
               csr     m
               csr     m             ; C[3]= page address
               c=c+c   x             ; unpack pointer
@@ -335,6 +503,9 @@ shellHandle:
               cxisa                 ; C[1:0]= XROM ID
               acex    m             ; C[6:3]= shell descriptor address
               acex    xs            ; C[2]= status nibble (of definition bits)
+              m=c                   ; M[6:0]= full shell handle
+              rcr     2
+              st=c
               rtn
 
 
@@ -811,7 +982,7 @@ disableOrphanShells:
               rcr     3
               c=0     m
               rcr     -2
-              acex    x             ; C.M= number of shell registers (counter)
+              c=a     x             ; C.M= number of shell registers (counter)
                                     ; C.X= buffer header
                                     ; (goes to N in the loop below)
               pt=     6

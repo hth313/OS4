@@ -279,6 +279,8 @@ reclaimSystemBuffer:
 ;;; insertShell - insert a shell register on top of stack
 ;;;
 ;;; In: A.X= buffer header address
+;;;     C.X= offset to insert at (insertShellC)
+;;;     B.X= address to insert at (insertShellB)
 ;;;     M= contents to write to the new register
 ;;; If no room for inserting a register, return to (P+1)
 ;;; If register was inserted, return to (P+2) with:
@@ -289,10 +291,18 @@ reclaimSystemBuffer:
 ;;; **********************************************************************
 
               .section code, reorder
-              .public insertShell
-insertShell:  ldi     1
+              .public insertShellC, insertShellB
+insertShellB: abex    x
+              a=a-b   x             ; A.X= offset to insert at
+              abex    x             ; B.X= offset to insert at
+              goto    insertShell10
+insertShellC: bcex    x             ; B.X= offset to insert at
+
+insertShell10:
+              ldi     1
               pt=     0
               g=c
+              bcex    x
               gosub   growBuffer
               rtn                   ; (P+1) no room
               c=b     x             ; (P+2) C.X= newly created space
@@ -431,18 +441,22 @@ growBuffer:   gosub buffer1
               pt=     0             ; fill the opened area with F0000...
               c=g
               c=0     xs
+
               a=c     x             ; A.X= number of registers opened
-              goto    25$
-20$:          bcex    x
+
+              a=a+b   x             ; A.X= top address of area + 1
+              abex    x             ; B.X= top address of area + 1
+                                    ; A.X= bottom address of area
+
+20$:          bcex    x             ; write top down to bottom
+              c=c-1   x
               dadd=c
-              c=c+1   x
               bcex    x
               c=0
               c=c-1   s             ; C= F0000....
               data=c
-25$:          a=a-1   x
-              gonc    20$
-
+              ?a<b    x
+              goc    20$
               c=b     m
               rcr     3
               dadd=c

@@ -582,12 +582,15 @@ tsApp:        ?s8=1                 ; app, are we looking for an extension?
               s9=1                  ; now we have seen an app
               goto    tsAccept
 
-tsSys:        ?s8=1                 ; app, are we looking for an extension?
+tsSys:        ?s8=1                 ; system shell, are we looking for an extension?
               goc     tsSkip        ; yes, skip
 
 ;;; * use this one
 tsAccept:     acex                  ; A[6:3]= pointer to shell
-                                    ; A[13]= slot state
+                                    ; Scan state:
+                                    ; C[13]= upper/lower slot flag
+                                    ; C.M= shell counter
+                                    ; C.X= points to shell address
               m=c                   ; M= shell scan state
               golong  RTNP3         ; found, return to (P+3)
 
@@ -774,7 +777,7 @@ doDisplay:    gosub   topShell
               ?c#0    x             ; does it have a display routine?
               rtnnc                 ; no
               acex                  ; yes, A[6,2:0]= packed display routine
-              c=b     x             ; C.X= address of system shell
+              c=b     x             ; C.X= address of system buffer
               dadd=c
               gosub   setDisplayFlags
               acex                  ; C[6,2:0]= display routine

@@ -74,27 +74,31 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gonc    22$           ; no
               ldi     0x80          ; adj row for shift
               c=a+c   x
+              a=c     x
 22$:          acex    m
               n=c                   ; N[2:1]= logical key code
                                     ; N[6:3]= keyboard descriptor
               c=regn  14            ; put up SS0
               st=c
               ?s7=1                 ; alpha mode?
-              goc     40$           ; yes, skip all reassigned tests
+              goc     400$          ; yes, skip all reassigned tests
               ?a#0    s             ; user mode?
-              goc     40$           ; no
+              goc     400$          ; no
+              c=m                   ; M normally contains shell scan state
+              bcex                  ; preserve it in B
               gosub   TBITMP        ; yes, test bit map
-              ?c#0                  ; key reassigned?
+              bcex
+              m=c                   ; M= shell scan state
+              ?b#0                  ; key reassigned?
               golc    60$           ; yes
               ?s3=1                 ; program mode?
               goc     40$           ; yes, skip auto-assign tests
 
-              acex    m
+              c=n
               cxisa                 ; C.X= keyboard flags
-              acex    m
               cstex
               ?s0=1                 ; skip auto-assign tests?
-              gonc    40$           ; yes
+400$:         gonc    40$           ; yes (also relay)
 
               c=n
               c=0     m

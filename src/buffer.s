@@ -594,8 +594,9 @@ buffer2:      c=0     m
 ;;; Convert buffer pointer to a scratch area pointer. It is only sensible
 ;;;
 ;;; In: Nothing
-;;; Out: A.X - pointer to scratch area
+;;; Out: C.X - pointer to scratch area
 ;;;      C[3] - size of scratch area (0-15 registers)
+;;;      DADD - first scratch register selected
 ;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
@@ -608,5 +609,6 @@ scratchArea:  gosub   sysbuf
               rcr     4
               c=0     xs
               c=c+1   x
-              a=a+c   x
+              c=a+c   x
+              dadd=c
               rtn

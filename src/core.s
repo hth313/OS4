@@ -77,6 +77,7 @@ lightWake:    ldi     0x2fd         ; PACH11
               ?s3=1                 ; program mode?
               golc    doPRGM        ; yes, we may need to display certain
                                     ; instructions in a custom way
+              gosub   disableOrphanShells
               gosub   doDisplay     ; we may want to override the display
 
 ;;; This is a replacement for MEMCHK. It is called whenever we are going
@@ -103,7 +104,6 @@ LocalMEMCHK:  c=0     x
               ?s2=1                 ; I/O flag?
               goc     3$            ; yes, keep going
 
-              gosub   disableOrphanShells
               golong  0x18c         ; go to light sleep
 
 toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed

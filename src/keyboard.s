@@ -38,13 +38,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
               c=stk                 ; get keyboard descriptor
-              cxisa
-              c=c+c   x
-              c=c+c   x
-              a=c     m
-              rcr     -3
-              pt=     5
-              a=c     wpt           ; A[6:3] = keyboard descriptor
+              a=c     m             ; A[6:3] = keyboard descriptor
               c=keys
               rcr     5             ; KC to C[13:12]
               ldi     0x2a4

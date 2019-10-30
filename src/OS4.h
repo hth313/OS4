@@ -88,6 +88,9 @@ scratchArea   .equlab 0x4f3e
                                        // handled, but if another (undefined)
                                        // key is pressed, the shell is terminated.
 
+// Sparse table XKD handler
+#define KeyXKD   0
+
 ;;; **********************************************************************
 ;;;
 ;;; Defined extensions.

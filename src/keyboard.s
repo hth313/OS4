@@ -16,7 +16,7 @@ PARS60:       .equlab 0xcb4
 ;;;
 ;;; Invoke this routine using:
 ;;;          gosub keyKeyboard
-;;;          .con  .low12 keyboardDesc
+;;;          .con ...       ; keyboard descriptor
 ;;; The 'gosub' is to get the page address to be coupled with the lower
 ;;; 12 bits. This function will not return to that caller, instead it is
 ;;; assumed that the real return address is located in the previous slot
@@ -160,6 +160,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=c+c   x
               c=c+c   x
               rcr     -3            ; C[6:3]= keyboard table
+              a=0     m             ; reset XKD counter
 
 42$:          cxisa                 ; search table for key
               c=c+1   m             ; step to its key definition
@@ -167,10 +168,24 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               goc     30$           ; key not defined, try another keyboard
               ?a#c    x
               gonc    43$           ; key found
+              cxisa                 ; fetch handler
               c=c+1   m             ; step to next entry
+              ?c#0    x             ; XKD special?
+              goc     42$           ; no
+              a=a+1   m             ; yes, step XKD counter
               goto    42$
 43$:          cxisa                 ; read key definition
-              goto    48$
+              ?c#0    x             ; XKD special key?
+              goc     48$           ; no, ordinary key
+              spopnd                ; we are handling it
+431$:         c=c+1   m             ; step to end of table to find XKD handlers
+              cxisa
+              c=c+1   m
+              ?c#0    xs
+              gonc    431$
+              c=a+c   m             ; point to XKD handler
+              cxisa                 ; fetch it
+              golong  jumpPacked
 
 44$:          cstex                 ; restore SS0
               cxisa
@@ -183,7 +198,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     -3            ; C[6:3]= keyboard table adr
               cxisa                 ; fetch key table entry
               ?c#0    x             ; something there?
-              gonc    30$           ; no, try another keyboard
+              golnc   30$           ; no, try another keyboard
 48$:          spopnd                ; we will handle the key, no going back now
               c=c-1   xs            ; XROM override?
               goc     50$           ; yes

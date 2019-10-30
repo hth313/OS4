@@ -491,10 +491,10 @@ clearScratch:
               rtnnc                 ; no, we are done
 
 clearScratch1:
-              a=c
-              lc      0             ; clear SC in buffer header
+              a=c     pt
+              c=0     pt            ; clear SC in buffer header
               data=c                ; write back
-              acex
+              acex    pt
               rcr     4             ; C[1:0]= number of shell registers
               c=0     xs            ; C.X= number of shell registers
               c=c+1   x             ; C.X= index of scratch area

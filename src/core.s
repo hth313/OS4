@@ -473,6 +473,7 @@ versionCheck: a=c     x
               .extern clearSystemDigitEntry, reclaimSystemBuffer
               .extern displayDone, extensionHandler, keyDispatch
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
+              .extern exitTransientApp, hasActiveTransientApp
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -506,6 +507,8 @@ versionCheck: a=c     x
               golong  allocScratch  ; 0x4f3a
               golong  clearScratch  ; 0x4f3c
               golong  scratchArea   ; 0x4f3e
+              golong  exitTransientApp ; 0x4f40
+              golong  hasActiveTransientApp ; 0x4f42
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

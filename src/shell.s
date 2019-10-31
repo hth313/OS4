@@ -430,6 +430,63 @@ exitReclaim10:
 
 ;;; **********************************************************************
 ;;;
+;;; exitTransientApp - exit the top level transient application
+;;;
+;;; Exit any top level transient application and its transient area.
+;;;
+;;; In: Nothing
+;;; Out: Nothing
+;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public exitTransientApp
+exitTransientApp:
+              gosub   hasActiveTransientApp
+              rtn                   ; (P+1) no
+              c=data                ; refetch
+              c=0     pt            ; deactivate
+              data=c
+              golong  clearScratch
+
+
+;;; **********************************************************************
+;;;
+;;; hasActiveTransientApp - is there an active top level transient application?
+;;;
+;;; In: Nothing
+;;; Out: Returns to (P+1) if no active transient application
+;;;      Returns to (P+2) if there is an active transient application
+;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public hasActiveTransientApp
+hasActiveTransientApp:
+              gosub   sysbuf
+              rtn                   ; (P+1) no system buffer
+              rcr     4
+              c=0     xs
+              ?c#0    x             ; any shells?
+              rtnnc                 ; no
+              a=a+1   x             ; yes, step to first
+              acex    x
+              dadd=c
+              c=data
+              pt=     6
+              ?c#0    pt            ; is it active?
+              rtnnc                 ; no
+              c=c+c   xs            ; is it a transient application?
+              c=c+c   xs
+              c=c+c   xs
+              rtnnc                 ; no
+              golong  RTNP2         ; yes, return to (P+2)
+
+
+;;; **********************************************************************
+;;;
 ;;; releaseShells - release all Shells
 ;;;
 ;;; This is done a wake up with the idea that modules that still want their

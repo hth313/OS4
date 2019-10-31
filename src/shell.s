@@ -142,7 +142,7 @@ activateShell:
               gonc    9$            ; no
 
               c=0     pt            ; yes, auto deactivate it
-                                    ;   (should be no harm to leave the
+              data=c                ;   (should be no harm to leave the
                                     ;    currupted xs field as we are going to
                                     ;    write it over in a moment)
               s4=     1             ; remember we dropped a transient application

@@ -340,7 +340,7 @@ insertShell10:
 ;;;      B.X= the location of the newly added space
 ;;;      A.X= buffer header address
 ;;;      DADD= buffer header address
-;;; Uses: A, B, C, G, DADD, active PT set to 10, +2 sub levels
+;;; Uses: A, B, C, G, S7, DADD, active PT set to 10, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
@@ -368,8 +368,8 @@ allocScratch: rcr     -7
               rcr     4
               c=0     xs
               c=c+1   x             ; C.X= offset to scratch area to be
-
-;;; !!! Fall into growBuffer !!!
+              s7=1                  ; tell growBuffer we are adding to scratch
+              goto    growBuffer10
 
 ;;; **********************************************************************
 ;;;
@@ -390,12 +390,13 @@ allocScratch: rcr     -7
 ;;;      B.X= the location of the newly added space
 ;;;      A.X= buffer header address
 ;;;      DADD= buffer header address
-;;; Uses: A, B, C, G, DADD, active PT set to 10, +1 sub levels
+;;; Uses: A, B, C, G, DADD, S7, active PT, +1 sub levels
 ;;;
 ;;; **********************************************************************
 
               .public growBuffer
-growBuffer:   gosub buffer1
+growBuffer:   s7=0
+growBuffer10: gosub   buffer1
 
 ;;; Ensure there is available space and step down the read pointer.
 4$:           a=a-1   x             ; step to next register
@@ -415,7 +416,14 @@ growBuffer:   gosub buffer1
                                     ; We know that buffer is F, so an overflow
                                     ; carry will ripple to outside of M field.
 
-              data=c                ; write back updated header
+              ?s7=1                 ; are we growing scratch area?
+              gonc    12$           ; no
+              a=c     m             ; yes
+              pt=     7
+              c=g                   ; insert scratch size
+              a=c     pt
+              acex    m
+12$:          data=c                ; write back updated header
 
               c=0     x             ; select chip 0
               dadd=c

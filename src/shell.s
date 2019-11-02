@@ -288,7 +288,8 @@ activateShell:
 
 ;;; In this situation we need to split the register as it is occupied
 ;;; by a non-app and an app.
-132$:         rcr     7             ; insert new shell here
+132$:         c=data
+              rcr     7             ; insert new shell here
               acex    wpt           ; A[6:0]= active one to push down
               rcr     7
               data=c                ; write back

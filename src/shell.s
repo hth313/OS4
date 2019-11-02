@@ -263,7 +263,7 @@ activateShell:
               bcex    x             ; only apps in the shell stack (or empty)
                                     ; B.X= where we will insert the register
                                     ;       (pointing one past now)
-122$:         acex                  ; C[0:6]= descriptor
+122$:         acex                  ; C[6:0]= descriptor
               rcr     7             ; C[13:7]= descriptor
               pt=     6
               c=0     wpt           ; C[0:6]= 0

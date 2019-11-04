@@ -482,8 +482,8 @@ ensure41CX:   ldi     25
 ;;;           number that must match. The lower 8 bits are the minor
 ;;;           number that be at least the same
 
-;;; Out: Return to (P+2) if the current version is at least the expected
-;;;      one. Exits showing error "OLD RTOSK" if expected version is
+;;; Out: Only returns if the current version is at least the expected
+;;;      one. Exits showing error "OLD OS4" if expected version is
 ;;;      higher than the current one.
 ;;; Uses: A.X, C[6:3]
 ;;;
@@ -494,10 +494,10 @@ versionCheck: a=c     x
               ?a#c    xs            ; main version good?
               goc     10$           ; no
               a=a-c   x             ; check minor version
-              golc    RTNP2         ; OK
+              rtnc                  ; OK
 10$:          gosub   errorMessl
               .messl  "OLD OS4"
-              goto    errorExit
+              goto    errorExitPop
 
 
 ;;; **********************************************************************

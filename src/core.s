@@ -316,41 +316,6 @@ gosubAlign4:  c=stk
               stk=c
               goto    jumpPacked
 
-;;; **********************************************************************
-;;;
-;;; noRoom - show NO ROOM error
-;;; displayError, errMessl, errExit - error support routines
-;;;
-;;; **********************************************************************
-
-              .public noRoom, noSysBuf, ensureHPIL
-noRoom:       gosub   errorMessl
-              .messl  "NO ROOM"
-              goto    errorExit
-
-noSysBuf:     gosub   errorMessl
-              .messl  "NO SYSBUF"
-              goto    errorExit
-
-              .public displayError, errorMessl, errorExit
-displayError: gosub   MESSL
-              .messl  " ERR"
-errorMessl:   gosub   ERRSUB
-              gosub   CLLCDE
-              golong  MESSL
-
-ensureHPIL:   c=0
-              gosub   CHKCST
-              ?c#0
-              rtnc
-              spopnd                ; not strictly needed, but probably a good
-                                    ; defensive measure
-              gosub   errorMessl
-              .messl "NO HP-IL"
-
-errorExit:    gosub   LEFTJ
-              gosub   MSG105
-              golong  ERR110
 
 ;;; **********************************************************************
 ;;;
@@ -435,6 +400,82 @@ unpack0:      cxisa
 
 ;;; **********************************************************************
 ;;;
+;;; noRoom - show NO ROOM error
+;;; displayError, errMessl, errExit - error support routines
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public noRoom, noSysBuf, ensureHPIL, ensure41CX
+noRoom:       gosub   errorMessl
+              .messl  "NO ROOM"
+              goto    errorExit
+
+noSysBuf:     gosub   errorMessl
+              .messl  "NO SYSBUF"
+              goto    errorExit
+
+              .public displayError, errorMessl, errorExit
+displayError: gosub   MESSL
+              .messl  " ERR"
+errorMessl:   gosub   ERRSUB
+              gosub   CLLCDE
+              golong  MESSL
+
+;;; **********************************************************************
+;;;
+;;; ensureHPIL - ensure that an HP-IL module is inserted
+;;;
+;;; This call only returns if we are running on a HP-41CX (or similar style)
+;;; operating system.
+;;;
+;;; Uses: C.M
+;;;
+;;; **********************************************************************
+
+ensureHPIL:   ldi     28            ; IL cassette XROM Id
+              a=c     x
+              c=0     m
+              lc      7             ; address 7000
+              cxisa                 ; fetch XROM Id from 7000
+              ?a#c    x
+              rtnnc
+              gosub   errorMessl
+              .messl "NO HP-IL"
+
+errorExitPop: spopnd                ; defensive measure
+                                    ; not strictly needed, but p robably a good
+errorExit:    gosub   LEFTJ
+              gosub   MSG105
+              golong  ERR110
+
+
+;;; **********************************************************************
+;;;
+;;; ensure41CX - ensure we are running on a 41CX style OS
+;;;
+;;; This call only returns if we are running on a HP-41CX (or similar style)
+;;; operating system.
+;;;
+;;; Uses: C.M
+;;;
+;;; **********************************************************************
+
+ensure41CX:   ldi     25
+              a=c     x
+              c=0     m
+              pt=     6
+              lc      3             ; build address 3000
+              cxisa                 ; fetch XROM Id from 3000
+              ?a#c    x
+              rtnnc
+              gosub   errorMessl
+              .messl  "NO 41CX OS"
+              goto    errorExitPop
+
+
+;;; **********************************************************************
+;;;
 ;;; versionCheck - check the version expected by OS4
 ;;;
 ;;; In: C.X = Version number, where the first nibble is the main version
@@ -453,7 +494,7 @@ versionCheck: a=c     x
               ?a#c    xs            ; main version good?
               goc     10$           ; no
               a=a-c   x             ; check minor version
-              goc     RTNP2         ; OK
+              golc    RTNP2         ; OK
 10$:          gosub   errorMessl
               .messl  "OLD OS4"
               goto    errorExit
@@ -522,6 +563,7 @@ versionCheck: a=c     x
               golong  exitTransientApp ; 0x4f40
               golong  hasActiveTransientApp ; 0x4f42
               golong  ensureHPIL    ; 0x4f44
+              golong  ensure41CX    ; 0x4f46
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

@@ -67,6 +67,7 @@ clearScratch: .equlab 0x4f3c
 scratchArea   .equlab 0x4f3e
 exitTransientApp:  .equlab 0x4f40
 hasActiveTransientApp:  .equlab 0x4f42
+ensureHPIL    .equlab 0x4f44
 #endif
 
 ;;; **********************************************************************

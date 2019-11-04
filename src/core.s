@@ -10,6 +10,7 @@
 #define IN_OS4
 #include "OS4.h"
 
+CHKCST:       .equlab 0x7cdd
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -322,7 +323,7 @@ gosubAlign4:  c=stk
 ;;;
 ;;; **********************************************************************
 
-              .public noRoom, noSysBuf
+              .public noRoom, noSysBuf, ensureHPIL
 noRoom:       gosub   errorMessl
               .messl  "NO ROOM"
               goto    errorExit
@@ -330,12 +331,23 @@ noRoom:       gosub   errorMessl
 noSysBuf:     gosub   errorMessl
               .messl  "NO SYSBUF"
               goto    errorExit
+
               .public displayError, errorMessl, errorExit
 displayError: gosub   MESSL
               .messl  " ERR"
 errorMessl:   gosub   ERRSUB
               gosub   CLLCDE
               golong  MESSL
+
+ensureHPIL:   c=0
+              gosub   CHKCST
+              ?c#0
+              rtnc
+              spopnd                ; not strictly needed, but probably a good
+                                    ; defensive measure
+              gosub   errorMessl
+              .messl "NO HP-IL"
+
 errorExit:    gosub   LEFTJ
               gosub   MSG105
               golong  ERR110
@@ -509,7 +521,7 @@ versionCheck: a=c     x
               golong  scratchArea   ; 0x4f3e
               golong  exitTransientApp ; 0x4f40
               golong  hasActiveTransientApp ; 0x4f42
-
+              golong  ensureHPIL    ; 0x4f44
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

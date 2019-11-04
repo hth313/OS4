@@ -315,6 +315,7 @@ insertShell10:
               c=data                ; C= buffer header
               rcr     4
               c=c+1   x             ; increase number of shell registers
+                                    ;  (cannot overflow due to max buffer size)
               rcr     4             ; C[1:0]= offset to secondary KAR
               pt=     1
               ?c#0    wpt           ; do we host secondary KARs?
@@ -567,7 +568,7 @@ shrinkBuffer: gosub   buffer1
 ;;; Support routine for growBuffer/shrinkBuffer
               .section code, reorder
 buffer1:      b=a     x             ; B.X= buffer header address
-              a=a+c   x             ; A.X= where we want to open space
+              a=a+c   x             ; A.X= where we want to open/close space
               c=0
               dadd=c
               pt=     3

@@ -253,7 +253,7 @@ activateShell:
               c=c+c   xs            ; is lower half an app?
               c=c+c   xs
               gonc    120$          ; no
-              c=c+c   pt            ; yes, is upper half and app?
+              c=c+c   pt            ; yes, is upper half an app?
               c=c+c   pt
               gonc    130$          ; no
               bcex                  ; yes, keep looking
@@ -266,23 +266,23 @@ activateShell:
 122$:         acex                  ; C[6:0]= descriptor
               rcr     7             ; C[13:7]= descriptor
               pt=     6
-              c=0     wpt           ; C[0:6]= 0
+              c=0     wpt           ; C[6:0]= 0
               cmex                  ; M= descriptor to write
-                                    ; C[13:11]= buffer pointer
+                                    ; C[13:11]= buffer header pointer
               rcr     11
-              a=c     x             ; A.X= buffer header
+              a=c     x             ; A.X= buffer header pointer
               gosub  insertShellB
               rtn                   ; (P+1) failed
               goto    80$           ; (P+2)
 
-120$:         s5=0
+120$:         s5=0                  ; low part not an app
               gosub   unusedSlot
               goto    122$          ; (P+1) no slots, need new register
               goto    34$           ; (P+2) write it here and ripple
 
-130$:         s5=1
+130$:         s5=1                  ; low part taken by app
               gosub   unusedSlot
-              goto    132$          ; (P+1) no slots
+              goto    132$          ; (P+1) no slots, need new register
               c=data                ; (P+2) there are slots
               goto    36$           ; write it to upper slot and ripple
 
@@ -290,7 +290,7 @@ activateShell:
 ;;; by a non-app and an app.
 132$:         c=data
               rcr     7             ; insert new shell here
-              acex    wpt           ; A[6:0]= active one to push down
+              acex    wpt           ; A[6:0]= previous active top to push down
               rcr     7
               data=c                ; write back
               bcex    x             ; step ahead register

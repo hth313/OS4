@@ -91,8 +91,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=n
               cxisa                 ; C.X= keyboard flags
               cstex
-              ?s0=1                 ; skip auto-assign tests?
-400$:         gonc    40$           ; yes (also relay)
+              ?st=1   KeyAutoAssign ; use auto-assigns?
+400$:         gonc    40$           ; no (also relay)
 
               c=n
               c=0     m

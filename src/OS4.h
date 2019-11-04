@@ -81,6 +81,8 @@ hasActiveTransientApp:  .equlab 0x4f42
 #define GenericExtension      0
 
 
+#define KeyAutoAssign         0        // Make use of the top-row auto label assignment
+                                       // feature (RPN label A-J and a-e)
 #define KeyFlagSparseTable    6        // Set if the keyboard table iso a linear
                                        // search rather than a lookup.
 #define KeyFlagTransientApp   7        // Set if this is a transient application

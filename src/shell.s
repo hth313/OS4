@@ -1069,14 +1069,16 @@ disableOrphanShells:
               dadd=c                ; select buffer header
               bcex    x             ; B.X= buffer header address
               a=a-b   x             ; A.X= offset to register to go
-              c=b     x
-              acex    x             ; A.X= buffer header
-                                    ; C.X= offset to register to go
+
               c=data                ; decrement shell counter in buffer header
               rcr     4
               c=c-1   x
               rcr     -4
               data=c
+
+              c=b     x
+              acex    x             ; A.X= buffer header
+                                    ; C.X= offset to register to go
 
               gosub   shrinkBuffer  ; remove this single shell register
                                     ; (this handles buffer size too)

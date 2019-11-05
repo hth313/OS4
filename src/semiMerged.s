@@ -245,7 +245,9 @@ RightJustify:
 ;;;
 ;;; IN: SS0 UP, CHIP0 selected
 ;;; OUT:  ST - numeric argument
+;;;       C[2:0] - numeric argument
 ;;;       A[2:0] - numeric argument
+;;;       B[2:0] - numeric argument
 ;;;       B.M - numeric argument
 ;;;       G - numeric argument
 ;;;
@@ -326,11 +328,14 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
 71$:          gosub   GTBYT         ; get argument
 8$:           pt=     0
               g=c                   ; put in G
-              a=c                   ; and A
-              rcr     -3            ; and finally to
-              bcex    m             ; B.M
               c=0
               dadd=c                ; select chip 0
+              c=g
+              a=c                   ; in A.X
+              b=c     x             ; in B.X
+              rcr     -3            ; and finally to
+              bcex    m             ; B.M
+              c=b     x
               rtn
 
 ;;; ----------------------------------------------------------------------

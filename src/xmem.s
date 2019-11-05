@@ -3,29 +3,6 @@
 #include "mainframe.i"
 #include "mainframe_cx.i"
 
-;;; **********************************************************************
-;;;
-;;; logoutXMem - log out from the x memory storage system
-;;;
-;;; This should be called by any module making use of the X-memory for
-;;; random access from its power off poll vector.
-;;;
-;;; Uses: B
-;;; Assume: chip 0 selected
-;;;
-;;; **********************************************************************
-
-              .public logoutXMem, restore169
-logoutXMem:
-restore169:   bcex                  ; preserve C
-              c=regn  13
-              rcr     6
-              ldi     0x169
-              rcr     -6
-              regn=c  13
-              bcex
-              rtn
-
 
 ;;; **********************************************************************
 ;;;
@@ -42,70 +19,38 @@ restore169:   bcex                  ; preserve C
 ;;; file system).
 ;;;
 ;;; In: C.X= logical register
-;;; Out: Returns to (P+2) with
-;;;        A.X = physical register
-;;;      Returns to (P+1) if anything is wrong, and there can be numerous
-;;;      reasons: no active file, active file is not a data file, register
-;;;               is out of range, etc
+;;; Out: A.X = physical register
 ;;; Uses: A, B, C, M, N, Q, PT, S0-7, DADD, +3 sub levels
 ;;;
 ;;; **********************************************************************
 
               .public getXAdr
-getXAdr:      ?s13=1                ; running?
-              gonc    2$            ; no, always search for file
-              n=c                   ; N.X= logical register
-              c=0     x
-              dadd=c
-              c=regn  13
-              rcr     6
-              c=c-1   xs
-              goc     9$            ; cache= 0XX (valid)
-              c=c-1   xs
-              gonc    8$            ; cache valid (>1FF)
-2$:           regn=c  Q             ; save logical register in Q
-              s0=0                  ; cache invalid
+              .extern ensure41CX
+getXAdr:      m=c                   ; M.X= register number
+              gosub   ensure41CX
+              s0=0
               gosub   FLSHAP        ; locate current file
-              ?s0=1
-              golnc   FLNOFN        ; "FL NOT FOUND"
-              c=n                   ; C=file header
+              ?s0=1                 ; file found?
+              golnc   FLNOFN        ; no -> "FL NOT FOUND"
+              c=m                   ; C.X= register number
+              goc     ERRNE_J1      ; address overflow
+              a=c     x             ; A.X= register
+              c=n                   ; C= file header information
               c=c-1   s             ; inspect file type
               c=c-1   s
               ?c#0    s             ; data file?
               golc    FLTPER        ; no, "FL TYPE ERR"
-
+              ?a<c    x             ; in range?
+              gonc    ERRNE_J1      ; no
+              a=a+1   x             ; step register forward
+                                    ;  (to compensate for file header)
+              b=a     x             ; B.X= advance (by register + 1)
               rcr     10            ; C.X= address of file header
-              bcex    x             ; B.X= address of file header
-              c=0     x             ; select chip 0
-              dadd=c
-              c=regn  13
-              rcr     6
-              c=b     x             ; set cache
-              rcr     -6
-              regn=c  13
-              c=regn  Q             ; C.X= logical register
-              n=c
-              goto    10$
-
-8$:           c=c+1   xs            ; restore cache
-9$:           c=c+1   xs
-              bcex    x
-10$:                                ; B.X= address of second header
-              c=b     x             ; C.X= address of second header
-              dadd=c
-              c=data                ; read second header register
-              a=c     x             ; A.X= file size
-              c=n                   ; C.X= logical register
-              c=c+1   x             ; C.X= steps to advance
-              goc     ERRNE_J1      ; address overflow
-              ?a<c    x             ; requested register in range?
-              goc     ERRNE_J1      ; no
-              bcex    x             ; B.X= advance
               a=c     x             ; A.X= address
               a=0     m
               gosub   ADVADR        ; move to desired register
-              ?a#0    x
-              gonc    ERRNE_J1      ; memory overflow
-              ?s2=1
-              rtnnc
-ERRNE_J1:     golong  ERRNE         ; discontinuity error
+              ?a#0    x             ; check for memory overflow (probably not
+              gonc    ERRNE_J1      ;  needed)
+              ?s2=1                 ; memory discontinuity?
+              rtnnc                 ; no
+ERRNE_J1:     golong  ERRNE         ; yes, discontinuity error

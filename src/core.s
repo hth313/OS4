@@ -457,7 +457,7 @@ errorExit:    gosub   LEFTJ
 ;;; This call only returns if we are running on a HP-41CX (or similar style)
 ;;; operating system.
 ;;;
-;;; Uses: C.M
+;;; Uses: C, A.X
 ;;;
 ;;; **********************************************************************
 
@@ -521,7 +521,7 @@ versionCheck: a=c     x
               .extern activateShell, exitShell, reclaimShell
               .extern chkbuf, ensureBuffer, growBuffer
               .extern findKAR2, stepKAR
-              .extern topExtension, shellDisplay, logoutXMem, shellName
+              .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
               .extern displayDone, extensionHandler, keyDispatch
@@ -537,7 +537,7 @@ versionCheck: a=c     x
               golong  findKAR2      ; 0x4f0c
               golong  stepKAR       ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
-              golong  logoutXMem    ; 0x4f12
+              golong  getXAdr       ; 0x4f12
               golong  topShell      ; 0x4f14
               golong  topExtension  ; 0x4f16
               golong  nextShell     ; 0x4f18
@@ -564,6 +564,7 @@ versionCheck: a=c     x
               golong  hasActiveTransientApp ; 0x4f42
               golong  ensureHPIL    ; 0x4f44
               golong  ensure41CX    ; 0x4f46
+
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

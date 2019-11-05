@@ -75,12 +75,12 @@ getXAdr:      ?s13=1                ; running?
               golc    FLTPER        ; no, "FL TYPE ERR"
 
               rcr     10            ; C.X= address of file header
-              a=c     x             ; A.X= address of file header
+              bcex    x             ; B.X= address of file header
               c=0     x             ; select chip 0
               dadd=c
               c=regn  13
               rcr     6
-              acex    x             ; set cache
+              c=b     x             ; set cache
               rcr     -6
               regn=c  13
               c=regn  Q             ; C.X= logical register
@@ -89,8 +89,9 @@ getXAdr:      ?s13=1                ; running?
 
 8$:           c=c+1   xs            ; restore cache
 9$:           c=c+1   xs
-10$:          a=c     x
-              b=a     x             ; B.X= address of second header
+              bcex    x
+10$:                                ; B.X= address of second header
+              c=b     x             ; C.X= address of second header
               dadd=c
               c=data                ; read second header register
               a=c     x             ; A.X= file size
@@ -100,7 +101,7 @@ getXAdr:      ?s13=1                ; running?
               ?a<c    x             ; requested register in range?
               goc     ERRNE_J1      ; no
               bcex    x             ; B.X= advance
-              a=c     x             ; A.X
+              a=c     x             ; A.X= address
               a=0     m
               gosub   ADVADR        ; move to desired register
               ?a#0    x

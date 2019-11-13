@@ -27,17 +27,27 @@
 ;;;    functions that belong to secondary FATs, allowing such extension
 ;;;    instructions to be assigned to keys.
 ;;;
+;;; Buffer layout:
+;;;        [ application temporary scratch  ] 0-15   high address
+;;;        [ seconday key assignments       ] 0-15
+;;;        [ hosted buffer area             ] 0-254
+;;;        [ shell stack                    ] 0-254
+;;;        [ buffer header                  ] 1      low address
+;;;
 ;;; Buffer header:
-;;;   ID SZ KA 'SC:BF' SH DF ST
+;;;   ID SZ BF 'SC:KA' SH DF ST
 ;;; where
 ;;;   ID - buffer ID
 ;;;   SZ - buffer size
-;;;   KA - offset to first secondary KAR, 00 means no secondary KAR
-;;;   BF - number of hosted buffers (single digit, 0-15 buffers possible)
-;;;   SC - number of transient application scratch registers
+;;;   BF - size of hosted buffer area
+;;;   SC - number of transient application scratch registers,
+;;;        single nibble, 0-15 registers allocated at top
+;;;   KA - number of secondary assignment registers, 0-30 such
+;;;        assignments possible
 ;;;   SH - number of shell registers
 ;;;   DF - Default postfix byte during semi-merged argument entry.
 ;;;   ST - system buffer status flags, see OS4.h
+;;;
 ;;;
 ;;; Shell stack register:
 ;;;   Two entries in each register, defined as follows
@@ -145,7 +155,6 @@ chkbuf:       dadd=c                ; select chip 0
               a=a+c   x
               goto    2$
 
-
 ;;; **********************************************************************
 ;;;
 ;;; ensureBuffer - find or create an empty buffer
@@ -181,7 +190,6 @@ ensureBuffer: gosub   chkbuf
               data=c
               goto    relayRTNP2
 
-
 ;;; **********************************************************************
 ;;;
 ;;; findKAR2 - locate the first secondary KAR
@@ -192,17 +200,10 @@ ensureBuffer: gosub   chkbuf
 ;;;
 ;;; In: Nothing
 ;;; Out: Returns to P+1 if no secondary KARs
-;;;      Returns to P+2 if secondary KARs exists
+;;;      Returns to P+2 if secondary KARs exists with:
 ;;;      A.X - address of first secondary KAR
-;;;      B.X - address of chain head
+;;;      A.S - number of secondary KARs - 1
 ;;; Uses: A, C, B.X, active PT=12, DADD, +1 sub levels
-;;;
-;;; Note: While scanning secondary KARs, you need to check both that
-;;;       the register has F in nibble 13 and that the address is below
-;;;       chain head (B.X). The routine stepKAR can be used for this.
-;;;
-;;;       If this routine indicates (by returning to P+2) that there are
-;;;       secondary KARs, there will be at least one such register.
 ;;;
 ;;; **********************************************************************
 
@@ -210,46 +211,20 @@ ensureBuffer: gosub   chkbuf
               .extern RTNP2
 findKAR2:     gosub   sysbuf
               rtn                   ; no system buffer, return to P+1
-              rcr     8             ; C[1:0] = secondary KAR offset
+              c=data
+              rcr     7
+              ?c#0    s             ; any key assignments?
+              rtnnc                 ; no, return to P+1
+              a=c     s             ; A.S= number of secondary KARs
+              a=a-1   s             ; start at 0 counter
+              rcr     7 + 4
               c=0     xs
-              ?c#0    x
-              rtnnc                 ; no secondary KARs, return to P+1
-              a=a+c   x             ; A.X= address of first secondary KAR
-                                    ; (assume this can not give carry)
+              a=a+c   x             ; step past shell area
+              rcr     4
+              c=0     xs
+              a=a+c   x             ; step past hosted buffers
+              a=a+1   x             ; and buffer header
 relayRTNP2:   golong  RTNP2         ; return to (P+2)
-
-
-;;; **********************************************************************
-;;;
-;;; stepKAR - step to next KAR
-;;;
-;;; In: A.X - address of current KAR
-;;;     B.X - address of chain head
-;;; Out: Returns to P+1 if no more KAR
-;;;      Returns to P+2 if there is a next KAR
-;;;           A.X - incremented KAR pointer
-;;;           C[12:0] - contents of that register
-;;;           C[13] - 0
-;;;           B.X - address of chain head
-;;;           DADD - next KAR
-;;; Uses: C, +0 sub levels, DADD
-;;;
-;;; **********************************************************************
-
-              .public stepKAR
-              .extern noRoom
-stepKAR:      a=a+1   x             ; step to next KAR
-              c=b     x             ; C.X= chain head .END.
-              ?a<c    x             ; have we reached chainhead?
-              rtnnc                 ; yes
-              acex    x             ; no, select next register
-              dadd=c
-              acex    x
-              c=data                ; read it
-              c=c+1   s             ; is it a KAR?
-              goc     relayRTNP2    ; yes
-              rtn                   ; no
-
 
 ;;; **********************************************************************
 ;;;
@@ -272,7 +247,6 @@ reclaimSystemBuffer:
               c=c+1   s
               data=c
               rtn
-
 
 ;;; **********************************************************************
 ;;;
@@ -316,15 +290,41 @@ insertShell10:
               rcr     4
               c=c+1   x             ; increase number of shell registers
                                     ;  (cannot overflow due to max buffer size)
-              rcr     4             ; C[1:0]= offset to secondary KAR
-              pt=     1
-              ?c#0    wpt           ; do we host secondary KARs?
-              gonc    10$           ; no
-              c=c+1   x             ; yes, bump offset
-10$:          rcr     -8            ; re-align C
+              rcr     -4
               data=c                ; write back updated header
-              golong  RTNP2         ; all good, return to (P+2)
+              golong  RTNP2
 
+;;; **********************************************************************
+;;;
+;;; scratchOffset - get offset to scratch area
+;;;
+;;; In: A.X= buffer header address (selected)
+;;; Out: C.X= offset to buffer area
+;;;      A.X= buffer header address
+;;; Uses: C, A.S, A.X, B.X
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+scratchOffset:
+              b=a     x             ; B.X= buffer header addressw
+              c=data                ; read buffer header
+              rcr     7
+              a=c     s             ; A.S= size of KARs
+              rcr     1
+              c=0     x
+              c=a+c   s             ; C.S= size of KARs + size of buffers
+              gonc    10$
+              c=c+1   x             ; C.X= carry
+10$:          rcr     -1
+              a=c     x             ; A.X= size of KARs + size of buffers
+              c=data
+              rcr     4
+              c=0     x
+              c=c+1   x
+              c=a+c   x
+              abex    x             ; A.X= buffer header addressw
+              rtn
 
 ;;; **********************************************************************
 ;;;
@@ -365,10 +365,7 @@ allocScratch: rcr     -7
               rcr     -1
               pt=     0
               g=c                   ; G= size to allocate
-              c=data                ; read buffer header
-              rcr     4
-              c=0     xs
-              c=c+1   x             ; C.X= offset to scratch area to be
+              gosub   scratchOffset
               s7=1                  ; tell growBuffer we are adding to scratch
               goto    growBuffer10
 
@@ -472,7 +469,6 @@ growBuffer10: gosub   buffer1
               a=c     x             ; A.X= buffer header address
               golong  RTNP2         ; done, return to (P+2)
 
-
 ;;; **********************************************************************
 ;;;
 ;;; clearScratch - remove transient application scratch area
@@ -504,12 +500,10 @@ clearScratch1:
               c=0     pt            ; clear SC in buffer header
               data=c                ; write back
               acex    pt
-              rcr     4             ; C[1:0]= number of shell registers
-              c=0     xs            ; C.X= number of shell registers
-              c=c+1   x             ; C.X= index of scratch area
-              pt=     4
-              lc      0             ; C[3:4]= size of scratch area
+              pt=     8
+              lc      0             ; C[8:7]= size of scratch area
               g=c                   ; G= size of scratch area
+              gosub   scratchOffset
 
 ;;; !!! Fall into shrinkBuffer !!!
 
@@ -595,18 +589,18 @@ buffer2:      c=0     m
               c=data                ; load buffer header
               rtn
 
-
 ;;; **********************************************************************
 ;;;
 ;;; scratchArea - get pointer to transient application scratch area
 ;;;
-;;; Convert buffer pointer to a scratch area pointer. It is only sensible
+;;; This routine assumes that the scratch area exists!!!
 ;;;
 ;;; In: Nothing
 ;;; Out: C.X - pointer to scratch area
+;;;      A.X - address of buffer header
 ;;;      C[3] - size of scratch area (0-15 registers)
 ;;;      DADD - first scratch register selected
-;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub levels
+;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -614,10 +608,7 @@ buffer2:      c=0     m
               .public scratchArea
 scratchArea:  gosub   sysbuf
               rtn                   ; (P+1) no system buffer
-              c=data
-              rcr     4
-              c=0     xs
-              c=c+1   x
+              gosub   scratchOffset
               c=a+c   x
               dadd=c
               rtn

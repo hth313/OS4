@@ -40,7 +40,7 @@ chkbuf:       .equlab 0x4f06
 ensureBuffer: .equlab 0x4f08
 openSpace:    .equlab 0x4f0a
 findKAR2:     .equlab 0x4f0c
-stepKAR:      .equlab 0x4f0e
+// stepKAR:      .equlab 0x4f0e
 shellDisplay: .equlab 0x4f10
 getXAdr:      .equlab 0x4f12
 topShell:     .equlab 0x4f14

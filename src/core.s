@@ -515,7 +515,7 @@ versionCheck: a=c     x
               .section entry
               .extern activateShell, exitShell, reclaimShell
               .extern chkbuf, ensureBuffer, growBuffer
-              .extern findKAR2, stepKAR
+              .extern findKAR2
               .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
@@ -530,7 +530,7 @@ versionCheck: a=c     x
               golong  ensureBuffer  ; 0x4f08
               golong  growBuffer    ; 0x4f0a
               golong  findKAR2      ; 0x4f0c
-              golong  stepKAR       ; 0x4f0e
+              golong  0             ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
               golong  getXAdr       ; 0x4f12
               golong  topShell      ; 0x4f14

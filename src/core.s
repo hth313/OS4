@@ -262,7 +262,7 @@ resetFlags:   c=b     x
 ;;; **********************************************************************
 
               .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5
-              .public jumpPacked
+              .public jumpPacked, callInd
 jumpC5:       c=c+1   m
 jumpC4:       c=c+1   m
 jumpC3:       c=c+1   m
@@ -277,7 +277,7 @@ jumpPacked:   c=c+c   x
               csr     m
               csr     m
               rcr     -3
-              gotoc
+callInd:      gotoc
 
 ;;; **********************************************************************
 ;;;
@@ -360,10 +360,10 @@ RTNP20:       c=c+1   m
 ;;;
 ;;; **********************************************************************
 
-              .public dropRTNP3, RTNP3
+              .public dropRTNP3, RTNP3, RTNP30
 dropRTNP3:    spopnd
 RTNP3:        c=stk
-              c=c+1   m
+RTNP30:       c=c+1   m
               goto    RTNP20
 
 ;;; **********************************************************************
@@ -374,29 +374,24 @@ RTNP3:        c=stk
 ;;; Basically base.member in C.
 ;;;
 ;;; In: C[6:3] - pointer to a structure
-;;; Out: Returns to (P+1) if pointer is 000
-;;;      Returns to (P+2) with
-;;;         A[6:3] - the member at given offset, unpacked
+;;; Out: C[6:3] - the member at given offset, unpacked
 ;;;
 ;;; **********************************************************************
 
-              .public unpack0, unpack1, unpack2, unpack3, unpack4, unpack5
+              .public unpack, unpack0, unpack1, unpack2, unpack3, unpack4, unpack5
 unpack5:      c=c+1   m
 unpack4:      c=c+1   m
 unpack3:      c=c+1   m
 unpack2:      c=c+1   m
 unpack1:      c=c+1   m
 unpack0:      cxisa
-              ?c#0    x
-              rtnnc
+unpack:       csr     m
+              csr     m
+              csr     m
               c=c+c   x
               c=c+c   x
-              acex    m
-              c=0     m
               rcr     -3
-              a=a+c   m
-              goto    RTNP2
-
+              rtn
 
 ;;; **********************************************************************
 ;;;

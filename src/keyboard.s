@@ -33,7 +33,7 @@ PARS60:       .equlab 0xcb4
               .section code, reorder
               .public keyKeyboard
               .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
-              .extern disableThisShell
+              .extern disableThisShell, unpack0
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -153,13 +153,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               ?st=1   KeyFlagSparseTable
               gonc    44$
               cstex                 ; restore SS0
-              cxisa                 ; C= packed page pointer to keyboard
-              csr     m
-              csr     m
-              csr     m
-              c=c+c   x
-              c=c+c   x
-              rcr     -3            ; C[6:3]= keyboard table
+              gosub   unpack0       ; C= packed page pointer to keyboard
+                                    ; C[6:3]= keyboard table
               a=0     m             ; reset XKD counter
 
 42$:          cxisa                 ; search table for key

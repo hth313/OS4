@@ -541,17 +541,13 @@ releaseShells:
 ;;;      M[1:0] - XROM ID of shell
 ;;;      S1 - set if this is a transient application shell
 ;;;      S2 - set if this is an application shell (of some kind)
-;;; Uses: A, C, M, ST, active PT=5
+;;; Uses: A, C, M, ST, active PT=5, +1 sub level
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
-shellHandle:  csr     m
-              csr     m
-              csr     m             ; C[3]= page address
-              c=c+c   x             ; unpack pointer
-              c=c+c   x
-              rcr     -3            ; C[6:3]= pointer to shell
+              .extern unpack
+shellHandle:  gosub   unpack        ; C[6:3]= pointer to shell
               cxisa                 ; read definition bits
               a=c                   ; A[6:3]= shell descriptor address
               asl     x
@@ -970,10 +966,13 @@ extensionHandler:
               .public shellName
               .extern unpack5
 shellName:    gosub   unpack5
-              nop                   ; (P+1) igonored, we assume there is a
-                                    ;       defined name
               gosub   ENLCD
-              golong  MESSL+1
+10$:          cxisa
+              slsabc
+              c=c+1   m
+              ?c#0    xs
+              gonc    10$
+              rtn
 
 
 ;;; **********************************************************************

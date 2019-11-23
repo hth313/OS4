@@ -414,7 +414,7 @@ noSysBuf:     gosub   errorMessl
 displayError: gosub   MESSL
               .messl  " ERR"
 errorMessl:   gosub   ERRSUB
-              gosub   CLLCDE
+setMessl:     gosub   CLLCDE
               golong  MESSL
 
 ;;; **********************************************************************
@@ -530,7 +530,7 @@ versionCheck: a=c     x
               golong  ensureBuffer  ; 0x4f08
               golong  growBuffer    ; 0x4f0a
               golong  findKAR2      ; 0x4f0c
-              golong  0             ; 0x4f0e
+              golong  setMessl      ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
               golong  getXAdr       ; 0x4f12
               golong  topShell      ; 0x4f14

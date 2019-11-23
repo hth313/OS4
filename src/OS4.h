@@ -27,7 +27,7 @@
 
 #define argumentEntry   0x4f1e
 #define xargumentEntry  0x4f20
-
+#define partialKeyEntry 0x4f48
 ;;; * Find ROM words for a call to a fixed address.
 #define FirstGosub(x)   ((((x) << 2) & (255 << 2)) | 1)
 #define SecondGosub(x)  (((x) >> 6) & (255 << 2))
@@ -69,6 +69,12 @@ exitTransientApp:  .equlab 0x4f40
 hasActiveTransientApp:  .equlab 0x4f42
 ensureHPIL    .equlab 0x4f44
 ensure41CX    .equlab 0x4f46
+partialKey:   .equlab partialKeyEntry
+parseNumber:  .equlab 0x4f4a
+parseNumberInput: .equlab 0x4f4c
+
+// Temporary until addresses are finally fixed
+              .extern RTNP2
 #endif
 
 ;;; **********************************************************************
@@ -126,5 +132,16 @@ Flag_DisplayOverride .equ  1           ; Set when message flag really means that
 Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shells.
 Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
 Flag_Pause           .equ  4           ; Our own pause flag.
+
+;;; **********************************************************************
+;;;
+;;; Key sequence parsing.
+;;;
+;;; **********************************************************************
+
+acceptAllValues: .equlab xargumentEntry
+
+
+ParseNumber_AllowEEX: .equ    1    // flag used for permitted EEX key
 
 #endif // OS4_H

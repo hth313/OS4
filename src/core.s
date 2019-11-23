@@ -155,35 +155,35 @@ fastDigitEntry:
 bufferScan:   c=c+c   xs
               c=c+c   xs
               c=c+c   xs
-              goc     toWKUP20      ; partial key in progress
+              golc    partialKeyTakeOver ; partial key in progress
               rcr     6             ; check for CATalog flag
               cstex
               ?s1=1                 ; catalog flag set?
-              goc     40$           ; yes, check what key it really is
+              goc     catflag       ; yes, check what key it really is
 
-10$:          pt=     3
+bufferScan10: pt=     3
               c=keys
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
               gosub   topShell
-              goto    20$           ; (P+1) no buffer, ordinary keyboard logic
+              goto    toWKUP20_SS0  ; (P+1) no buffer, ordinary keyboard logic
               goto    30$           ; (P+2) no shell, ordinary keyboard logic
               gosub   resetFlags    ; (P+3)
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
                                     ; next shell
-              goto    20$           ; (P+1) no buffer, out of shells
-              goto    20$           ; (P+2) out of shells
+              goto    toWKUP20_SS0  ; (P+1) no buffer, out of shells
+              goto    toWKUP20_SS0  ; (P+2) out of shells
               goto    14$           ; (P+3) inspect next shell
 
 30$:          gosub   resetFlags
-20$:          gosub   LDSST0        ; bring up SS0
+toWKUP20_SS0: gosub   LDSST0        ; bring up SS0
               goto    toWKUP20
 
 ;;; Should really check for reassigned keys here as that is done by the OS!
 ;;; However, we settle for assuming that we just use default behavior for
 ;;; now.
-40$:          ldi     0x13          ; keycode for the ENTER key
+catflag:      ldi     0x13          ; keycode for the ENTER key
               a=c     x
               c=keys
               acex    x
@@ -193,8 +193,8 @@ bufferScan:   c=c+c   xs
               c=c-1   s             ; hack hack, but that is how it is...
               c=c-1   s
               c=c-1   s
-              goc     20$           ; CAT 2, go and do it
-              goto    10$
+              goc     toWKUP20_SS0  ; CAT 2, go and do it
+              goto    bufferScan10
 42$:          gosub   45$
               .con    0x12          ; SHIFT
               .con    0xc2          ; SST
@@ -204,9 +204,9 @@ bufferScan:   c=c+c   xs
 45$:          c=stk
 46$:          cxisa
               ?c#0    x
-              gonc    10$           ; end of scan, not a catalog key
+              gonc    bufferScan10  ; end of scan, not a catalog key
               ?a#c    x
-              gonc    20$           ; should be handled by CAT
+              gonc    toWKUP20_SS0  ; should be handled by CAT
               c=c+1   m
               goto    46$
 
@@ -222,6 +222,50 @@ resetFlags:   c=b     x
               cstex
               data=c
               rtn
+
+;;; Inspect if this is an XROM that do partial key takeover
+partialKeyTakeOver:
+              c=regn  15            ; C[4:3]= ptemp2
+              rcr     2
+              c=c+c   xs
+              goc     noTakeOver    ; already inspected
+              c=c+c   xs
+              c=c+c   xs
+              gonc    noTakeOver    ; no XROM
+              c=regn  10            ; read function code
+              rcr     1
+              gosub   GTRMAD
+              goto    noTakeOver
+              acex
+              rcr     -3            ; C[6:3]= XADR
+              ldi     FirstGosub(partialKeyEntry)
+              a=c     x
+              cxisa
+              ?c#0    x             ; is it marked as non-programmable?
+              goc     10$           ; no
+              c=c+1   m             ; yes, step ahead
+              cxisa
+10$:          ?a#c    x
+              goc     noTakeOver
+              c=c+1   m
+              ldi     SecondGosub(partialKeyEntry)
+              a=c     x
+              cxisa
+              ?a#c    x
+              goc     noTakeOver
+              spopnd                ; drop NEXT address that we do not need
+              c=c+1   m             ; point to takeover vector
+              c=c+1   m
+              stk=c                 ; push it instead
+              c=0                   ; reset the XROM bit in ptemp2 to do this
+              pt=     4             ;    only once
+              lc      8             ; C= 0x80000 (the XROM bit)
+              a=c
+              c=regn  15
+              c=a+c
+              regn=c  15
+noTakeOver:   golong  toWKUP20_SS0
+
 
 ;;; **********************************************************************
 ;;;
@@ -522,6 +566,7 @@ versionCheck: a=c     x
               .extern displayDone, extensionHandler, keyDispatch
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
               .extern exitTransientApp, hasActiveTransientApp
+              .extern parseNumber, parseNumberInput
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -539,7 +584,7 @@ versionCheck: a=c     x
               golong  shellName     ; 0x4f1a
               golong  keyKeyboard   ; 0x4f1c
               golong  argument      ; 0x4f1e
-              golong  RTNP2         ; 0x4f20 xargument
+              golong  RTNP2         ; 0x4f20 xargument  / acceptAllValues
               golong  fastDigitEntry ; 0x4f22
               golong  NXBYTP        ; 0x4f24
               golong  NXBYT         ; 0x4f26
@@ -559,6 +604,10 @@ versionCheck: a=c     x
               golong  hasActiveTransientApp ; 0x4f42
               golong  ensureHPIL    ; 0x4f44
               golong  ensure41CX    ; 0x4f46
+              rtn                   ; 0x4f48 partialKey (from program execution)
+              nop                   ;        partialKey filler
+              golong  parseNumber   ; 0x4f4a
+              golong  parseNumberInput ; 0x4f4c
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

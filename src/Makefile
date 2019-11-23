@@ -1,6 +1,6 @@
 
 SRCS = core.s buffer.s shell.s mainframe.s mainframe_cx.s keyboard.s \
-       secondaryFAT.s semiMerged.s xmem.s
+       secondaryFAT.s semiMerged.s xmem.s partial.s
 OBJS = $(SRCS:%.s=%.o)
 MOD = osext.mod
 

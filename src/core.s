@@ -567,6 +567,7 @@ versionCheck: a=c     x
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
               .extern exitTransientApp, hasActiveTransientApp
               .extern parseNumber, parseNumberInput
+              .extern XASRCH, XSAROM, secondaryAddress
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -608,6 +609,8 @@ versionCheck: a=c     x
               nop                   ;        partialKey filler
               golong  parseNumber   ; 0x4f4a
               golong  parseNumberInput ; 0x4f4c
+              golong  XASRCH        ; 0x4f4e
+              golong  secondaryAddress ; 0x4f50
 
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4

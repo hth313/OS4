@@ -101,7 +101,7 @@
 
               .section code, reorder
               .public XASRCH
-              .extern RTNP30, unpack, unpack0, unpack4, jumpC5, callInd, RTNP2
+              .extern RTNP30, unpack, unpack0, unpack4, jumpC5, RTNP2
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
               lc      4             ; C[2:0]_END link

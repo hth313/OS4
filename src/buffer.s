@@ -29,7 +29,7 @@
 ;;;
 ;;; Buffer layout:
 ;;;        [ application temporary scratch  ] 0-15   high address
-;;;        [ seconday key assignments       ] 0-15
+;;;        [ seconday key assignments       ] 0-17
 ;;;        [ hosted buffer area             ] 0-254
 ;;;        [ shell stack                    ] 0-254
 ;;;        [ buffer header                  ] 1      low address
@@ -74,12 +74,17 @@
 ;;;    will have the highest bit set and shall not match any valid buffer ID.
 ;;;
 ;;; Secondary assignments:
+;;;   The first two registers are the secondary bitmaps, much like register 10
+;;;   and 15 in the system area. The idea is that system assignments takes
+;;;   precedence and shadows these bits.
+;;;   The size is therefore 0, 3, 4, .. 17 registers as we always allocate
+;;;   the two bitmap registers for the first secondary assignment.
 ;;;   These defines key assignments of secondary FAT entries. They are defined
 ;;;   as follows:
 ;;;     F0 XRSC KK XRSC KK
 ;;;   where
 ;;;     F0 - Is the usual KAR marker, which will not cause problems as it is
-;;;          held inside a buffer.
+;;;          inside a buffer.
 ;;;     XRSC - The function, XR is the XROM# 1-31 left shifted 3 steps to
 ;;;            align it with the highest bits. The lower 11 bits is the
 ;;;            index in the secondary FATs. Primary FAT instructions use
@@ -164,7 +169,7 @@ chkbuf:       dadd=c                ; select chip 0
 ;;; does not previously exist.
 ;;;
 ;;; In: C.X - buffer ID
-;;; If not found, return to (P+1)
+;;; If not existing and cannot be created (not free space), return to (P+1)
 ;;; If found, return to (P+2) with:
 ;;;   A.X = address of buffer start register
 ;;;   DADD = first address of buffer
@@ -181,7 +186,7 @@ ensureBuffer: gosub   chkbuf
               goto    10$           ; (P+1) need to create it
               goto    relayRTNP2    ; (P+2) already exists
 10$:          ?a<b    x             ; have we reched chainhead?
-              rtnnc                 ; yes, we are out of spaace
+              rtnnc                 ; yes, we are out of space
               c=0                   ; build buffer header
               c=c+1   s             ; 100000000...
               acex    pt            ; 1b0000000... (where b is buffer number)
@@ -307,13 +312,17 @@ insertShell10:
 
               .section code, reorder
 scratchOffset:
-              b=a     x             ; B.X= buffer header addressw
+              b=a     x             ; B.X= buffer header address
               c=data                ; read buffer header
               rcr     7
               a=c     s             ; A.S= size of KARs
               rcr     1
               c=0     x
-              c=a+c   s             ; C.S= size of KARs + size of buffers
+              ?a#0    s             ; do we actually have any KARs?
+              gonc    5$            ; no
+              c=c+1   x             ; yes, we need two registers for bitmaps
+              c=c+1   x
+5$:           c=a+c   s             ; C.S= size of KARs + size of buffers
               gonc    10$
               c=c+1   x             ; C.X= carry
 10$:          rcr     -1
@@ -323,7 +332,7 @@ scratchOffset:
               c=0     x
               c=c+1   x
               c=a+c   x
-              abex    x             ; A.X= buffer header addressw
+              abex    x             ; A.X= buffer header address
               rtn
 
 ;;; **********************************************************************
@@ -612,3 +621,37 @@ scratchArea:  gosub   sysbuf
               c=a+c   x
               dadd=c
               rtn
+
+;;; **********************************************************************
+;;;
+;;; assignArea - get pointer to secondary assignment area
+;;;
+;;; In: Nothing
+;;; Out: Returns to (P+1) if there is no assignment area
+;;;      Returns to (P+2) if there are secondary assignments, with
+;;;          C.X - pointer to assignment area
+;;;          A.X - address of buffer header
+;;;          DADD - buffer header
+;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub level
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public assignArea
+assignArea:   gosub   sysbuf
+              rtn                   ; (P+1) no system buffer
+              b=a     x             ; B.X= buffer header address
+              c=data                ; read buffer header
+              pt=     6
+              ?c#0    pt            ; are there any assignments?
+              rtnnc                 ; no
+              rcr     4
+              c=0     xs            ; C.X= shell area size
+              a=a+c   x
+              rcr     4
+              c=0     xs            ; C.X= buffer area size
+              c=a+c   x             ;
+              c=c+1   x
+              abex    x             ; A.X= buffer header address
+              golong  RTNP2
+

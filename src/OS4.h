@@ -74,11 +74,13 @@ parseNumber:  .equlab 0x4f4a
 parseNumberInput: .equlab 0x4f4c
 XASRCH:       .equlab 0x4f4e
 secondaryAddress: .equlab 0x4f50
+clearAssignment: .equlab 0x4f52
+assignSecondary: .equlab 0x4f54
 
 // Temporary until addresses are finally fixed
               .extern RTNP2
-#endif
               .extern setBank1
+#endif
 
 ;;; **********************************************************************
 ;;;

@@ -360,7 +360,6 @@ gosubAlign4:  c=stk
               stk=c
               goto    jumpPacked
 
-
 ;;; **********************************************************************
 ;;;
 ;;; RTNP2 - return to P+2
@@ -436,6 +435,33 @@ unpack:       csr     m
               c=c+c   x
               rcr     -3
               rtn
+
+;;; **********************************************************************
+;;;
+;;; setBank1 - enable bank 1
+;;;
+;;; Enable primary bank 1 in the given ROM pags. This routine is "safe"
+;;; in that it is guarded by looking at the bank bit presence in the
+;;; ROM identifier.
+;;;
+;;; In: C[6]= page to enable bank 1 for
+;;; Uses: C[5:3]
+;;;
+;;; **********************************************************************
+
+              .public setBank1
+setBank1:     pt=     5
+              lc      0xf           ; xFFD
+              lc      0xf
+              lc      0xd
+              cxisa
+              ?c#0    xs            ; has banks?
+              rtnnc                 ; no, do not assume there is code to
+                                    ;  switch back to bank 1
+              pt=     4
+              lc      0xc           ; xFC7
+              lc      7
+              gotoc
 
 ;;; **********************************************************************
 ;;;

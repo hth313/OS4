@@ -78,6 +78,7 @@ secondaryAddress: .equlab 0x4f50
 // Temporary until addresses are finally fixed
               .extern RTNP2
 #endif
+              .extern setBank1
 
 ;;; **********************************************************************
 ;;;

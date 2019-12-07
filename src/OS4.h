@@ -76,10 +76,11 @@ XASRCH:       .equlab 0x4f4e
 secondaryAddress: .equlab 0x4f50
 clearAssignment: .equlab 0x4f52
 assignSecondary: .equlab 0x4f54
+secondaryAssignment: .equlab 0x4f56
+resetBank:    .equlab 0x4f58
 
 // Temporary until addresses are finally fixed
               .extern RTNP2
-              .extern setBank1
 #endif
 
 ;;; **********************************************************************

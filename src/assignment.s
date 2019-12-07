@@ -21,7 +21,7 @@
 
               .section code, reorder
               .public clearAssignment
-              .extern shrinkBuffer
+              .extern shrinkBuffer, secondaryAddress
 clearAssignment:
               acex
 clearAssignment10:
@@ -37,7 +37,6 @@ clearAssignment10:
 ;;; * only reset the system one in that case. We will take care of
 ;;; * this 'double' case further down.
               c=m                   ; reset bitmap bit
-              acex
               c=a-c
               data=c
 
@@ -133,10 +132,16 @@ clearAssignment10:
               c=a-c
               data=c
 
-50$:          c=n
+50$:          c=0     x             ; select chip 0
+              dadd=c
+              c=n
               a=c                   ; A[1:0]= keycode
+              regn=c  9             ; preserve N in REGN9 (GCPKC clobbers N)
               s1=1
-              golong    GCPKC       ; clear the key assignment in system
+              gosub   GCPKC         ; clear the key assignment in system
+              c=regn  9
+              n=c
+              rtn
 
 ;;; **********************************************************************
 ;;;
@@ -155,6 +160,7 @@ clearAssignment10:
 ;;;          M= bitmap bit
 ;;;          A= contents of bitmap register
 ;;;          DADD= bitmap register selected
+;;;          B.X= address of buffer header
 ;;; Uses: A[13:12], A.X, C, B.X, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -211,6 +217,7 @@ testAssignBit10:
               gosub   assignArea
               rtn                   ; (P+1) no secondary assignments, return to (P+1)
                                     ;   as not assigned
+              b=a     x             ; B.X= address of buffer header
               acex                  ; A.X= assignment area
                                     ; C.S= shift flag
               c=0     x
@@ -380,3 +387,80 @@ assignSecondary10:
               c=n                   ; get return address back from N
               rcr     3
               gotoc
+
+;;; **********************************************************************
+;;;
+;;; secondaryAssignment - look up a secondary assignment
+;;;
+;;; In: N[1:0] - keycode
+;;;     B.X= address of buffer header (as after testAssignBit)
+;;; Out: Returns to (P+1) if not found
+;;;      Returns to (P+2) if found, with
+;;;
+;;; **********************************************************************
+
+              .public secondaryAssignment
+              .extern assignArea10
+              .section code, reorder
+secondaryAssignment:
+              c=b     x
+              a=c     x
+              dadd=c
+              gosub   assignArea10
+              rtn                   ; (P+1) no assignments
+              c=c+1   x             ; step past bitmap registers
+              bcex    x             ; B.X= pointer to assignment registers
+              c=data                ; read buffer header
+              rcr     7
+              a=c     s             ; A.S= assignment register counter
+              pt=     1
+              c=n                   ; C[1:0]= keycode
+              a=c     x
+              goto    20$
+10$:          c=data                ; read assignment register
+              ?a#c    wpt           ; keycode match?
+              gonc    50$           ; yes
+              rcr     6             ; look at upper part
+              ?a#c    wpt           ; keycode match?
+              gonc    50$           ; yes
+20$:          bcex    x             ; step to and select next register
+              c=c+1   x
+              dadd=c
+              bcex    x
+              a=a-1   s
+              gonc    10$
+              rtn                   ; not found
+;;; * Scan plugged in ROMs, checking Id and that it has the flag set for having
+;;; * secondaries. If matching, we check if function number is in range.
+50$:          rcr     2             ; C[3:0]= combined XROM Id and function Id
+              a=c     x             ; A.X= function number (may have unused msb set)
+              rcr     2
+              c=0     xs
+              c=c+c
+              csr     x             ; C.X= XROM Id
+              acex                  ; A.X= XROM Id
+              n=c                   ; N.X= function number (with possible garbage in msb)
+              c=0
+              pt=     6
+              lc      6             ; start looking from page 6 (assuming page 3 and 5 are
+                                    ;  of no interset)
+              pt=     6
+55$:          cxisa
+              ?a#c    x             ; XROM Id match?
+              gonc    60$           ; yes
+57$:          c=c+1   pt
+              gonc    55$
+              rtn                   ; not found
+60$:          a=c     m
+              pt=     5
+              lc      0xf
+              lc      0xf
+              lc      0xe
+              cxisa
+              ?c#0    xs            ; are there secondaries in this ROM?
+              goc     62$           ; yes
+              acex    m
+              goto    57$           ; no
+62$:          c=n
+              acex
+              golong   secondaryAddress

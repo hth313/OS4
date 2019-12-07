@@ -4,6 +4,7 @@
 #include "OS4.h"
 
 PARS60:       .equlab 0xcb4
+PRT5:         .equlab 0x6fe5
 
 ;;; **********************************************************************
 ;;;
@@ -33,7 +34,8 @@ PARS60:       .equlab 0xcb4
               .section code, reorder
               .public keyKeyboard
               .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
-              .extern disableThisShell, unpack0
+              .extern disableThisShell, unpack0, testAssignBit
+              .extern secondaryAssignment
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -79,12 +81,25 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               ?a#0    s             ; user mode?
               goc     400$          ; no
               c=m                   ; M normally contains shell scan state
+              rcr     -4            ; The [2:0] field is busted, but we know
+                                    ;   [12:6] is 0, so align [12:10] over [2:0]
               bcex                  ; preserve it in B
-              gosub   TBITMP        ; yes, test bit map
-              bcex
-              m=c                   ; M= shell scan state
-              ?b#0                  ; key reassigned?
-              golc    60$           ; yes
+              asr     x             ; A[1:0]= keycode, 0-79 form
+              a=a+1   x             ; to 1-80 form
+              gosub   testAssignBit
+              goto    24$           ; (P+1) not reassigned
+              goto    23$           ; (P+2) normal reassigned
+              golong  60$           ; (P+3) secondary reassigned
+23$:          c=0     x
+              dadd=c
+              golong  RAK60
+
+24$:          bcex                  ; not reassigned
+              c=0     x             ; restore scan state to M
+              dadd=c
+              rcr     4
+              m=c
+
               ?s3=1                 ; program mode?
               goc     40$           ; yes, skip auto-assign tests
 
@@ -198,7 +213,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=c-1   xs            ; XROM override?
               goc     50$           ; yes
               c=c-1   xs            ; digit entry?
-              goc     110$          ; yes
+              golc    110$          ; yes
               c=c-1   xs            ; built-in, ends digit entry?
               gonc    45$           ; no
               cnex                  ; save function code
@@ -232,14 +247,66 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=n
 58$:          golong  RAK70
 
-60$:          gosub   sysbuf        ; assigned key
-              goto    70$           ; (P+1) ordinary key assignment
+240$:         golong  24$
 
-;;; @@@ Here we should scan for secondary assignments!!!
-;;; @@@ Clear digit entry should be done here also?
+;;; * Handle secondary reassigned keys.
+60$:          c=n                   ; convert keycode to 1-80 form
+              csr     x
+              c=c+1   x
+              n=c                   ; N[1:0]= keycode to 1-80 form
+              gosub   secondaryAssignment
+              goto    240$          ; (P+1) not assigned(?)
+              acex    m             ; C[6:3]= XADR
+              m=c                   ; M[6:3]= XADR
+              ?s3=1                 ; program mode?
+              gonc    65$           ; no
+              cxisa
+              ?c#0    x             ; programmable?
+              goc     65$           ; no
 
+;;; * @@@ TODO: insert into program
 
-70$:          golong  RAK60
+65$:          c=c+1   m             ; check for XKD
+              cxisa                 ; is C(XADR+1) non-zero?
+              ?c#0    x
+              goc     70$           ; yes
+              gotoc                 ; no -> XKD FCN - go do it
+
+70$:          gosub   OFSHFT
+              gosub   DSPLN_
+              c=m
+              gosub   PROMF2
+              gosub   LEFTJ
+              gosub   ENCP00
+              ldi     200
+              .newt_timing_start
+              disoff
+72$:          rst kb
+              chk kb
+              gonc    73$
+              c=c-1   x
+              gonc    72$
+              distog
+              .newt_timing_end
+              gosub   NULTST
+              goto    74$
+73$:          gosub   RST05         ; debounce key up
+              gosub   CLLCDE
+              distog
+              gosub   ENCP00
+74$:                                ; key is up. go execute FCN
+                                    ; first give printer a chance
+              gosub   PRT5
+              gosub   RSTSEQ        ; clear SHIFTSET, PKSEQ,
+                                    ; MSGFLAG, DATAENTRY,
+                                    ; CATALOGFLAG, & PAUSING
+                                    ; leaves SS0 up
+              c=0
+              pt=     4
+              lc      15            ; put NFRPU (0x00f0)
+              stk=c                 ;  on the subroutine stack
+              c=m                   ; get XADR
+              gotoc
 
 ;;; Builtin function. We always end digit entry here. There are some builtins
 ;;; that do not clear digit entry, but that should be handled by having 000 and

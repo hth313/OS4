@@ -101,7 +101,7 @@
 
               .section code, reorder
               .public XASRCH
-              .extern RTNP30, unpack, unpack0, unpack4, jumpC5, RTNP2
+              .extern RTNP30, unpack, unpack0, unpack3, unpack4, jumpC5, RTNP2
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
               lc      4             ; C[2:0]_END link
@@ -387,8 +387,9 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
 ;;;
 ;;; resetBank - reset to primary bank
 ;;;
-;;; Call the XFC7 entry in given bank to reset to bank 1. This assumes
-;;; that there is such routine at that point (or at least a RTN).
+;;; Call the XFC7 entry in given bank to reset to bank 1. This routine is "safe"
+;;; in that it is guarded by looking at the bank bit presence in the
+;;; ROM identifier.
 ;;; The bankswitcher is assumed to be an enromX instruction followed
 ;;; by RTN, if not the 'Uses' statement here may not apply!
 ;;;
@@ -400,12 +401,18 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
 
               .section code, reorder
               .public resetBank
-resetBank:    pt=     5             ; C[6:3]= XFC7 to switch back to bank 1
+resetBank:    pt=     5
+              lc      0xf           ; xFFD
               lc      0xf
-              lc      0xc
+              lc      0xd
+              cxisa
+              ?c#0    xs            ; has banks?
+              rtnnc                 ; no, do not assume there is code to
+                                    ;  switch back to bank 1
+              pt=     4
+              lc      0xc           ; xFC7
               lc      7
               gotoc
-
 
 ;;; **********************************************************************
 ;;;
@@ -472,11 +479,13 @@ secondaryAddress:
               goto    10$
 
 20$:          a=c     m             ; A[6:3]= FAT header pointer
-              gosub   jumpC5        ; switch bank
+              c=c+1   m
+              c=c+1   m
+              gosub   RTNP30        ; switch bank
               acex
               c=c+c   x             ; index * 2
               acex    x
-              gosub   unpack4       ; get start location of FAT
+              gosub   unpack3       ; get start location of FAT
               rcr     3
               c=a+c   x             ; add offset to entry
               rcr     -3

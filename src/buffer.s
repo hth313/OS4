@@ -637,11 +637,11 @@ scratchArea:  gosub   sysbuf
 ;;; **********************************************************************
 
               .section code, reorder
-              .public assignArea
+              .public assignArea, assignArea10
 assignArea:   gosub   sysbuf
               rtn                   ; (P+1) no system buffer
               b=a     x             ; B.X= buffer header address
-              c=data                ; read buffer header
+assignArea10: c=data                ; read buffer header
               pt=     6
               ?c#0    pt            ; are there any assignments?
               rtnnc                 ; no

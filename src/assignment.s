@@ -394,8 +394,13 @@ assignSecondary10:
 ;;;
 ;;; In: N[1:0] - keycode
 ;;;     B.X= address of buffer header (as after testAssignBit)
-;;; Out: Returns to (P+1) if not found
+;;; Out: Returns to (P+1) if not found, with
+;;;        A.X - XROM Id
+;;;        N.X - secondary function Id
 ;;;      Returns to (P+2) if found, with
+;;;        N.X - secondary function Id
+;;;
+;;; Uses: A, C, B.X, N, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
@@ -438,8 +443,18 @@ secondaryAssignment:
               c=0     xs
               c=c+c
               csr     x             ; C.X= XROM Id
-              acex                  ; A.X= XROM Id
-              n=c                   ; N.X= function number (with possible garbage in msb)
+              n=c                   ; N.X= XROM Id
+              c=0     x
+              pt=     2
+              lc      8             ; C.X= 0x800
+              ?a<c    x             ; unused msb set?
+              goc     51$           ; no
+              a=a-c   x             ; yes, reset it
+51$:          acex    x             ; C.= function number
+              cnex                  ; N.X= function number
+                                    ; C.X= XROM Id
+              a=c     x             ; A.X= XROM Id
+
               c=0
               pt=     6
               lc      6             ; start looking from page 6 (assuming page 3 and 5 are

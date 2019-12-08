@@ -247,7 +247,18 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=n
 58$:          golong  RAK70
 
-240$:         golong  24$
+62$:          gosub   CLLCDE        ; display it as XXROM nn,func
+              ldi     'X'-64
+              slsabc
+              asl
+              asl
+              asl
+              c=n
+              a=c     x
+              b=a                   ; B.X= funcId, B[5:3] = xrom Id
+              gosub   XROMNF
+              s9=0                  ; we did not find it
+              goto    71$
 
 ;;; * Handle secondary reassigned keys.
 60$:          c=n                   ; convert keycode to 1-80 form
@@ -255,7 +266,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=c+1   x
               n=c                   ; N[1:0]= keycode to 1-80 form
               gosub   secondaryAssignment
-              goto    240$          ; (P+1) not assigned(?)
+              goto    62$           ; (P+1) not plugged in
+              s9=1                  ; found
               acex    m             ; C[6:3]= XADR
               m=c                   ; M[6:3]= XADR
               ?s3=1                 ; program mode?
@@ -278,7 +290,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   PROMF2
               gosub   LEFTJ
               gosub   ENCP00
-              ldi     200
+71$:          ldi     200
               .newt_timing_start
               disoff
 72$:          rst kb
@@ -301,6 +313,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
                                     ; MSGFLAG, DATAENTRY,
                                     ; CATALOGFLAG, & PAUSING
                                     ; leaves SS0 up
+              ?s9=1
+              golnc   ERRNE         ; we did not find it
               c=0
               pt=     4
               lc      15            ; put NFRPU (0x00f0)

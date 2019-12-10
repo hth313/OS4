@@ -308,7 +308,8 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   ENCP00
 74$:                                ; key is up. go execute FCN
                                     ; first give printer a chance
-              gosub   PRT5
+              ?s9=1
+              gsubc   PRT5          ; only print if found
               gosub   RSTSEQ        ; clear SHIFTSET, PKSEQ,
                                     ; MSGFLAG, DATAENTRY,
                                     ; CATALOGFLAG, & PAUSING

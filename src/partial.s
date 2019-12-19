@@ -228,14 +228,17 @@ validateClear:
 
 lcdValue:     a=0                   ; A.X= sum
               a=a-1   s             ; A.S= digit counter
-10$:          rabcr
+              cstex
+10$:          cstex
+              rabcr
               a=a+1   s
-              st=c
+              cstex
               ?s7=1                 ; comma or colon?
               goc     19$           ; yes, stop
               ?s4=1
               goc     10$           ; shift until " " or " ."
-19$:          pt=     1
+19$:          cstex
+              pt=     1
               rabcl                 ; restore digit we do not want
               goto    22$
 20$:          rabcl

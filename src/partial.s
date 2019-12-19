@@ -154,6 +154,7 @@ parseNumber10:
               c=c-1   s
               gonc    350$
               c=b     m             ; C[6:3]= validator
+              s8=1                  ; incomplete input
               gosub   callInd       ; validate value
               goto    37$           ; not accepted
               gosub   ENCP00
@@ -209,6 +210,7 @@ validateClear:
               gosub   lcdValue
               gosub   ENCP00
               c=regn  9             ; C[6:3]= validator
+              s8=0                  ; signal complete input
               gosub   callInd
               goto    90$           ; not good
               spopnd                ; drop return to digit input

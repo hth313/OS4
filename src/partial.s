@@ -139,6 +139,7 @@ parseNumber10:
               c=regn  9
               c=c-1   s
               gonc    35$           ; not complete
+              regn=c  9
               gosub   ENLCD
               gosub   validateClear
               goto    37$           ; not accepted
@@ -217,9 +218,7 @@ validateClear:
               golong  RTNP2         ; accept
 90$:          gosub   ENLCD
               ?s3=1                 ; doing single digit entry?
-              gonc    95$           ; no, shift off all digits
-              rabcr                 ; yes, remove single digit
-              rtn                   ; return to (P+1) not accepted
+              rtnc                  ; yes, it will remove last digit
 95$:          rabcr                 ; shift off all digits
               st=c
               ?s4=1

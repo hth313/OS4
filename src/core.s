@@ -127,6 +127,7 @@ deepWake:     gosub   releaseShells
               cstex
               st=0    Flag_Argument ; no argument handling going on
               st=0    Flag_Pause    ; no pause
+              st=0    Flag_SEC_PROXY ; no secondary proxy in progress
               st=1    Flag_OrphanShells
                                     ; set Flag_OrphanShells flag to signal that
                                     ;  we need to check for orphaned shells
@@ -219,6 +220,7 @@ resetFlags:   c=b     x
               st=0    Flag_DisplayOverride
               st=0    Flag_Argument
               st=0    Flag_Pause
+              st=0    Flag_SEC_PROXY
               cstex
               data=c
               rtn
@@ -232,13 +234,17 @@ partialKeyTakeOver:
               c=c+c   xs
               c=c+c   xs
               gonc    noTakeOver    ; no XROM
+              ldi     1             ; XROM 0,1 (lower 3 nibbles)
+              a=c     x
               c=regn  10            ; read function code
               rcr     1
+              ?a#c    x             ; is this XROM 0,1?
+              gonc    checkSecondaryTakeOver ; yes
               gosub   GTRMAD
               goto    noTakeOver
               acex
               rcr     -3            ; C[6:3]= XADR
-              ldi     FirstGosub(partialKeyEntry)
+checkXADR:    ldi     FirstGosub(partialKeyEntry)
               a=c     x
               cxisa
               ?c#0    x             ; is it marked as non-programmable?
@@ -266,6 +272,20 @@ partialKeyTakeOver:
               regn=c  15
 noTakeOver:   golong  toWKUP20_SS0
 
+;;; * Check for partial key sequence secondary function. These are
+;;; * marked as XROM 6,0 (the header of BOOST module), but ensure
+;;; * that we are actually doing a prompting secondary.
+checkSecondaryTakeOver:
+              gosub   sysbuf
+              goto    noTakeOver    ; (P+1) no system buffer
+              st=c
+              ?st=1   Flag_SEC_PROXY
+              gonc    noTakeOver    ; not doing secondary
+              c=0     x
+              dadd=c
+              c=regn  8
+              rcr     7
+              goto    checkXADR
 
 ;;; **********************************************************************
 ;;;
@@ -568,7 +588,7 @@ versionCheck: a=c     x
               .extern parseNumber, parseNumberInput
               .extern XASRCH, XSAROM, secondaryAddress
               .extern clearAssignment, assignSecondary, secondaryAssignment
-              .extern resetBank
+              .extern resetBank, invokeSecondary, XABTSEQ
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -616,7 +636,8 @@ versionCheck: a=c     x
               golong  assignSecondary ; 0x4f54
               golong  secondaryAssignment ; 0x4f56
               golong  resetBank     ; 0x4f58
-
+              golong  invokeSecondary ; 0x4f5a
+              golong  XABTSEQ       ; 0x4f5c
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

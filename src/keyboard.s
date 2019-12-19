@@ -32,10 +32,10 @@ PRT5:         .equlab 0x6fe5
 ;;; **********************************************************************
 
               .section code, reorder
-              .public keyKeyboard
+              .public keyKeyboard, invokeSecondary
               .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell, unpack0, testAssignBit
-              .extern secondaryAssignment
+              .extern secondaryAssignment, secondaryAddress
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -89,7 +89,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   testAssignBit
               goto    24$           ; (P+1) not reassigned
               goto    23$           ; (P+2) normal reassigned
-              golong  60$           ; (P+3) secondary reassigned
+              golong  secondaryASN  ; (P+3) secondary reassigned
 23$:          c=0     x
               dadd=c
               golong  RAK60
@@ -213,7 +213,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=c-1   xs            ; XROM override?
               goc     50$           ; yes
               c=c-1   xs            ; digit entry?
-              golc    110$          ; yes
+              golc    digitEntry    ; yes
               c=c-1   xs            ; built-in, ends digit entry?
               gonc    45$           ; no
               cnex                  ; save function code
@@ -225,7 +225,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               a=c     x
               ldi     64
               ?a<c    x             ; local XROM function?
-              golnc   150$          ; no, need to look at secondaries
+              golnc   secondary     ; no, need to look at secondaries
 
               pt=     5             ; yes, local XROM
               c=0     wpt           ; point to XROM ID
@@ -247,7 +247,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=n
 58$:          golong  RAK70
 
-62$:          gosub   CLLCDE        ; display it as XXROM nn,func
+noXXROM:      gosub   CLLCDE        ; display it as XXROM nn,func
               ldi     'X'-64
               slsabc
               asl
@@ -258,17 +258,17 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               b=a                   ; B.X= funcId, B[5:3] = xrom Id
               gosub   XROMNF
               s9=0                  ; we did not find it
-              goto    71$
+              golong  nullTest
 
 ;;; * Handle secondary reassigned keys.
-60$:          c=n                   ; convert keycode to 1-80 form
+secondaryASN: c=n                   ; convert keycode to 1-80 form
               csr     x
               c=c+1   x
               n=c                   ; N[1:0]= keycode to 1-80 form
               gosub   secondaryAssignment
-              goto    62$           ; (P+1) not plugged in
+              goto    noXXROM           ; (P+1) not plugged in
+foundXXROM:   acex    m             ; C[6:3]= XADR
               s9=1                  ; found
-              acex    m             ; C[6:3]= XADR
               m=c                   ; M[6:3]= XADR
               ?s3=1                 ; program mode?
               gonc    65$           ; no
@@ -288,9 +288,49 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   DSPLN_
               c=m
               gosub   PROMF2
-              gosub   LEFTJ
+              c=m                   ; retrieve XADR again
+              c=c-1   m             ; point to XADR-1
+              cxisa                 ; op1 to C.XS
+              ?c#0    xs            ; op1 # 0?
+              gonc    noOperand
+              n=c
+              rcr     3
+              a=c
+              a=a+1                 ; A[3:0]= XADR
+              gosub   ENCP00        ; has operands
+              c=regn  10            ; set XROM 0,1 as function code
+                                    ;  (This is an impossible XROM as 0 is
+                                    ;   not valid. We are not going to execute
+                                    ;   it, rather use it as a marker for
+                                    ;   partialKeyTakeOver to redirect it).
+              rcr     1
+              pt=     3
+              lc      10            ; A001
+              ldi     1
+              rcr     -1
+              regn=c  10
+              lc      2             ; C[2]= 2, PT=1
+              g=c                   ; set XROM bit (0x20) in ptemp2
+              pt=     3
+              c=regn  8             ; REG8[13:10] = XADR of secondary
+              rcr     -4
+              acex    wpt
+              rcr     4
+              regn=c  8
+              gosub   sysbuf
+              goto    noOperand     ; (P+1) should not happen
+              c=data                ; set secondary proxy bit to indicate
+              cstex                 ;  that we are doing secondary prompt handling
+              st=1    Flag_SEC_PROXY
+              cstex
+              data=c
+              gosub   ENLCD
+              c=n
+              golong  0xcda         ; start argument parsing
+
+noOperand:    gosub   LEFTJ
               gosub   ENCP00
-71$:          ldi     200
+nullTest:     ldi     200
               .newt_timing_start
               disoff
 72$:          rst kb
@@ -316,6 +356,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
                                     ; leaves SS0 up
               ?s9=1
               golnc   ERRNE         ; we did not find it
+
               c=0
               pt=     4
               lc      15            ; put NFRPU (0x00f0)
@@ -338,7 +379,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               golong PARS56
 
 ;;; Handle digit entry and backspace.
-110$:         a=c     x             ; A[1:0]= digit
+digitEntry:   a=c     x             ; A[1:0]= digit
               c=c+1   x             ; check for backspace
               gonc    112$          ; not backspace
               c=regn  14            ; backspace
@@ -393,7 +434,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 ;;;    put 'RCL d' on your keyboard.
 ;;; 2. An secondary FAT instruction. In this case the first word is 0
 ;;;    and the second word is the offset (0-1023).
-150$:         a=a-c   x             ; A.X= offset to secondary
+secondary:    a=a-c   x             ; A.X= offset to secondary
               rcr     3
               c=a+c   x
               rcr     -3            ; C[6:3]= adr of secondary
@@ -402,24 +443,41 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               a=c     x
               cxisa
               ?a#0    x             ; extended FAT?
-              gonc    160$          ; yes
+              gonc    invokeSecondary ; yes
               rcr     2             ; no, a 2-byte instruction
               acex    x
               rcr     -2            ; C[3:0]= complete 2-byte instruction
               golong  RAK70
 
+;;; **********************************************************************
+;;;
+;;; invokeSecondary - call a secondary function
+;;;
+;;; Invoke a secondary function, that is, execute it or store in a program
+;;; as appropriate. This function does not return, control is given back
+;;; to operating system or program to execute next command.
+;;; If the given secondary function is not currently in the given module
+;;; page, appropriate action is taken (shows XXROM identity number, and
+;;; give NONEXISTENT error unless NULLed).
+;;;
+;;; In: C[6]= page address
+;;;     C.X - secondary function identity
+;;;
+;;; **********************************************************************
 
-
-160$:                               ; C.X= extended FAT offset
-                                    ; C[6:3]= pointing somewhere in ROM page
-
-
+invokeSecondary:
+              a=c     x             ; A.X= secondary index
+              gosub   secondaryAddress
+              goto    10$           ; (P+1) function not available(?)
+              golong  foundXXROM
+10$:          golong  noXXROM
 
 ;;; **********************************************************************
 ;;;
 ;;; clearSystemDigitEntry - reset the system digit entry flag
 ;;;
 ;;; Uses: C, enables chip 0
+;;;
 ;;; **********************************************************************
 
               .public clearSystemDigitEntry
@@ -444,7 +502,6 @@ clearSystemDigitEntry:
               rcr     -2
               regn=c  14
               rtn
-
 
 ;;; ************************************************************
 ;;;

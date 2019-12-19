@@ -78,7 +78,8 @@ clearAssignment: .equlab 0x4f52
 assignSecondary: .equlab 0x4f54
 secondaryAssignment: .equlab 0x4f56
 resetBank:    .equlab 0x4f58
-
+invokeSecondary: .equlab 0x4f5a
+XABTSEQ       .equlab 0x4f5c
 // Temporary until addresses are finally fixed
               .extern RTNP2
 #endif
@@ -137,7 +138,9 @@ Flag_DisplayOverride .equ  1           ; Set when message flag really means that
                                        ; we override the display.
 Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shells.
 Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
-Flag_Pause           .equ  4           ; Our own pause flag.
+Flag_Pause:          .equ  4           ; Our own pause flag.
+Flag_SEC_PROXY:      .equ  5           ; Set when doing partial key for secondary
+                                       ; functions.
 
 ;;; **********************************************************************
 ;;;

@@ -445,7 +445,6 @@ secondary:    pt=     5
               a=c     m
               golong  RTNP2
 
-
 ;;; **********************************************************************
 ;;;
 ;;; secondaryAddress - look up a secondary function

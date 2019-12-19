@@ -256,14 +256,13 @@ mul10:        acex    x             ; multiply by 10
 ;;; * Dispatch on number of digits to prompt for
 dispatch:     gosub   ENCP00
               c=regn  9
-              a=c     s
               gosub   ENLCD
               c=stk
-              a=a-1   s
+              c=c-1   s
               gonc    10$
               gotoc                 ; return to (P+1) for 1 digit
 10$:          c=c+1   m
-              a=a-1   s
+              c=c-1   s
               gonc    20$
               gotoc                 ; return to (P+2) for 2 digits
 20$:          c=c+1   m

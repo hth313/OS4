@@ -193,6 +193,7 @@ SARO04:       rcr     2             ; right-justify
               ?c#0    wpt
               gonc    SARO04
 SARO06:       m=c                   ; M_LCD char string
+              s5=0                  ; doing XROMs
               pt=     6             ; B[M]_C[M]_56K
               c=0
               dadd=c                ; -  (sel chip 0)
@@ -359,7 +360,7 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               rtn
 
 50$:
-; * Next two instructions (P T=7,LC 0) may not be necessary.
+; * Next two instructions (PT=7,LC 0) may not be necessary.
               pt=     7
               lc      0
               a=c                   ; C[7:4]_XROM F.C.

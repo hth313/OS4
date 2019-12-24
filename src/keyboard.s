@@ -270,20 +270,21 @@ secondaryASN: c=n                   ; convert keycode to 1-80 form
 foundXXROM:   acex    m             ; C[6:3]= XADR
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR
+              cxisa                 ; C.X= first word
               pt=     13
               lc      2             ; XROM bit to be part of ptemp2
               ?s3=1                 ; program mode?
               gonc    65$           ; no
-              cxisa
               ?c#0    x             ; programmable?
               gonc    65$           ; no
               c=c+1   s             ; yes, set insert bit
-65$:          c=c+1   m             ; check for XKD
+65$:          ?c#0    x             ; programmable?
+              goc     70$           ; yes, do not check XKD
+              c=c+1   m             ; not programmable, check for XKD
               cxisa                 ; is C(XADR+1) non-zero?
               ?c#0    x
               goc     70$           ; yes
               gotoc                 ; no -> XKD FCN - go do it
-
 70$:          g=c                   ; save upper nibble in ptemp2
               rcr     12
               st=c                  ; bring up ptemp2

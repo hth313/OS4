@@ -273,18 +273,16 @@ foundXXROM:   acex    m             ; C[6:3]= XADR
               cxisa                 ; C.X= first word
               pt=     13
               lc      2             ; XROM bit to be part of ptemp2
-              ?s3=1                 ; program mode?
-              gonc    65$           ; no
               ?c#0    x             ; programmable?
-              gonc    65$           ; no
-              c=c+1   s             ; yes, set insert bit
-65$:          ?c#0    x             ; programmable?
-              goc     70$           ; yes, do not check XKD
-              c=c+1   m             ; not programmable, check for XKD
-              cxisa                 ; is C(XADR+1) non-zero?
-              ?c#0    x
+              goc     65$           ; yes
+              c=c+1   m             ; no, check for XKD
+              cxisa                 ; fetch next word
+              ?c#0    x             ; is C(XADR+1) non-zero?
               goc     70$           ; yes
-              gotoc                 ; no -> XKD FCN - go do it
+              gotoc                 ; no -> XKD function - go do it
+65$:          ?s3=1                 ; program mode?
+              gonc    70$           ; no
+              c=c+1   s             ; yes, set insert bit
 70$:          g=c                   ; save upper nibble in ptemp2
               rcr     12
               st=c                  ; bring up ptemp2

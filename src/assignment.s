@@ -467,3 +467,34 @@ secondaryAssignment:
 62$:          c=n
               acex
               golong   secondaryAddress
+
+;;; **********************************************************************
+;;;
+;;; clearSecondaryAssignments - clear all secondary assignments
+;;;
+;;; In: Nothing
+;;; Out: Nothing
+;;; Uses: A, C, B, G, PT, DADD, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .public clearSecondaryAssignments
+              .section code, reorder
+clearSecondaryAssignments:
+              gosub   assignArea
+              rtn                   ; (P+1) no secondary assignemnts
+              bcex    x             ; B.X= pointer to assignment area
+              c=data                ; read buffer header
+              rcr     6
+              pt=     1
+              lc      0             ; C[1:0]= register count - 2
+              c=c+1   x             ; add 2 for bitmap registers
+              c=c+1   x
+              g=c                   ; G= number of registers to remove
+              c=data                ; read buffer header
+              pt=     6
+              lc      0             ; no secondary assignments
+              data=c                ; update buffer header
+              bcex    x             ; C.X= offset to first register to remove
+              golong  shrinkBuffer  ; remove the secondary assignment area
+

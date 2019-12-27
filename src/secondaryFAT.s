@@ -426,7 +426,7 @@ resetBank:    pt=     5
 ;;; Out: Returns to (P+1) if no secondaries exist
 ;;;      Returns to (P+2) if there are secondaries with:
 ;;;        A[6:3]= first secondary FAT header
-;;; Uses: A.M, C[6:0]
+;;; Uses: A.M, C[6:0], +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -456,7 +456,7 @@ secondary:    pt=     5
 ;;;      Returns to (P+2) if exists and:
 ;;;        A[6:3]= address of secondary function
 ;;;        active bank set for secondary
-;;; Uses:
+;;; Uses: A, C, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 

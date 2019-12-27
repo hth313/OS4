@@ -266,7 +266,7 @@ secondaryASN: c=n                   ; convert keycode to 1-80 form
               c=c+1   x
               n=c                   ; N[1:0]= keycode to 1-80 form
               gosub   secondaryAssignment
-              goto    noXXROM           ; (P+1) not plugged in
+              goto    noXXROM       ; (P+1) not plugged in
 foundXXROM:   acex    m             ; C[6:3]= XADR
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR

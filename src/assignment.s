@@ -239,7 +239,7 @@ testAssignBit10:
 ;;; assignSecondary - assign a secondary function
 ;;;
 ;;; In: A[1:0] - keycode
-;;;     B[3:0] - assignment
+;;;     B[4:0] - assignment (XR-FFF)
 ;;;
 ;;; Uses: A, C, B.X, N, M, DADD, +3 sub levels
 ;;;
@@ -294,13 +294,13 @@ toNoRoom:     golong  noRoom
               .public assignSecondary
 assignSecondary:
               c=stk                 ; get return address
-              rcr     -1
-              pt=     3
+              rcr     -2
+              pt=     4
               c=b     wpt
               rcr     -2
               pt=     1
-              acex    wpt           ; C[5:0]= assignment
-                                    ; C[9:6]= return address
+              acex    wpt           ; C[6:0]= assignment
+                                    ; C[10:7]= return address
               gosub   clearAssignment10 ; remove any existing assignment
 
 ;;; 1. Ensure there is an assignment area (with one register).
@@ -322,7 +322,7 @@ assignSecondary10:
               c=data                ; read KAR
               ?c#0    wpt           ; empty slot in lower part?
               gonc    40$           ; yes
-              rcr     6
+              rcr     7
               ?c#0    wpt           ; empty slot in upper part?
               gonc    50$           ; yes
 25$:          a=a+1   x             ; step ahead
@@ -349,27 +349,26 @@ assignSecondary10:
               data=c                ; write back
               c=b     x
               dadd=c                ; select new register
-              a=0
-              a=a-1   s             ; A= F0000....
+              a=0                   ; A= 0000...
               c=n
-              a=c     wpt           ; A=F000..assignment
+              a=c     wpt           ; A=0000..assignment
               acex
               data=c                ; write it out
               goto    60$
 
 40$:          a=c                   ; insert assignment in low part
               c=n
-              pt=     5
+              pt=     6
               a=c     wpt
               acex
               goto    55$
 
 50$:          a=c                   ; insert assignment in upper part
               c=n
-              pt=     5
+              pt=     6
               a=c     wpt
               acex
-              rcr     -6
+              rcr     -7
 55$:          data=c                ; write back
 
 ;;; 4. Set the assignment bit
@@ -385,7 +384,7 @@ assignSecondary10:
               c=a+c
               data=c                ; write it back
               c=n                   ; get return address back from N
-              rcr     3
+              rcr     4
               gotoc
 
 ;;; **********************************************************************
@@ -394,12 +393,12 @@ assignSecondary10:
 ;;;
 ;;; In: N[1:0] - keycode
 ;;;     B.X= address of buffer header (as after testAssignBit)
-;;; Out: Returns to (P+1) if not found, with
+;;; Out: Returns to (P+1) if not found, if S0=1 with:
 ;;;        A.X - XROM Id
 ;;;        N.X - secondary function Id
 ;;;      Returns to (P+2) if found, with
-;;;        N.X - secondary function Id
-;;;
+;;;        A[6:3]= address of secondary function
+;;;        active bank set for secondary
 ;;; Uses: A, C, B.X, N, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -408,6 +407,7 @@ assignSecondary10:
               .extern assignArea10
               .section code, reorder
 secondaryAssignment:
+              s0=0
               c=b     x
               a=c     x
               dadd=c
@@ -437,24 +437,12 @@ secondaryAssignment:
               rtn                   ; not found
 ;;; * Scan plugged in ROMs, checking Id and that it has the flag set for having
 ;;; * secondaries. If matching, we check if function number is in range.
-50$:          rcr     2             ; C[3:0]= combined XROM Id and function Id
-              a=c     x             ; A.X= function number (may have unused msb set)
-              rcr     2
-              c=0     xs
-              c=c+c
-              csr     x             ; C.X= XROM Id
-              n=c                   ; N.X= XROM Id
-              c=0     x
-              pt=     2
-              lc      8             ; C.X= 0x800
-              ?a<c    x             ; unused msb set?
-              goc     51$           ; no
-              a=a-c   x             ; yes, reset it
-51$:          acex    x             ; C.= function number
-              cnex                  ; N.X= function number
-                                    ; C.X= XROM Id
-              a=c     x             ; A.X= XROM Id
-
+50$:          s0=1                  ; There is an assignment
+              rcr     5             ; C[1:0]= XROM Id
+              c=0     xs            ; C.X= XROM Id
+              a=c     x
+              rcr     -3            ; C.X= function Id
+              n=c                   ; N.X= function Id
               c=0
               pt=     6
               lc      6             ; start looking from page 6 (assuming page 3 and 5 are

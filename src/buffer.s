@@ -81,16 +81,10 @@
 ;;;   the two bitmap registers for the first secondary assignment.
 ;;;   These defines key assignments of secondary FAT entries. They are defined
 ;;;   as follows:
-;;;     F0 XRSC KK XRSC KK
+;;;     XR-FFF-KK XR-FFF-KK
 ;;;   where
-;;;     F0 - Is the usual KAR marker, which will not cause problems as it is
-;;;          inside a buffer.
-;;;     XRSC - The function, XR is the XROM# 1-31 left shifted 3 steps to
-;;;            align it with the highest bits. The lower 11 bits is the
-;;;            index in the secondary FATs. Primary FAT instructions use
-;;;            the normal assignment mechanism.
-;;;            This allows for selecting any of the first 2048 secondary
-;;;            FAT entries for a key.
+;;;     XR - The XROM Id
+;;;     FFF - The secondary function
 ;;;     KK - the key used
 ;;;
 ;;; **********************************************************************

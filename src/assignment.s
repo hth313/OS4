@@ -395,9 +395,10 @@ assignSecondary10:
 ;;;     B.X= address of buffer header (as after testAssignBit)
 ;;; Out: Returns to (P+1) if not found, if S0=1 with:
 ;;;        A.X - XROM Id
-;;;        N.X - secondary function Id
+;;;        N.X - secondary function identity
 ;;;      Returns to (P+2) if found, with
 ;;;        A[6:3]= address of secondary function
+;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
 ;;; Uses: A, C, B.X, N, PT, DADD, +2 sub levels
 ;;;
@@ -497,4 +498,3 @@ clearSecondaryAssignments:
               data=c                ; update buffer header
               bcex    x             ; C.X= offset to first register to remove
               golong  shrinkBuffer  ; remove the secondary assignment area
-

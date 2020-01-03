@@ -219,9 +219,18 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               golc    digitEntry    ; yes
               c=c-1   xs            ; built-in, ends digit entry?
               gonc    45$           ; no
+;;; Builtin function. We always end digit entry here. There are some builtins
+;;; that do not clear digit entry, but that should be handled by having 000 and
+;;; falling back to default keyboard, not by coming here.
               cnex                  ; save function code
               gosub   appClearDigitEntry
               c=n                   ; restore function code
+              c=c-1   x             ; adjust function code, it is offset by
+                                    ; one to allow for 000 meaning pass through
+                                    ; but the real 000 is CAT, and that is
+                                    ; probably more useful than Text 15 (which
+                                    ; is 0FF and that is now not possible to
+                                    ; have on a key)
 45$:          golong  PARS56
 
 50$:          c=0     xs            ; decode XROM
@@ -405,20 +414,6 @@ gotoFunction: c=0
               stk=c                 ;  on the subroutine stack
               acex    m
               gotoc
-
-;;; Builtin function. We always end digit entry here. There are some builtins
-;;; that do not clear digit entry, but that should be handled by having 000 and
-;;; falling back to default keyboard, not by coming here.
-100$:         cnex                  ; N=KC, get table pointer
-              gosub   appClearDigitEntry ; clear digit entry flag
-              c=n                   ; restore key code
-              c=c-1   x             ; adjust function code, it is offset by
-                                    ; one to allow for 000 meaning pass through
-                                    ; but the real 000 is CAT, and that is
-                                    ; probably more useful than Text 15 (which
-                                    ; is 0FF and that is now not possible to
-                                    ; have on a key)
-              golong PARS56
 
 ;;; Handle digit entry and backspace.
 digitEntry:   a=c     x             ; A[1:0]= digit

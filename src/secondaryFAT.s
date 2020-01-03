@@ -1,5 +1,6 @@
 #include "mainframe.i"
 
+Text1:        .equ    0xf1
 
 ;;; **********************************************************************
 ;;;
@@ -101,7 +102,8 @@
 
               .section code, reorder
               .public XASRCH
-              .extern RTNP30, unpack, unpack0, unpack3, unpack4, jumpC5, RTNP2
+              .extern RTNP30, unpack, unpack0, unpack1, unpack3, unpack4
+              .extern NXBYTP, jumpC5, RTNP2, gotoFunction
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
               lc      4             ; C[2:0]_END link
@@ -243,7 +245,7 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
 
 50$:          c=b     m
               rcr     4             ; C[6:3]= secondary FAT header
-              cxisa                 ; read the next work
+              cxisa                 ; read the next word
               ?c#0    x             ; end?
               gonc    55$           ; yes
               gosub   unpack
@@ -455,14 +457,18 @@ secondary:    pt=     5
 ;;; Out: Returns to (P+1) if function does not exist
 ;;;      Returns to (P+2) if exists and:
 ;;;        A[6:3]= address of secondary function
+;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
-;;; Uses: A, C, active PT, +2 sub levels
+;;; Uses: A, B.X, C, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
               .public secondaryAddress
 secondaryAddress:
+              b=a     x             ; B.X= secondary function identity
+              a=0     s
+secondaryAddress10:
               gosub   secondary
               rtn                   ; (P+1) no secondaries
               acex    m
@@ -473,12 +479,14 @@ secondaryAddress:
               a=a-c   x             ; deduct entries in this secondary
               c=c-1   m
               cxisa
-              ?c#0    x             ; do we have a next secodary?
+              ?c#0    x             ; do we have a next secondary?
               rtnnc                 ; no, does not exist
               gosub   unpack        ; read next pointer
               goto    10$
 
 20$:          a=c     m             ; A[6:3]= FAT header pointer
+              ?a#0    s             ; coming from secondaryProgram?
+              goc     toRTNP2       ; yes
               c=c+1   m
               c=c+1   m
               gosub   RTNP30        ; switch bank
@@ -486,7 +494,7 @@ secondaryAddress:
               c=c+c   x             ; index * 2
               acex    x
               gosub   unpack3       ; get start location of FAT
-              rcr     3
+lookupFAT:    rcr     3
               c=a+c   x             ; add offset to entry
               rcr     -3
               cxisa
@@ -503,4 +511,117 @@ secondaryAddress:
               asl
               asl
               asl                   ; A[6:3]= address of secondary function
+              abex    x             ; A.X= secondary function identity
+toRTNP2:      golong  RTNP2
+
+;;; **********************************************************************
+;;;
+;;; secondaryProgram - how to represent a secondary in program memory
+;;;
+;;; Get information needed for how to store a secondary function in a
+;;; program. This consists of the XROM prefix to be used and the adjusted
+;;; secondary number (for that prefix).
+;;;
+;;; In: C[6]= page address
+;;;     A.X= secondary function identifier
+;;; Out: Returns to (P+1) if function does not exist
+;;;      Returns to (P+2) if exists and:
+;;;        B[1:0]= adjusted secondary function identity
+;;;        A[3:0]= XROM function code
+;;; Uses: A, C, +3 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public secondaryProgram
+secondaryProgram:
+              a=0     s
+              a=a+1   s
+              gosub   secondaryAddress10
+              rtn
+              b=a     x             ; B[1:0]= adjusted secondary function identity
+              acex    m             ; C[6:3]= secondary FAT header
+              c=c+1   m
+              c=c+1   m
+              cxisa                 ; read XROM j prefix
+              pt=     3
+              lc      10
+              a=c                   ; A[3]= 10
+                                    ; A.X= j prefix
+              pt=     5
+              c=0     wpt           ; C[6:3]= P000
+              cxisa                 ; read XROM i
+              c=0     s
+              rcr     -1
+              c=c+c   x
+              c=c+c   x
+              a=a+c   x
               golong  RTNP2
+
+;;; **********************************************************************
+;;;
+;;; runSecondary - run-time handling of secondary invocation
+;;;
+;;; In: STK= called from ROM page, @STK is prefix function number
+;;;
+;;; Out: does not return to caller
+;;; Uses: N/A
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public runSecondary
+runSecondary: c=stk                 ; C[6:3]= some page address
+              cxisa
+              a=c     x             ; A.X= XROM prefix code
+              gosub   secondary
+              rtn                   ; (P+1) not found
+              ?s13=1                ; running?
+              goc     10$           ; yes
+              ?s4=1                 ; no, single stepping?
+              rtnnc                 ; no, do nothing
+              acex    m
+
+10$:          c=c+1   m
+              c=c+1   m
+              cxisa
+              ?a#c    x             ; the prefix we are looking for?
+              gonc    20$           ; yes
+              c=c-1   m
+              c=c-1   m
+              cxisa
+              ?c#0    x             ; are there more tables?
+99$:          golnc   ERRNE         ; no - does not exist
+              gosub   unpack
+              goto    10$
+
+20$:          c=c+1   m
+              m=c                   ; M= secondary FAT pointer
+
+              gosub   NXBYTP
+              b=a
+              a=c     x
+              ldi     Text1
+              ?a#c    x             ; argument there?
+              golc    ERRNE         ; no, better flag it as an error
+              abex
+              gosub   INCAD
+              gosub   PUTPC         ; store new pc (skip over Text1 instruction)
+              c=regn  14
+              st=c
+              ?s4=1                 ; single step?
+              gonc    30$           ; no
+              c=regn  15            ; yes, bump line number
+              c=c+1   x
+              regn=c  15
+30$:          gosub   GTBYT         ; get argument
+              c=0     xs
+              c=c+c   x
+              a=c     x             ; A.X= index in FAT
+              c=m
+              gosub   RTNP30        ; switch bank
+              c=m
+              gosub   unpack1       ; location of the FAT
+              gosub   lookupFAT
+              nop                   ; needed as it returns to (P+2)
+              golong  gotoFunction

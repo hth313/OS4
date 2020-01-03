@@ -589,7 +589,7 @@ versionCheck: a=c     x
               .extern XASRCH, XSAROM, secondaryAddress
               .extern clearAssignment, assignSecondary, secondaryAssignment
               .extern resetBank, invokeSecondary, XABTSEQ
-              .extern clearSecondaryAssignments
+              .extern clearSecondaryAssignments, runSecondary
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -640,6 +640,7 @@ versionCheck: a=c     x
               golong  invokeSecondary ; 0x4f5a
               golong  XABTSEQ       ; 0x4f5c
               golong  clearSecondaryAssignments ; 0x4f5e
+              golong  runSecondary  ; 0x4f60
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

@@ -6,6 +6,8 @@
 PARS60:       .equlab 0xcb4
 PRT5:         .equlab 0x6fe5
 
+Text1:        .equ    0xf1
+
 ;;; **********************************************************************
 ;;;
 ;;; keyKeyboard - act on a key using the given keyboard definition
@@ -36,6 +38,7 @@ PRT5:         .equlab 0x6fe5
               .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell, unpack0, testAssignBit
               .extern secondaryAssignment, secondaryAddress
+              .extern resetBank, secondaryProgram
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -267,9 +270,11 @@ secondaryASN: c=n                   ; convert keycode to 1-80 form
               n=c                   ; N[1:0]= keycode to 1-80 form
               gosub   secondaryAssignment
               goto    noXXROM       ; (P+1) not plugged in
-foundXXROM:   acex    m             ; C[6:3]= XADR
+foundXXROM:   acex                  ; C[6:3]= XADR
+                                    ; C.X= secondary function identity
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR
+                                    ; M.X= secondary function identity
               cxisa                 ; C.X= first word
               pt=     13
               lc      2             ; XROM bit to be part of ptemp2
@@ -355,13 +360,50 @@ nullTest:     ldi     200
                                     ; CATALOGFLAG, & PAUSING
                                     ; leaves SS0 up
               ?s9=1
-              golnc   ERRNE         ; we did not find it
+99$:          golnc   ERRNE         ; we did not find it
 
-              c=0
+              pt=     0
+              c=g
+              cstex                 ; get ptemp2
+              ?s4=1                 ; insert?
+              gonc    76$           ; no
+              ?s12=1                ; private?
+              golc    ABTS10        ; yes
+              c=m                   ; C[6]= page address
+              gosub   resetBank     ; reset to bank 1, we are not going to execute it
+              c=m
+              a=c     x
+              gosub   secondaryProgram
+              goto    99$           ; (P+1) not found
+              acex
+              rcr     -3
+              c=b     x
+              n=c                   ; N[6:3]= prefix XROM function code
+                                    ; N[1:0]= secondary byte index for it
+              gosub   INSSUB        ; prepare for insert
+              a=0     s             ; number of inserts so far
+              c=n
+              rcr     5
+              gosub   INBYTC
+              c=n
+              rcr     3
+              gosub   INBYTC
+              gosub   INSSUB
+              a=0     s
+              ldi     Text1
+              gosub   INBYTC
+              c=n
+              gosub   INBYTC        ; adjust secondary function identity
+              golong  NFRC
+
+76$:          c=m                   ; get XADR
+              a=c     m
+              .public gotoFunction
+gotoFunction: c=0
               pt=     4
               lc      15            ; put NFRPU (0x00f0)
               stk=c                 ;  on the subroutine stack
-              c=m                   ; get XADR
+              acex    m
               gotoc
 
 ;;; Builtin function. We always end digit entry here. There are some builtins

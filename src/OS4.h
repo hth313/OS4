@@ -79,10 +79,12 @@ assignSecondary: .equlab 0x4f54
 secondaryAssignment: .equlab 0x4f56
 resetBank:    .equlab 0x4f58
 invokeSecondary: .equlab 0x4f5a
-XABTSEQ       .equlab 0x4f5c
-clearSecondaryAssignments .equlab 0x4f5e
+XABTSEQ:      .equlab 0x4f5c
+clearSecondaryAssignments: .equlab 0x4f5e
+runSecondary: .equlab 0x4f60
 // Temporary until addresses are finally fixed
-              .extern RTNP2
+//              .extern RTNP2
+RTNP2:        .equlab 0x4d18
 #endif
 
 ;;; **********************************************************************

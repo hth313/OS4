@@ -484,9 +484,9 @@ secondaryAddress10:
               gosub   unpack        ; read next pointer
               goto    10$
 
-20$:          a=c     m             ; A[6:3]= FAT header pointer
-              ?a#0    s             ; coming from secondaryProgram?
+20$:          ?a#0    s             ; coming from secondaryProgram?
               goc     toRTNP2       ; yes
+lookupFAT0:   a=c     m             ; A[6:3]= FAT header pointer
               c=c+1   m
               c=c+1   m
               gosub   RTNP30        ; switch bank
@@ -625,3 +625,66 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               gosub   lookupFAT
               nop                   ; needed as it returns to (P+2)
               golong  gotoFunction
+
+
+;;; **********************************************************************
+;;;
+;;; inProgramSecondary - find secondary as stored in program memory
+;;;
+;;; In: M[6:3]= points one word ahead of the program memory suffix
+;;;     B.X= prefix XROM number (jj of XROM ii,jj)
+;;; Out: Returns to (P+1) if secondary not found, with:
+;;;        M[5:3] and M.X= function number after XROM
+;;;      Returns to (P+2) if there are secondary found, with:
+;;;        A[6:3]= address of secondary function
+;;;        A.X= secondary function identity
+;;;        M.X= actual function number
+;;;        M[5:3]= function number after XROM
+;;;        active bank set for secondary
+;;; Uses: A, B, C, M, PT, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public inProgramSecondary
+inProgramSecondary:
+              c=b
+              rcr     -3
+              c=b     x
+              cmex                  ; M[5:3]= function number after XROM
+                                    ; M.X= also function number after XROM
+              c=c+1   m
+              cxisa                 ; C.X= read jj suffix
+              a=c     x             ; A.X= prefix XROM number (jj of XROM ii,jj)
+              gosub   secondary
+              rtn
+              b=a     m             ; B[6:3]= pointer to secondary FAT header
+
+10$:          c=b     m             ; C[6:3]= pointer to secondary FAT header
+              c=c+1   m
+              c=c+1   m
+              cxisa
+              ?a#c    x             ; this secondary
+              gonc    20$           ; yes
+              acex                  ; no, swap A and M
+              cmex
+              acex
+              c=b     m
+              gosub   unpack1       ; number of entries we skipped
+              c=a+c   x             ; update function index
+              cmex
+              a=c
+              c=b     m
+              gosub   unpack0       ; point to next
+              ?c#0    x             ; is there a next table?
+              rtnnc                 ; no
+              bcex    m
+              goto    10$
+20$:          abex    m             ; A[6:3]= FAT header pointer
+              c=m
+              bcex    x             ; B.X= actual function number
+              rcr     3
+              acex                  ; A.X= function number in this table
+                                    ; C[6:3]= secondary FAT header
+              c=c+1   m
+              golong  lookupFAT0

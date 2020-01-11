@@ -31,6 +31,7 @@ Text1:        .equ    0xf1
               .section code, reorder
               .public doPRGM
               .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP2
+              .extern inProgramSecondary, resetBank
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
               gosub   sysbuf
@@ -116,7 +117,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               m=c                   ; M[3:0]= address
               acex                  ; C[1:0]= byte
               abex                  ; A[0]= low nibble of XROM opcode
-              asl     x             ; A[2] = low nibble of XROM opcode
+              asl     x             ; A[2]= low nibble of XROM opcode
               asl     x
               acex    xs            ; C[2:0]= lower 1 & half bytes of XROM function code
               gosub   GTRMAD
@@ -189,14 +190,70 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 200$:         a=c     x             ; A.X= first ROM word
               ldi     FirstGosub(xargumentEntry)
               ?a#c    x
-              goc     900000$       ; not xargument
+              goc     300$          ; not xargument
               ldi     SecondGosub(xargumentEntry)
               a=c     x
               c=c+1   m
               cxisa
               ?a#c    x
               gsubnc  jumpP2        ; do display handler
-              goto    900000$
+9000000$:     goto    900000$
+
+;;; Check for secondary function.
+300$:         ldi     FirstGosub(runSecondaryEntry)
+              ?a#c    x
+              goc     900000$       ; not runSecondary
+              ldi     SecondGosub(runSecondaryEntry)
+              a=c     x
+              c=c+1   m
+              cxisa
+              ?a#c    x
+              goc     900000$       ; not runSecondary
+              bcex    m             ; B.M= ROM page pointer, LINNUM may smash a lot
+              s8=     0             ; say no prompt, scrolling
+              s1=     0             ; say lcd notl full yet
+              s0=     0             ; assume 2nd operand
+              gosub   ENCP00
+              gosub   LINNUM
+              a=c     x
+              b=a     x             ; B.X= saved line number
+              gosub   CLLCDE
+              a=0     s
+              gosub   GENNUM        ; output line #
+              ldi     0x20
+              slsabc                ; output a blank
+              c=b     m             ; C[6:3]= ROM page pointer
+              m=c                   ; save in M
+              gosub   ENCP00
+              gosub   NXBYTP
+              gosub   INCAD
+              gosub   NXBYT         ; get next byte
+              b=a
+              a=c     x
+              ldi     Text1
+              ?a#c    x             ; is it a text 1?
+              goc     900000$       ; no
+              abex
+              gosub   INCAD
+              gosub   GTBYT         ; get argument
+              b=c     x             ; B[1:0]= argument
+              b=0     xs            ; B.X= argument
+              gosub   ENLCD
+              gosub   inProgramSecondary
+90000000$:    goto    9000000$     ; (P+1) not available
+                                    ;   We know the ROM is there as we looked
+                                    ;   it, so the problem is really that its
+                                    ;   FAT structure has been altered in a way
+                                    ;   that makes it impossible to find it.
+                                    ;   Just use the default display, we cannot
+                                    ;   make anything meaningful out of it
+                                    ;   anyway.
+              acex    m
+              gosub   PROMF2
+              gosub   DF150
+              c=b     m
+              gosub   resetBank     ; restore to primary bank
+              goto    90000000$
 
 ;;; **********************************************************************
 ;;;

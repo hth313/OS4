@@ -25,9 +25,11 @@
 ;;;
 ;;; **********************************************************************
 
-#define argumentEntry   0x4f1e
-#define xargumentEntry  0x4f20
-#define partialKeyEntry 0x4f48
+#define argumentEntry      0x4f1e
+#define xargumentEntry     0x4f20
+#define partialKeyEntry    0x4f48
+#define runSecondaryEntry  0x4f60
+
 ;;; * Find ROM words for a call to a fixed address.
 #define FirstGosub(x)   ((((x) << 2) & (255 << 2)) | 1)
 #define SecondGosub(x)  (((x) >> 6) & (255 << 2))
@@ -81,7 +83,7 @@ resetBank:    .equlab 0x4f58
 invokeSecondary: .equlab 0x4f5a
 XABTSEQ:      .equlab 0x4f5c
 clearSecondaryAssignments: .equlab 0x4f5e
-runSecondary: .equlab 0x4f60
+runSecondary: .equlab runSecondaryEntry
 // Temporary until addresses are finally fixed
 //              .extern RTNP2
 RTNP2:        .equlab 0x4d18

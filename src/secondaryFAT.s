@@ -485,7 +485,10 @@ secondaryAddress10:
               goto    10$
 
 20$:          ?a#0    s             ; coming from secondaryProgram?
-              goc     toRTNP2       ; yes
+              gonc    lookupFAT0    ; no
+              c=c-1   m             ; yes
+              acex    m             ; A[6:3]= the secondary FAT header
+              goto    toRTNP2
 lookupFAT0:   a=c     m             ; A[6:3]= FAT header pointer
               c=c+1   m
               c=c+1   m

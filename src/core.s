@@ -583,7 +583,7 @@ versionCheck: a=c     x
               .extern clearAssignment, assignSecondary, secondaryAssignment
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
-              .extern setTimeout, clearTimeout
+              .extern setTimeout, clearTimeout, activeApp
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -637,6 +637,7 @@ versionCheck: a=c     x
               golong  runSecondary  ; 0x4f60
               golong  setTimeout    ; 0x4f62
               golong  clearTimeout  ; 0x4f64
+              golong  activeApp     ; 0x4f66
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

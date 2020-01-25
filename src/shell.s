@@ -496,6 +496,43 @@ hasActiveTransientApp:
 
 ;;; **********************************************************************
 ;;;
+;;; activeApp - return pointer to active application
+;;;
+;;; In: Nothing
+;;; Out: Returns to (P+1) if no active application
+;;;      Returns to (P+2) if there is an active application with
+;;;        A[6:3]= unpacked pointer to application
+;;;        PT= 6
+;;; Uses: A, B.X, C, active PT, DADD, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public activeApp
+activeApp:    gosub   shellSetup
+              rtn                   ; (P+1) no system buffer
+              rtn                   ; (P+2) no shells
+10$:          a=a+1   x
+              acex    x
+              dadd=c
+              acex    x
+              c=data
+              ?c#0    pt            ; lower active?
+              gonc    20$           ; no
+              rcr     7
+              ?c#0    pt            ; upper active?
+              gonc    20$           ; no
+              c=c+c   xs            ; application?
+              c=c+c   xs
+              rtnnc                 ; no apps
+              a=c     m
+              golong  RTNP2
+20$:          a=a-1   m
+              gonc    10$
+              rtn
+
+;;; **********************************************************************
+;;;
 ;;; releaseShells - release all Shells
 ;;;
 ;;; This is done a wake up with the idea that modules that still want their
@@ -718,7 +755,7 @@ disableThisShell:
 ;;;          ST= system buffer flags, Header[1:0]
 ;;;          PT= 6
 ;;;          DADD= buffer header
-;;; Uses: A, B.X, C, +1 sub level
+;;; Uses: A, B.X, C, PT, +1 sub level
 ;;;
 ;;; **********************************************************************
 

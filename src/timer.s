@@ -99,7 +99,7 @@ clearTimeout: gosub   ENTMR
 ;;; **********************************************************************
 
               .public checkTimeout
-              .extern noTimeout, topShell, jumpPacked
+              .extern noTimeout, topShell, jumpC5
 checkTimeout: gosub   sysbuf
               goto    50$           ; (P+1) no system buffer
               c=data                ; read buffer header
@@ -127,13 +127,9 @@ checkTimeout: gosub   sysbuf
               goto    50$
               ?s9=1                 ; did we find an applicaton?
               gonc    50$           ; no
-              c=0     m
-              pt=     3
-              lc      8             ; offset to timeout vector
-              c=a+c   m
-              cxisa
-              ?c#0    x             ; does it define a timeout?
-              gsubc   jumpPacked    ; yes, call it
+              acex    m
+              c=c+1   m
+              gosub   jumpC5        ; call timeout vector (if it exists)
 
 50$:          gosub   LDSST0
               golong  noTimeout

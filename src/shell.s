@@ -27,10 +27,7 @@
 ;;;          .con    .low12 userKeys
 ;;;          .con    .low12 alphaKeys
 ;;;          .con    .low12 appendName
-;;;                                      (only for applications)
-;;;          .con    .low12 activation
-;;;          .con    .low12 deactivation
-;;;          .con    .low12 timeout
+;;;          .con    .low12 timeout      (only for applications)
 ;;;
 ;;; kind
 ;;;   SysShell - system shell, means that it is a system extension.
@@ -158,7 +155,7 @@ activateShell:
 12$:          ?a#c    wpt           ; is this the one we are looking for?
               goc     14$           ; no
 13$:          ?s3=1                 ; are we looking at the top entry?
-              gonc    90$           ; yes, we are done
+              golnc   RTNP2         ; yes, we are done
               c=0     pt            ; mark as unused
               goto    22$
 14$:          abex    pt            ; A[6]= 1
@@ -203,7 +200,10 @@ activateShell:
                                     ; (P+2)
 80$:          ?s4=1                 ; did we drop a transient application?
               gsubc   clearScratch  ; yes, also clear its scratch area
-90$:          golong  RTNP2
+              c=stk
+              c=c+1   m
+              stk=c
+              golong  shellChanged
 
 ;;; push app handle on top of stack
 30$:          c=m
@@ -405,6 +405,9 @@ exitReclaim10:
 12$:          data=c                ; write back
 90$:          ?s1=1                 ; if we are deactivaing a transient app
               gsubc   clearScratch  ;  also drop scratch area
+              ?s8=1                 ; reclaim mode?
+              rtnc                  ; yes, done
+              golong  shellChanged  ; no, send a notification too
               rtn                   ; done
 14$:          ?c#0    pt            ; reclaim it, was it active before?
               rtnnc                 ; no
@@ -453,7 +456,8 @@ exitTransientApp:
               c=data                ; refetch
               c=0     pt            ; deactivate
               data=c
-              golong  clearScratch
+              gosub   clearScratch
+              golong  shellChanged
 
 
 ;;; **********************************************************************
@@ -875,10 +879,10 @@ setDisplayFlags:
               regn=c  14
               rtn
 
-
 ;;; **********************************************************************
 ;;;
 ;;; extensionHandler - invoke an extension
+;;; shellChanged - the shell stack was changed
 ;;;
 ;;; In:  C[1:0] - generic extension code
 ;;; Out:   Depends on extension behavior and if there is an active one.
@@ -918,17 +922,23 @@ setDisplayFlags:
 
               .section code, reorder
               .public extensionHandler
+shellChanged: ldi     ExtensionShellChanged
 extensionHandler:
               pt=     0
               g=c                   ; G= extension code
               gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)
               rtn                   ; (P+2) no shells (with buffer)
+10$:          c=0     pt            ; we may come here during power on with an
+                                    ;  extension point that is not yet reclaimed
+              c=c+1   pt            ; Shell page= 1
+              ?a#c    pt            ; extension point dormant in reclaimable mode?
+              gonc    50$           ; yes, do not use this one
               pt=     0
-              c=g                   ; (P+3) go ahead and look
-              c=0     xs
+              c=g                   ; C[1:0]= extension code
+              c=0     xs            ; C.X= extension code
               bcex    x             ; B.X= extension code to look for
-10$:          acex    m             ; C[6:3]= pointer to shell descriptor
+              acex    m             ; C[6:3]= pointer to shell descriptor
               c=c+1   m             ; step past 'GenericExtension' kind word
 12$:          cxisa                 ; read control word
               ?c#0    x             ; end of list?

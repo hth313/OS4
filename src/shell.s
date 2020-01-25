@@ -518,11 +518,11 @@ activeApp:    gosub   shellSetup
               acex    x
               c=data
               ?c#0    pt            ; lower active?
-              gonc    20$           ; no
+              goc     15$           ; yes
               rcr     7
               ?c#0    pt            ; upper active?
               gonc    20$           ; no
-              c=c+c   xs            ; application?
+15$:          c=c+c   xs            ; application?
               c=c+c   xs
               rtnnc                 ; no apps
               a=c     m

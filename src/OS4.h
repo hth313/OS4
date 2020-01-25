@@ -86,6 +86,7 @@ clearSecondaryAssignments: .equlab 0x4f5e
 runSecondary: .equlab runSecondaryEntry
 setTimeout:   .equlab 0x4f62
 clearTimeout: .equlab 0x4f64
+activeApp:    .equlab 0x4f66
 // Temporary until addresses are finally fixed
 //              .extern RTNP2
 RTNP2:        .equlab 0x4d18

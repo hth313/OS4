@@ -298,7 +298,7 @@ insertShell10:
 ;;; scratchOffset - get offset to scratch area
 ;;;
 ;;; In: A.X= buffer header address (selected)
-;;; Out: C.X= offset to buffer area
+;;; Out: C.X= offset to scratch area
 ;;;      A.X= buffer header address
 ;;; Uses: C, A.S, A.X, B.X
 ;;;
@@ -308,24 +308,20 @@ insertShell10:
 scratchOffset:
               b=a     x             ; B.X= buffer header address
               c=data                ; read buffer header
-              rcr     7
-              a=c     s             ; A.S= size of KARs
-              rcr     1
-              c=0     x
-              ?a#0    s             ; do we actually have any KARs?
+              rcr     5
+              c=0     xs
+              csr     x             ; C.X= key assignment size
+              a=c     x             ; A.X= key assignment size
+              rcr     2             ; C[1:0]= hosted buffer size
+              ?a#c    x             ; do we have any key assignments?
               gonc    5$            ; no
-              c=c+1   x             ; yes, we need two registers for bitmaps
+              c=c+1   x             ; yes, add two for bitmap registers
               c=c+1   x
-5$:           c=a+c   s             ; C.S= size of KARs + size of buffers
-              gonc    10$
-              c=c+1   x             ; C.X= carry
-10$:          rcr     -1
-              a=c     x             ; A.X= size of KARs + size of buffers
-              c=data
-              rcr     4
-              c=0     x
-              c=c+1   x
-              c=a+c   x
+5$:           a=a+c   x             ; A[1:0]= key assignment + buffer sizes
+              rcr     11            ; C[1:0]= shell registers
+              c=c+1   x             ; add one for buffer header
+              c=a+c   x             ; C[1:0]= offset to scratch area
+              c=0     xs            ; C.X= offset to scratch area
               abex    x             ; A.X= buffer header address
               rtn
 

@@ -1,1 +1,1 @@
-              .extern FLSHAP, FLNOFN, FLTPER, ADVADR
+              .extern FLSHAP, FLNOFN, FLTPER, ADVADR, ENTMR

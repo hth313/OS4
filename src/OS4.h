@@ -84,6 +84,8 @@ invokeSecondary: .equlab 0x4f5a
 XABTSEQ:      .equlab 0x4f5c
 clearSecondaryAssignments: .equlab 0x4f5e
 runSecondary: .equlab runSecondaryEntry
+setTimeout:   .equlab 0x4f62
+clearTimeout: .equlab 0x4f64
 // Temporary until addresses are finally fixed
 //              .extern RTNP2
 RTNP2:        .equlab 0x4d18
@@ -146,6 +148,7 @@ Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
 Flag_Pause:          .equ  4           ; Our own pause flag.
 Flag_SEC_PROXY:      .equ  5           ; Set when doing partial key for secondary
                                        ; functions.
+Flag_IntervalTimer:  .equ  7           ; Set when we are using the interval timer
 
 ;;; **********************************************************************
 ;;;

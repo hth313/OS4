@@ -82,28 +82,21 @@ lightWake:    ldi     0x2fd         ; PACH11
               gosub   doDisplay     ; we may want to override the display
 
 ;;; This is a replacement for MEMCHK. It is called whenever we are going
-;;; to light sleep. As we are not running a program and the HP-41 may
-;;; time out and go to sleep, we put back the warm start constant.
-;;; We do use MEMCHK when doing a wake up from deep sleep, as this is
-;;; the most likely time some power disruption may have happen.
-;;; This means that in reality we get a similar cover for memory corruption
-;;; as before.
+;;; to light sleep.
               .public LocalMEMCHK
-LocalMEMCHK:  c=0     x
-              pfad=c                ; turn off peripheral chips
-              dadd=c                ; turn on chip 0
-              c=regn  13
-              rcr     6
-              ldi     169           ; put back warm start constant
-              gosub   0x0212        ; join forces with MEMCHK
+LocalMEMCHK:  gosub   MEMCHK
 
 ;;; Keep processing I/O and key down before going to light sleep
-3$:           chk kb                ; check key down while doing I/O
+              .public noTimeout
+              .extern checkTimeout
+ioLoop:       chk     kb            ; check key down while doing I/O
               goc     bufferScan0
-              ldi     8             ; I/O service
+              ?f13=1                ; peripheral wants service?
+              golc    checkTimeout  ; yes
+noTimeout:    ldi     8             ; I/O service
               gosub   ROMCHK        ; needs chip 0,SS0,hex,P selected
               ?s2=1                 ; I/O flag?
-              goc     3$            ; yes, keep going
+              goc     ioLoop        ; yes, keep going
 
               golong  0x18c         ; go to light sleep
 
@@ -590,6 +583,7 @@ versionCheck: a=c     x
               .extern clearAssignment, assignSecondary, secondaryAssignment
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
+              .extern setTimeout, clearTimeout
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -641,6 +635,8 @@ versionCheck: a=c     x
               golong  XABTSEQ       ; 0x4f5c
               golong  clearSecondaryAssignments ; 0x4f5e
               golong  runSecondary  ; 0x4f60
+              golong  setTimeout    ; 0x4f62
+              golong  clearTimeout  ; 0x4f64
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

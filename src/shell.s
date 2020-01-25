@@ -27,6 +27,10 @@
 ;;;          .con    .low12 userKeys
 ;;;          .con    .low12 alphaKeys
 ;;;          .con    .low12 appendName
+;;;                                      (only for applications)
+;;;          .con    .low12 activation
+;;;          .con    .low12 deactivation
+;;;          .con    .low12 timeout
 ;;;
 ;;; kind
 ;;;   SysShell - system shell, means that it is a system extension.

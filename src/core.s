@@ -128,6 +128,7 @@ deepWake:     gosub   releaseShells
                                     ;  (releaseShells above has already marked
                                     ;   it properly)
               st=0    Flag_DisplayOverride
+              st=0    Flag_IntervalTimer
               cstex
               data=c
 10$:          golong  DSWKUP+2

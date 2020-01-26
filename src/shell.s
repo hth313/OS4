@@ -966,12 +966,11 @@ extensionHandler:
               gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)
               rtn                   ; (P+2) no shells (with buffer)
-10$:          c=0     pt            ; we may come here during power on with an
-                                    ;  extension point that is not yet reclaimed
-              c=c+1   pt            ; Shell page= 1
-              ?a#c    pt            ; extension point dormant in reclaimable mode?
-              gonc    50$           ; yes, do not use this one
-              pt=     0
+              ?st=1   Flag_OrphanShells
+              rtnc                  ; in reclaim mode (power on), we do not
+                                    ;  send notifications as the listeners may
+                                    ;  not be ready
+10$:          pt=     0
               c=g                   ; C[1:0]= extension code
               c=0     xs            ; C.X= extension code
               bcex    x             ; B.X= extension code to look for
@@ -1137,4 +1136,6 @@ disableOrphanShells:
 62$:          c=n
 65$:          c=c-1   m             ; decrement shell counter
               gonc    60$           ; loop again
+              gosub   shellChanged  ; send notification as all shells are not
+                                    ;  in order
               goto    50$           ; done

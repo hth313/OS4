@@ -62,7 +62,7 @@ clearSystemDigitEntry: .equlab 0x4f2e
 reclaimSystemBuffer .equlab 0x4f30
 displayDone:  .equlab 0x4f32
 extensionHandler .equlab 0x4f34
-keyDispatch:  .equlab 0x4f36
+activeApp:    .equlab 0x4f36
 shrinkBuffer: .equlab 0x4f38
 allocScratch: .equlab 0x4f3a
 clearScratch: .equlab 0x4f3c
@@ -86,7 +86,7 @@ clearSecondaryAssignments: .equlab 0x4f5e
 runSecondary: .equlab runSecondaryEntry
 setTimeout:   .equlab 0x4f62
 clearTimeout: .equlab 0x4f64
-activeApp:    .equlab 0x4f66
+keyDispatch:  .equlab 0x4f66
 // Temporary until addresses are finally fixed
 //              .extern RTNP2
 RTNP2:        .equlab 0x4d18

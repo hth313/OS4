@@ -284,6 +284,22 @@ foundXXROM:   acex                  ; C[6:3]= XADR
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR
                                     ; M.X= secondary function identity
+              c=regn  10            ; set XROM 0,1 as function code
+                                    ;  (This is an impossible XROM as 0 is
+                                    ;   not valid. We are not going to execute
+                                    ;   it, rather use it as a marker for
+                                    ;   partialKeyTakeOver to redirect it).
+                                    ;  (It is also used by semi-merged operand
+                                    ;   handling to see that we are actually
+                                    ;   executing a secondary function and the
+                                    ;   function number will be in M.X)
+              pt=     4
+              lc      10            ; A001
+              lc      0
+              lc      0
+              lc      1
+              regn=c  10
+              c=m
               cxisa                 ; C.X= first word
               pt=     13
               lc      2             ; XROM bit to be part of ptemp2
@@ -313,18 +329,7 @@ foundXXROM:   acex                  ; C[6:3]= XADR
               rcr     3
               a=c
               a=a+1                 ; A[3:0]= XADR
-              gosub   ENCP00        ; has operands
-              c=regn  10            ; set XROM 0,1 as function code
-                                    ;  (This is an impossible XROM as 0 is
-                                    ;   not valid. We are not going to execute
-                                    ;   it, rather use it as a marker for
-                                    ;   partialKeyTakeOver to redirect it).
-              rcr     1
-              pt=     3
-              lc      10            ; A001
-              ldi     1
-              rcr     -1
-              regn=c  10
+              gosub   ENCP00
               pt=     3
               c=regn  8             ; REG8[13:10] = XADR of secondary
               rcr     -4

@@ -128,6 +128,7 @@ deepWake:     gosub   releaseShells
                                     ;  (releaseShells above has already marked
                                     ;   it properly)
               st=0    Flag_DisplayOverride
+              st=0    Flag_SEC_Argument
               st=0    Flag_IntervalTimer
               cstex
               data=c
@@ -215,6 +216,7 @@ resetFlags:   c=b     x
               st=0    Flag_Argument
               st=0    Flag_Pause
               st=0    Flag_SEC_PROXY
+              st=0    Flag_SEC_Argument
               cstex
               data=c
               rtn

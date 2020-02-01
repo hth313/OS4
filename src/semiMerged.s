@@ -31,7 +31,7 @@ Text1:        .equ    0xf1
               .section code, reorder
               .public doPRGM
               .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP2
-              .extern inProgramSecondary, resetBank
+              .extern inProgramSecondary, resetBank, secondaryProgram
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
               gosub   sysbuf
@@ -41,6 +41,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               st=0    Flag_Pause    ; always reset pause flag when entering
                                     ;  program mode
               st=0    Flag_Argument ; reset argument flag
+              st=0    Flag_SEC_Argument
               cstex                 ; keep old argument flag in ST
               data=c                ; write back
 
@@ -62,10 +63,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 900$:         golong  LocalMEMCHK
 
 4$:           ?s10=1                ; ROM?
-              goc     10$           ; yes, no need to change it
+              goc     100$          ; yes, no need to change it
 
               ?st=1   Flag_Argument ; check if inserting prompt
-              gonc    10$           ; no
+100$          golnc   10$           ; no
 
 ;;; Now change byte from $99 to $f1!!
               gosub   NXBYTP
@@ -80,11 +81,12 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 
               gosub   INCADA        ; step forward to postfix byte
               gosub   GTBYTA
+              n=c                   ; N[1:0]= postfix byte
               acex
               cmex
               pt=     1
               ?a#c    wpt           ; same as default?
-              goc     5$            ; no
+              goc     6$            ; no
               cmex                  ; yes, restore address to postfix byte
               a=c
               c=0     x             ; null
@@ -94,7 +96,43 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   PTBYTA        ; clear it too
               gosub   PUTPC         ; go to previous line
               gosub   BSTEP
-5$:           gosub   DFRST8        ; bring text1 line up
+              goto    5$
+
+6$:           ?st=1   Flag_SEC_Argument ; are we dealing with a secondary?
+              gonc    5$            ; no
+              gosub   GETPC
+              gosub   NXBYTA        ; read Text1 (postfix operand)
+              b=a
+              a=c     x
+              ldi     Text1
+              pt=     1
+              ?a#c    wpt
+              goc     5$            ; hmm, not Text1
+              c=0     x             ; clear it
+              abex
+              gosub   PTBYTA
+              gosub   INCADA
+              c=0     x
+              gosub   PTBYTA
+              gosub   PUTPC
+              gosub   BSTEP         ; step back to Text1 for secondary
+              gosub   GETPC
+              gosub   NXBYTA        ; read Text1 (secondary suffix)
+              abex
+              a=c     x
+              ldi     Text1
+              pt=     1
+              ?a#c    wpt
+              goc     5$            ; hmm, not Text1
+              c=c+1   x             ; now it is Text2 !
+              abex
+              gosub   PTBYTA
+              gosub   INCADA
+              gosub   INCADA
+              c=n
+              gosub   PTBYTA        ; write postfix byte
+
+5$:           gosub   DFRST8        ; bring instruction line up
 
 ;;; ***********************************************
 ;;; See if current line is an MCODE prompt function
@@ -105,10 +143,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               a=c     x             ; A.X= opcode
               ldi     0xa0          ; test if is an XROM
               ?a<c    x
-              goc     900$          ; not XROM
+              goc     9000$         ; not XROM
               ldi     0xa8
               ?a<c    x
-9000$:        gonc    900$          ; not XROM
+9000$:        golnc   900$          ; not XROM
               abex
               gosub   INCAD
               gosub   GTBYT         ; read next byte
@@ -126,26 +164,9 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               goc     9000$         ; user code
               acex
               rcr     11
-              cxisa
-              ?c#0    x             ; check if 2 nops
-              goc     200$          ; no, it can still be a special form XROM
-              c=c+1   m
-              cxisa
-              ?c#0    x
-              goc     200$          ; no XROM XKD
-              c=c+1   m             ; inspect next word which should be
-                                    ;  gosub Argument for a semi-merged
-              ldi     FirstGosub(argumentEntry)
-              a=c     x
-              cxisa
-              ?a#c    x
-              goc     200$          ; not normal semi-merged
-              c=c+1   m
-              ldi     SecondGosub(argumentEntry)
-              a=c     x
-              cxisa
-              ?a#c    x
-              goc     9000$         ; not any semi-merged
+              s2=0                  ; not a secondary
+              gosub   isArgument
+              goto    200$
 
 ;;; **********************************************************************
 ;;;
@@ -154,16 +175,26 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 ;;;
 ;;; **********************************************************************
 
-              c=c+1   m             ; step to default argument
+400$:         c=c+1   m             ; step to default argument
               cxisa                 ; get default argument
               n=c                   ; save it in case we need it
-              gosub   DFRST8        ; display normal line
+              ?s2=1                 ; secondary?
+              gsubnc  DFRST8        ; no, display normal line
               gosub   ENLCD
               gosub   RightJustify
               acex                  ; add a blank
               slsabc
               gosub   ENCP00
-              gosub   NXBYTP
+              ?s2=1                 ; secondary?
+              gonc    410$          ; no
+              ?s0=1                 ; do we have a text 2?
+              gonc    420$          ; no, default argument
+              c=m                   ; C[3:0]= get address of text2 line (plus 1)
+              a=c
+              gosub   INCAD         ; step to postfix argument
+              goto    430$
+
+410$:         gosub   NXBYTP
               gosub   INCAD
               gosub   NXBYT         ; get next byte
               b=a
@@ -171,18 +202,19 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               ldi     Text1
               ?a#c    x             ; is it a text 1?
               gonc    35$           ; yes
-              c=n                   ; no, use default argument instead
+420$:         c=n                   ; no, use default argument instead
               goto    36$
 35$:          abex
               gosub   INCAD
-              gosub   GTBYT         ; get argument
+430$:         gosub   GTBYT         ; get argument
 36$:          s0=0                  ; ensure 2-digit operand
               gosub   ROW930        ; display argument
+              golong  320$          ; @@
+
 900000$:      goto    90000$
 
 ;;; **********************************************************************
 ;;;
-;;; XKD XROM, but not an ordinary postfix semi-merged.
 ;;; Probe the XROM to see if it is some other special form.
 ;;;
 ;;; **********************************************************************
@@ -231,16 +263,23 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               b=a
               a=c     x
               ldi     Text1
+              s0=0                  ; say no argument
               ?a#c    x             ; is it a text 1?
+              gonc    310$          ; yes
+              c=c+1                 ; make a text 2
+              s0=1                  ; say argument in text 2
+              ?a#c    x             ; is it a text 2?
               goc     900000$       ; no
-              abex
+310$:         abex
               gosub   INCAD
               gosub   GTBYT         ; get argument
               b=c     x             ; B[1:0]= argument
               b=0     xs            ; B.X= argument
+              acex
+              n=c                   ; N=address
               gosub   ENLCD
               gosub   inProgramSecondary
-90000000$:    goto    9000000$     ; (P+1) not available
+90000000$:    goto    90000000$     ; (P+1) not available
                                     ;   We know the ROM is there as we looked
                                     ;   it, so the problem is really that its
                                     ;   FAT structure has been altered in a way
@@ -248,12 +287,23 @@ doPRGM:       ?s12=1                ; PRIVATE ?
                                     ;   Just use the default display, we cannot
                                     ;   make anything meaningful out of it
                                     ;   anyway.
-              acex    m
+              b=a     m
+              c=b     m
               gosub   PROMF2
-              gosub   DF150
+              c=b     m
+              gosub   isArgument    ; postfix argument?
+              goto    320$          ; no
+              s2=1                  ; this is a secondary
+              cnex                  ; M[3:0]=address (preserve C)
+              m=c
+              c=n
+              golong  400$
+
+
+320$:         gosub   DF150         ; normal secondary, finalize line
               c=b     m
               gosub   resetBank     ; restore to primary bank
-              goto    90000000$
+              golong  9000000$
 
 ;;; **********************************************************************
 ;;;
@@ -424,6 +474,8 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               ?st=1   Flag_Argument ; (inspecting previous value of flag)
               goc     50$           ; with Flag_Argument set indicating found
               a=c
+              c=n
+              rcr     3             ; C[13:11]= buffer address
               c=stk
               cxisa                 ; C[1:0] = default argument
               n=c                   ; N[2:0]= modifier bits and default argument
@@ -438,7 +490,55 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
 
               gosub   LDSST0        ; argument not obtained yet
               ?s3=1                 ; program mode?
-              gonc    30$           ; no
+              golnc   30$           ; no
+              a=0     x
+              a=a+1   x             ; 001, lower 3 nibbles of A001
+              c=regn  10
+              rcr     1
+              ?a#c    x             ; is this a secondary?
+              goc     16$           ; no
+
+              c=n                   ; yes, set the Flag_SEC_Argument flag
+              rcr     -3
+              dadd=c
+              c=data                ; read buffer header
+              cstex
+              st=1    Flag_SEC_Argument
+              cstex
+              data=c
+              c=0     x
+              dadd=c
+
+              c=m                   ; C.X= secondary function number
+              n=c                   ; N[6:3]= secondary XADR
+              a=c     x
+              gosub   secondaryProgram
+              nop                   ; (P+1) will not happen
+                                    ;       (because we are called from the function
+                                    ;        so it must exist!)
+              acex
+              rcr     -3
+              c=b     x
+              rcr     -4
+              bcex
+              gosub   INSSUB        ; prepare for insert
+              a=0     s             ; clear count of successful inserts
+              c=b
+              rcr     9
+              gosub   INBYTC
+              c=b
+              rcr     7
+              gosub   INBYTC
+              gosub   INSSUB
+              a=0     s
+              ldi     Text1
+              gosub   INBYTC
+              c=b
+              rcr     4
+              goto    18$
+
+16$:          c=0                   ; N[6:3]= 0 (no secondary XADR)
+              n=c
               gosub   INSSUB        ; prepare for insert
               a=0     s             ; clear count of successful inserts
               c=regn  10            ; insert instruction in program memory
@@ -446,7 +546,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               gosub   INBYTC
               c=regn  10
               rcr     1
-              gosub   INBYTC
+18$:          gosub   INBYTC
               gosub   LDSST0
 
 ;;; ************************************************************************
@@ -499,13 +599,19 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               gonc    49$
               abex    x
               gosub   DSPLN+8       ; display line number
-49$:          c=m
+49$:          c=n
+              ?c#0    m             ; do we have a secondary XADR?
+              goc     52$           ; yes
+              c=m                   ; no
               rcr     1
               gosub   GTRMAD
               nop
               acex
               rcr     11
-              gosub   PROMF2        ; prompt string
+52$:          gosub   PROMF2        ; prompt string
+              c=n
+              ?c#0    m             ; secondary XADR?
+              gsubc   resetBank     ; yes, reset to primary bank
 
               pt=     0             ; restore PTEMP2
               c=g
@@ -612,3 +718,43 @@ parseStack:   gosub   MESSL
               ?a#c    x
               gonc    05$
               goto    15$
+
+
+;;; **********************************************************************
+;;;
+;;; It this a postfix argument?
+;;;
+;;; In: C[6:3] - XADR
+;;; Out: Returns to (P+1) if not an argument style function
+;;;      Returns to (P+1) if it is argument, with
+;;;     C[6:3] - points to second byte of 'gosub argument'
+;;; Uses: A, C
+;;;
+;;; **********************************************************************
+
+isArgument:   cxisa
+              ?c#0    x             ; check if 2 nops
+              rtnc                  ; no
+              c=c+1   m
+              cxisa
+              ?c#0    x
+              rtnc                  ; no XROM XKD
+              c=c+1   m             ; inspect next word which should be
+                                    ;  gosub Argument for a semi-merged
+              ldi     FirstGosub(argumentEntry)
+              a=c     x
+              cxisa
+              ?a#c    x
+              rtnc                  ; not normal semi-merged
+              c=c+1   m
+              ldi     SecondGosub(argumentEntry)
+              a=c     x
+              cxisa
+              ?a#c    x
+              rtnc                  ; not normal semi-merged
+              acex    m             ; match, return to P+2, preserving C.M
+              c=stk
+              c=c+1   m
+              stk=c
+              acex    m
+              rtn

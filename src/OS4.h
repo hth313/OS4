@@ -152,6 +152,8 @@ Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
 Flag_Pause:          .equ  4           ; Our own pause flag.
 Flag_SEC_PROXY:      .equ  5           ; Set when doing partial key for secondary
                                        ; functions.
+Flag_SEC_Argument:   .equ  6           ; Set when doing a semi-merged postfix on
+                                       ; a secondary function.
 Flag_IntervalTimer:  .equ  7           ; Set when we are using the interval timer
 
 ;;; **********************************************************************

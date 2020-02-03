@@ -190,8 +190,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               ?s0=1                 ; do we have a text 2?
               gonc    420$          ; no, default argument
               c=m                   ; C[3:0]= get address of text2 line (plus 1)
+              rcr     4
               a=c
               gosub   INCAD         ; step to postfix argument
+              gosub   INCAD
               goto    430$
 
 410$:         gosub   NXBYTP
@@ -241,45 +243,59 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               cxisa
               ?a#c    x
               goc     900000$       ; not runSecondary
-              bcex    m             ; B.M= ROM page pointer, LINNUM may smash a lot
-              s8=     0             ; say no prompt, scrolling
-              s1=     0             ; say lcd notl full yet
-              s0=     0             ; assume 2nd operand
-              gosub   ENCP00
-              gosub   LINNUM
-              a=c     x
-              b=a     x             ; B.X= saved line number
-              gosub   CLLCDE
-              a=0     s
-              gosub   GENNUM        ; output line #
-              ldi     0x20
-              slsabc                ; output a blank
-              c=b     m             ; C[6:3]= ROM page pointer
-              m=c                   ; save in M
+              rcr     -6            ; C[12:9]= ROM pointer
+              bcex                  ; B[12:9]= ROM pointer
               gosub   ENCP00
               gosub   NXBYTP
               gosub   INCAD
               gosub   NXBYT         ; get next byte
-              b=a
-              a=c     x
+              acex                  ; A[1:0]= program memory byte
+                                    ; C[3:0]= program memory address
+              rcr     -5            ; C[8:5]= program memory address
+              pt=     8
+              bcex    wpt           ; B[8:5]= program memory address
+                                    ;  (saved for LINNUM)
+
               ldi     Text1
-              s0=0                  ; say no argument
+              a=0     s             ; say no argument
               ?a#c    x             ; is it a text 1?
               gonc    310$          ; yes
-              c=c+1                 ; make a text 2
-              s0=1                  ; say argument in text 2
+              c=c+1                 ; opcode for text 2
+              a=a+1   s             ; say argument in text 2
               ?a#c    x             ; is it a text 2?
               goc     900000$       ; no
-310$:         abex
-              gosub   INCAD
+310$:         b=a     s             ; B.S= text1/2 flag
+              bsr                   ; B[12]= text1/2 flag
+                                    ; B[7:4]= program memory address
+                                    ; B[11:8]= ROM page pointer
+              s8=     0             ; say no prompt, scrolling
+              s1=     0             ; say lcd not full yet
+              s0=     0             ; assume 2nd operand
+              gosub   ENCP00
+              gosub   LINNUM
+              bcex    x             ; B.X= line number
+              c=b
+              rcr     4             ; C[3:0]= program memory address
+              a=c                   ; A[3:0]= program memory address
+              rcr     -5            ; C[13]= text 1/2 flag
+              s0=0
+              ?c#0    s             ; text2?
+              gonc    312$          ; no
+              s0=1                  ; yes
+312$:         gosub   INCAD
               gosub   GTBYT         ; get argument
-              b=c     x             ; B[1:0]= argument
-              b=0     xs            ; B.X= argument
-              acex
-              n=c                   ; N=address
+              c=0     xs
+              bcex                  ; B.X= prefix XROM number
+                                    ; C[11:8]= ROM page pointer
+                                    ; C[7:4]= program memory address
+                                    ; C[3:0]= address
+              n=c                   ; save in N
+
+              rcr     5             ; C[6:3]= ROM page pointer
+              m=c                   ; M[6:3]= ROM page pointer
               gosub   ENLCD
               gosub   inProgramSecondary
-90000000$:    goto    90000000$     ; (P+1) not available
+              goto    90000000$     ; (P+1) not available
                                     ;   We know the ROM is there as we looked
                                     ;   it, so the problem is really that its
                                     ;   FAT structure has been altered in a way
@@ -288,12 +304,20 @@ doPRGM:       ?s12=1                ; PRIVATE ?
                                     ;   make anything meaningful out of it
                                     ;   anyway.
               b=a     m
+              c=n                   ; C.X= line number
+              a=c     x
+              a=0     s
+              gosub   CLLCDE
+              gosub   GENNUM        ; output line #
+              ldi     0x20
+              slsabc                ; output a blank
+
               c=b     m
               gosub   PROMF2
               c=b     m
               gosub   isArgument    ; postfix argument?
               goto    320$          ; no
-              s2=1                  ; this is a secondary
+              s2=1                  ; yes, indicate this is a secondary
               cnex                  ; M[3:0]=address (preserve C)
               m=c
               c=n
@@ -303,7 +327,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 320$:         gosub   DF150         ; normal secondary, finalize line
               c=b     m
               gosub   resetBank     ; restore to primary bank
-              golong  9000000$
+90000000$:    golong  9000000$
 
 ;;; **********************************************************************
 ;;;

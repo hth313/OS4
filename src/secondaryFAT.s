@@ -634,8 +634,8 @@ runSecondary: c=stk                 ; C[6:3]= some page address
 ;;;
 ;;; inProgramSecondary - find secondary as stored in program memory
 ;;;
-;;; In: M[6:3]= points one word ahead of the program memory suffix
-;;;     B.X= prefix XROM number (jj of XROM ii,jj)
+;;; In: M[6:3]= points to word before program memory suffix
+;;;     B.X= secondary function after XROM prefix
 ;;; Out: Returns to (P+1) if secondary not found, with:
 ;;;        M[5:3] and M.X= function number after XROM
 ;;;      Returns to (P+2) if there are secondary found, with:
@@ -690,4 +690,7 @@ inProgramSecondary:
               acex                  ; A.X= function number in this table
                                     ; C[6:3]= secondary FAT header
               c=c+1   m
+              cxisa                 ; C.X= number of entries
+              ?a<c    x
+              rtnnc                 ; out of range
               golong  lookupFAT0

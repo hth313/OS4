@@ -580,10 +580,10 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               gosub   secondary
               rtn                   ; (P+1) not found
               ?s13=1                ; running?
-              goc     10$           ; yes
+              goc     5$            ; yes
               ?s4=1                 ; no, single stepping?
               rtnnc                 ; no, do nothing
-              acex    m
+5$:           acex    m
 
 10$:          c=c+1   m
               c=c+1   m

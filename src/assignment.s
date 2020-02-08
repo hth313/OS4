@@ -447,7 +447,7 @@ secondaryAssignment:
               c=0
               pt=     6
               lc      6             ; start looking from page 6 (assuming page 3 and 5 are
-                                    ;  of no interset)
+                                    ;  of no interest)
               pt=     6
 55$:          cxisa
               ?a#c    x             ; XROM Id match?

@@ -284,6 +284,8 @@ foundXXROM:   acex                  ; C[6:3]= XADR
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR
                                     ; M.X= secondary function identity
+              c=0
+              dadd=c
               c=regn  10            ; set XROM 0,1 as function code
                                     ;  (This is an impossible XROM as 0 is
                                     ;   not valid. We are not going to execute

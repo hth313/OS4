@@ -579,12 +579,7 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               a=c     x             ; A.X= XROM prefix code
               gosub   secondary
               rtn                   ; (P+1) not found
-              ?s13=1                ; running?
-              goc     5$            ; yes
-              ?s4=1                 ; no, single stepping?
-              rtnnc                 ; no, do nothing
-5$:           acex    m
-
+              acex    m
 10$:          c=c+1   m
               c=c+1   m
               cxisa
@@ -601,7 +596,14 @@ runSecondary: c=stk                 ; C[6:3]= some page address
 20$:          c=c+1   m
               m=c                   ; M= secondary FAT pointer
 
-              gosub   NXBYTP
+              ?s13=1                ; running?
+              goc     25$           ; yes
+              ?s4=1                 ; no, single stepping?
+              goc     25$           ; yes
+              c=regn  9             ; read function code
+              goto    35$
+
+25$:          gosub   NXBYTP
               b=a
               a=c     x
               ldi     Text1
@@ -618,7 +620,7 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               c=c+1   x
               regn=c  15
 30$:          gosub   GTBYT         ; get argument
-              c=0     xs
+35$:          c=0     xs
               c=c+c   x
               a=c     x             ; A.X= index in FAT
               c=m

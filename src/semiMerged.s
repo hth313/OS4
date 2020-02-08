@@ -211,7 +211,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 430$:         gosub   GTBYT         ; get argument
 36$:          s0=0                  ; ensure 2-digit operand
               gosub   ROW930        ; display argument
-              golong  320$          ; @@
+              golong  320$
 
 900000$:      goto    90000$
 
@@ -285,10 +285,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 312$:         gosub   INCAD
               gosub   GTBYT         ; get argument
               c=0     xs
-              bcex                  ; B.X= prefix XROM number
+              bcex                  ; B.X= secondary function after XROM prefix
                                     ; C[11:8]= ROM page pointer
                                     ; C[7:4]= program memory address
-                                    ; C[3:0]= address
+                                    ; C[3:0]= line number
               n=c                   ; save in N
 
               rcr     5             ; C[6:3]= ROM page pointer
@@ -417,6 +417,8 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               goc     3$            ; yes
               c=0     x
               dadd=c
+              c=m                   ; save potential secondary function in REG9/Q
+              regn=c  9             ; needed when doing direct execution
               c=regn  14
               cstex
               ?s4=1                 ; single step?
@@ -502,19 +504,23 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               rcr     3             ; C[13:11]= buffer address
               c=stk
               cxisa                 ; C[1:0] = default argument
-              n=c                   ; N[2:0]= modifier bits and default argument
               c=c+1   m             ; bump return address
               stk=c
+              rcr     4
+              c=0     x
+              c=0     s
+              rcr     -4
+              n=c                   ; N[2:0]= modifier bits and default argument
+                                    ; N[6:3]= 0 (no secondary XADR, for a start)
+                                    ; N[13:11]= buffer address
               pt=     0
               g=c
               acex                  ; get header again
               pt=     2
               c=g                   ; put default arg into 'pf' field
               data=c                ; write back
-
-              gosub   LDSST0        ; argument not obtained yet
-              ?s3=1                 ; program mode?
-              golnc   30$           ; no
+              c=0     x
+              dadd=c
               a=0     x
               a=a+1   x             ; 001, lower 3 nibbles of A001
               c=regn  10
@@ -530,12 +536,16 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               st=1    Flag_SEC_Argument
               cstex
               data=c
-              c=0     x
-              dadd=c
-
+              gosub   LDSST0
               c=m                   ; C.X= secondary function number
+                                    ; C[6:3]= XADR for secondary
+              a=c
+              c=n
+              acex    m
               n=c                   ; N[6:3]= secondary XADR
-              a=c     x
+                                    ; N[2:0]= modifier bits and default argument
+              ?s3=1                 ; program mode?
+              golnc   40$           ; no
               gosub   secondaryProgram
               nop                   ; (P+1) will not happen
                                     ;       (because we are called from the function
@@ -563,6 +573,10 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
 
 16$:          c=0                   ; N[6:3]= 0 (no secondary XADR)
               n=c
+              c=regn  14
+              st=c
+              ?s3=1                 ; program mode
+              gonc    30$           ; no
               gosub   INSSUB        ; prepare for insert
               a=0     s             ; clear count of successful inserts
               c=regn  10            ; insert instruction in program memory
@@ -625,8 +639,32 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               gosub   DSPLN+8       ; display line number
 49$:          c=n
               ?c#0    m             ; do we have a secondary XADR?
+              gonc    51$           ; no
+              ?s4=1                 ; program mode?
               goc     52$           ; yes
-              c=m                   ; no
+
+;;; When executing from the keyboard we need to find the instruction again later.
+;;; Change the XROM to be the prefix instruction of the secondary.
+;;; Later when argument is given it is called and we can sort out
+;;; how to call the secondary.
+              gosub   ENCP00
+              c=regn  9
+              a=c     x             ; A.X= function number
+                                    ; C[6:3]= XADR
+              gosub   secondaryProgram
+              nop                   ; (P+1) we know this exists
+              bcex    x             ; C[1:0]= adjusted function number
+              regn=c  9             ; save in REGN9/Q
+              c=regn  10
+              pt=     4
+              asl                   ; A[4:1]= XROM prefix
+              acex    wpt
+              regn=c  10            ; REGN10[4:1]= XROM prefix
+              gosub   ENLCD
+              c=n                   ; C[6:2]= XADR
+              goto    52$
+
+51$:          c=m                   ; primary XROM
               rcr     1
               gosub   GTRMAD
               nop

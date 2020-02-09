@@ -571,9 +571,7 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               rcr     4
               goto    18$
 
-16$:          c=0                   ; N[6:3]= 0 (no secondary XADR)
-              n=c
-              c=regn  14
+16$:          c=regn  14
               st=c
               ?s3=1                 ; program mode
               gonc    30$           ; no
@@ -638,7 +636,9 @@ argument:     gosub   sysbuf        ; ensure we have the system buffer
               abex    x
               gosub   DSPLN+8       ; display line number
 49$:          c=n
-              ?c#0    m             ; do we have a secondary XADR?
+              c=0     x
+              pt=     6
+              ?c#0    wpt           ; do we have a secondary XADR?
               gonc    51$           ; no
               ?s4=1                 ; program mode?
               goc     52$           ; yes

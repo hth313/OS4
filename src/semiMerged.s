@@ -55,8 +55,17 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gonc    4$
               goto    900$
 
-8$:           gosub   GETPC         ; abort entry of semi-merged instruction
-              gosub   DELLIN        ;  remove the XROM instruction as well
+;;; Abort entry of semi-merged instruction, remove XROM instruction as well.
+;;; This has to done expanded as DELLIN cannot be called from a subroutine.
+
+8$:           ?st=1   Flag_SEC_Argument
+              gonc    7$
+              gosub   GETPC
+              gosub   DELLIN
+              gosub   PUTPC
+              gosub   BSTEP
+7$:           gosub   GETPC
+              gosub   DELLIN
               gosub   PUTPC
               gosub   BSTEP
               gosub   DFRST8

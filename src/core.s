@@ -478,37 +478,44 @@ setMessl:     gosub   CLLCDE
 
 ;;; **********************************************************************
 ;;;
+;;; ensureDrive - ensure that an HP-IL moduld and mass storage exists
 ;;; ensureHPIL - ensure that an HP-IL module is inserted
 ;;;
-;;; This call only returns if we are running on a HP-41CX (or similar style)
-;;; operating system.
+;;; This routine only returns if the HP-IL module is present, and there
+;;; is a mass storage drive (ensureDrive).
 ;;;
-;;; Uses: C.M
+;;; Uses: C, A.X
 ;;;
 ;;; **********************************************************************
 
-ensureHPIL:   ldi     28            ; IL cassette XROM Id
+ensureDrive:  c=0
+	      gosub   CHKCST
+	      ?c#0
+              goc     ensureHPIL
+	      gosub   errorMessl
+	      .messl  "NO DRIVE"
+errorExitPop: spopnd                ; defensive measure
+                                    ; not strictly needed, but probably a good
+errorExit:    gosub   LEFTJ
+              gosub   MSG105
+              golong  ERR110
+
+ensureHPIL:   ldi     28            ; HP-IL XROM Id
               a=c     x
               c=0     m
               lc      7             ; address 7000
               cxisa                 ; fetch XROM Id from 7000
               ?a#c    x
-              rtnnc
-              gosub   errorMessl
+	      rtnnc
+	      gosub errorMessl
               .messl "NO HP-IL"
-
-errorExitPop: spopnd                ; defensive measure
-                                    ; not strictly needed, but p robably a good
-errorExit:    gosub   LEFTJ
-              gosub   MSG105
-              golong  ERR110
-
+	      goto    errorExitPop
 
 ;;; **********************************************************************
 ;;;
 ;;; ensure41CX - ensure we are running on a 41CX style OS
 ;;;
-;;; This call only returns if we are running on a HP-41CX (or similar style)
+;;; This routine only returns if we are running on a HP-41CX (or similar style)
 ;;; operating system.
 ;;;
 ;;; Uses: C, A.X
@@ -641,6 +648,7 @@ versionCheck: a=c     x
               golong  setTimeout    ; 0x4f62
               golong  clearTimeout  ; 0x4f64
               golong  keyDispatch   ; 0x4f66
+	      golong  ensureDrive   ; 0x4f68
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

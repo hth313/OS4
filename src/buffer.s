@@ -645,3 +645,169 @@ assignArea10: c=data                ; read buffer header
               abex    x             ; A.X= buffer header address
               golong  RTNP2
 
+;;; **********************************************************************
+;;;
+;;; hostedBufferSetup - get pointer to hosted buffer area
+;;;
+;;; In: Nothing
+;;; Out: Returns to (P+1) if there is no hosted buffer area
+;;;      Returns to (P+1) if the hosted buffer area exists with:
+;;;          A.X= start of hosted buffer area
+;;;          A.M= number of registers in area - 1
+;;; Uses: A[12:0], C, PT, DADD, +1 sub level
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+hostedBufferSetup:
+              gosub   sysbuf
+              rtn                   ; no system buffer
+              c=data                ; read buffer header
+              rcr     4
+              c=0     xs            ; C.X= size of shell stack
+              c=c+1   x             ; add one for buffer header
+              a=a+c   x             ; A.X= start of buffer area
+              rcr     3
+              c=0     m             ; C[12:1]= number of registers in buffer area
+              rcr     -2            ; C.M= number of registers in buffer area
+              a=c     m             ; A.M= number of registers in buffer area
+              a=a-1   m             ; A.M= number of registers in buffer area - 1
+              rtnc                  ; no hosted buffers
+              golong  RTNP2
+
+;;; **********************************************************************
+;;;
+;;; newHostedBuffer - reserve space for a hosted buffer.
+;;;
+;;; Typical use is to call chkbufHosted to find a specific buffer.
+;;; If it is not there, it can be created using createBufHosted.
+;;; !! NOTE: This routine assumes that the hosted buffer does not exist !!
+;;;
+;;; If out of memory, returns to (P+1)
+;;; If successful, returns to (P+2) with:
+;;;      B.X= the location of the newly added space
+;;;      A.X= buffer header address
+;;;      DADD= buffer header address
+;;; Uses: A, B, C, G, DADD, S7, active PT, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public newHostedBuffer
+newHostedBuffer:
+              pt=     0
+              g=c                   ; G= number of registers to reserve
+              gosub   ensureSysBuf
+              rtn
+              c=data                ; read buffer header
+              rcr     4
+              c=0     xs            ; C.X= size of shell stack
+              c=c+1   x             ; add one for buffer header
+              golong  growBuffer
+
+;;; **********************************************************************
+;;;
+;;; chkbufHosted - find a hosted buffer
+;;;
+;;; Locate a secondary buffer.
+;;; In: C[1:0]= buffer number
+;;; Out: A.X= buffer header address (selected)
+;;; Uses: A, C, B.X, N, active PT=12, +1 sub level
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public chkbufHosted
+chkbufHosted: n=c                   ; N.X= buffer number we are looking for
+              gosub   hostedBufferSetup
+              rtn                   ; no buffer
+              c=n                   ; C.X= buffer number we are looking for
+              bcex    x             ; B.X= buffer number we are looking for
+10$:          acex    x             ; C.X= buffer header address
+              dadd=c
+              acex    x
+              c=data                ; read a buffer header
+              rcr     12
+              c=0     xs            ; C.X= buffer identity
+              abex    x             ; A.X= buffer we are looking for
+              ?a#c    x             ; is this the buffer we are looking for?
+              gonc    20$           ; yes
+              abex    x             ; A.X= buffer header address
+                                    ; B.X= buffer we are looking for
+              rcr     -2            ; C[1:0]= size
+              c=0     xs            ; C.X= size
+              a=a+c   x             ; advance to next buffer header
+              c=0     m
+              rcr     -3            ; C.M= size
+              a=a-c   m             ; reduce remaining registers
+              gonc    10$
+              rtn                   ; no more
+
+20$:          abex    x             ; A.X= buffer header address
+              golong  RTNP2         ; done, return to (P+2)
+
+;;; **********************************************************************
+;;;
+;;; reclaimHostedBuffer
+;;;
+;;; Reclaim a hosted buffer, typically called at power on by modules that
+;;; want to retain a hosted buffer.
+;;;
+;;; In: Nothing
+;;; Out: Nothing
+;;; Uses: A, C, B.X, N, active PT=12, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public reclaimHostedBuffer
+reclaimHostedBuffer:
+              gosub   chkbufHosted
+              rtn
+              c=data                ; clear upper bit in buffer
+              rcr     -2
+              cstex
+              s7=0
+              cstex
+              rcr     2
+              data=c
+              rtn
+
+;;; **********************************************************************
+;;;
+;;; releaseHostedBuffers - release all hosted buffers
+;;;
+;;; Mark all hosted buffers for removal.
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public releaseHostedBuffers
+releaseHostedBuffers:
+              gosub   hostedBufferSetup
+              rtn                   ; (P+1) no buffers
+              pt=     13
+              lc      8
+              a=c     s             ; A.S= 8
+10$:          acex    x
+              dadd=c
+              acex    x
+              c=data
+              c=a+c   s             ; set mark bit
+              gonc    15$
+              c=a+c   s             ; was set before, set it again
+15$:          data=c
+              rcr     10
+              c=0     xs            ; C.X= size of this buffer
+              a=a+c   x             ; advance pointer
+              c=0     m
+              rcr     -3
+              a=a-c   m             ; decrement register counter
+              gonc    10$
+              rtn
+
+
+;;; growHostedBuffer
+
+
+;;; shrinkHostedBuffer

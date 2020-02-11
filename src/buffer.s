@@ -29,7 +29,7 @@
 ;;;
 ;;; Buffer layout:
 ;;;        [ application temporary scratch  ] 0-15   high address
-;;;        [ seconday key assignments       ] 0-17
+;;;        [ secondary key assignments      ] 0-17
 ;;;        [ hosted buffer area             ] 0-254
 ;;;        [ shell stack                    ] 0-254
 ;;;        [ buffer header                  ] 1      low address

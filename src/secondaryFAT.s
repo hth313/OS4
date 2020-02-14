@@ -1,4 +1,4 @@
-#include "mainframe.i"
+#include "mainframe.h"
 
 Text1:        .equ    0xf1
 

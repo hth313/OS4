@@ -1,7 +1,7 @@
 #define IN_OS4
 #include "OS4.h"
-#include "mainframe.i"
-#include "mainframe_cx.i"
+#include "mainframe.h"
+#include "mainframe_cx.h"
 
 
 ;;; **********************************************************************

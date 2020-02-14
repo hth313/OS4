@@ -1,4 +1,4 @@
-#include "mainframe.i"
+#include "mainframe.h"
 
 #define IN_OS4
 #include "OS4.h"

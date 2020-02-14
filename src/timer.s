@@ -1,9 +1,8 @@
 #include "mainframe.h"
+#include "time.h"
 
 #define IN_OS4
 #include "OS4.h"
-
-ENTMR:        .equlab 0x50e2
 
 ;;; **********************************************************************
 ;;;

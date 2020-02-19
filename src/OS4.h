@@ -121,13 +121,14 @@ RTNP2:        .equlab 0x4d18
 
 ;;; **********************************************************************
 ;;;
-;;; Defined extensions.
+;;; Extension messages.
 ;;;
 ;;; **********************************************************************
 
 #define ExtensionListEnd  0
 
 // Invoke a CAT, N.X is the catalog number.
+// If a catalog is implemented, exit by jumping to QUTCAT in mainframe.
 #define ExtensionCAT      1
 
 // Shell stack was altered in some way.

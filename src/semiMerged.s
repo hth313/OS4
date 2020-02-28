@@ -30,7 +30,7 @@ Text1:        .equ    0xf1
 
               .section code, reorder
               .public doPRGM
-              .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP2
+              .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP1
               .extern inProgramSecondary, resetBank, secondaryProgram
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
@@ -239,7 +239,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               c=c+1   m
               cxisa
               ?a#c    x
-              gsubnc  jumpP2        ; do display handler
+              gsubnc  jumpP1        ; do display handler
 9000000$:     goto    900000$
 
 ;;; Check for secondary function.

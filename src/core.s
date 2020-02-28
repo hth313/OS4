@@ -394,11 +394,10 @@ gosubAlign4:  c=stk
 ;;;
 ;;; **********************************************************************
 
-              .public dropRTNP2, RTNP2, jumpP2
+              .public dropRTNP2, RTNP2, jumpP1
 dropRTNP2:    spopnd
 RTNP2:        c=stk
-jumpP2:
-RTNP20:       c=c+1   m
+jumpP1:       c=c+1   m
               gotoc
 
 ;;; **********************************************************************
@@ -419,11 +418,11 @@ RTNP20:       c=c+1   m
 ;;;
 ;;; **********************************************************************
 
-              .public dropRTNP3, RTNP3, RTNP30
+              .public dropRTNP3, RTNP3, jumpP2
 dropRTNP3:    spopnd
 RTNP3:        c=stk
-RTNP30:       c=c+1   m
-              goto    RTNP20
+jumpP2:       c=c+1   m
+              goto    jumpP1
 
 ;;; **********************************************************************
 ;;;

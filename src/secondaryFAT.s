@@ -102,7 +102,7 @@ Text1:        .equ    0xf1
 
               .section code, reorder
               .public XASRCH
-              .extern RTNP30, unpack, unpack0, unpack1, unpack3, unpack4
+              .extern jumpP2, unpack, unpack0, unpack1, unpack3, unpack4
               .extern NXBYTP, jumpC5, RTNP2, gotoFunction
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
@@ -236,7 +236,7 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
               c=c+1   m             ; C[6:3] += 5
               c=c+1   m
               c=c+1   m
-              gosub   RTNP30        ; call bank switcher
+              gosub   jumpP2        ; call bank switcher
               c=c-1   m             ; step back to point to seconday
                                     ;   FAT location entry
               gosub   unpack0       ; C[6:3]= address of secondary FAT
@@ -492,7 +492,7 @@ secondaryAddress10:
 lookupFAT0:   a=c     m             ; A[6:3]= FAT header pointer
               c=c+1   m
               c=c+1   m
-              gosub   RTNP30        ; switch bank
+              gosub   jumpP2        ; switch bank
               acex
               c=c+c   x             ; index * 2
               acex    x
@@ -624,7 +624,7 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               c=c+c   x
               a=c     x             ; A.X= index in FAT
               c=m
-              gosub   RTNP30        ; switch bank
+              gosub   jumpP2        ; switch bank
               c=m
               gosub   unpack1       ; location of the FAT
               gosub   lookupFAT

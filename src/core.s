@@ -584,7 +584,7 @@ versionCheck: a=c     x
               .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
-              .extern displayDone, extensionHandler, keyDispatch
+              .extern displayDone, sendMessage, keyDispatch
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
               .extern exitTransientApp, hasActiveTransientApp
               .extern parseNumber, parseNumberInput
@@ -620,7 +620,7 @@ versionCheck: a=c     x
               golong  clearSystemDigitEntry ; 0x4f2e
               golong  reclaimSystemBuffer ; 0x4f30
               golong  displayDone   ; 0x4f32
-              golong  extensionHandler ; 0x4f34
+              golong  sendMessage   ; 0x4f34
               golong  activeApp     ; 0x4f36
               golong  shrinkBuffer  ; 0x4f38
               golong  allocScratch  ; 0x4f3a

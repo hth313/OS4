@@ -918,7 +918,7 @@ setDisplayFlags:
 
 ;;; **********************************************************************
 ;;;
-;;; extensionHandler - invoke an extension
+;;; sendMessage - invoke an extension
 ;;; shellChanged - the shell stack was changed
 ;;;
 ;;; In:  C[1:0] - generic extension code
@@ -928,7 +928,7 @@ setDisplayFlags:
 ;;;        If there is a matching generic extension, it decides on what to
 ;;;        do next and is extension defined.
 ;;;        Typical behavior include one of the following:
-;;;        1. Return to extensionHandler using a normal 'rtn'. This is
+;;;        1. Return to sendMessage using a normal 'rtn'. This is
 ;;;           typical if it is some kind of notification or broadcast.
 ;;;           In this case the shell stack is further searched for more
 ;;;           matching generic extensions that will also get the chance
@@ -940,7 +940,7 @@ setDisplayFlags:
 ;;;           Which takes us back to the original caller. It is not possible
 ;;;           for it to tell whether the call was handled by a generic
 ;;;           extension, unless some told by the return value, for example
-;;;           using the N register that is not used by extensionHandler.
+;;;           using the N register that is not used by sendMessage.
 ;;;           Another alternative is to return to (P+2) if the call was
 ;;;           handled (unhandled calls always return to (P+1)), this can
 ;;;           be done using:
@@ -951,17 +951,16 @@ setDisplayFlags:
 ;;;        is appropriate/useful. This is basically a protocol between
 ;;;        the original caller and the handlers, and is completely up to
 ;;;        the extension to define the protocol.
-;;; Note: An extension that returns to extensionHandler must preserve
+;;; Note: An extension that returns to sendMessage must preserve
 ;;;       M, S9 and B.X and not leave PFAD active.
 ;;; Uses: A, B.X, C, M, ST, DADD, active PT, +3 sub levels
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
-              .public extensionHandler
+              .public sendMessage
 shellChanged: ldi     ExtensionShellChanged
-extensionHandler:
-              pt=     0
+sendMessage:  pt=     0
               g=c                   ; G= extension code
               gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)

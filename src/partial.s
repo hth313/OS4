@@ -37,10 +37,7 @@
 ;;;              using multiple calls to the key sequence parser.
 ;;;    REG9[13] is used to keep track of the number of digits entered so far.
 ;;;
-;;; In: C.X= packed pointer to an input validator
-;;;          to accept any value:
-;;;              ldi .low12 acceptAllValues
-;;;              gosub parseDec2
+;;; In: Nothing
 ;;; Out: Returns to (P+1) if input was aborted.
 ;;;      Returns to (P+2) if final valid input with:
 ;;;        C.X= binary value entered
@@ -70,10 +67,10 @@ parseNumber10:
               cxisa                 ; read control word
               c=c+1   m
               stk=c                 ; push updated return address
-              c=c-1   xs            ; use 0-based digit counter
-              a=c     x             ; A.X= control word
-              rcr     3             ; C.S= number of digits left - 1
-              a=c     s             ; A.S= number of digits left - 1
+	      rcr     1
+              c=c-1   s             ; use 0-based digit counter
+              a=c     x             ; A[1:0]= control word flag bits
+	      a=c     s             ; A.S= number of digits left - 1
               gosub   ENCP00
               pt=     6
               c=regn  9             ; C[12:7]= outside state

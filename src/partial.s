@@ -67,10 +67,10 @@ parseNumber10:
               cxisa                 ; read control word
               c=c+1   m
               stk=c                 ; push updated return address
-              c=c-1   xs            ; use 0-based digit counter
-              a=c     x             ; A.X= control word
-              rcr     3             ; C.S= number of digits left - 1
-              a=c     s             ; A.S= number of digits left - 1
+	      rcr     1
+              c=c-1   s             ; use 0-based digit counter
+              a=c     x             ; A[1:0]= control word flag bits
+	      a=c     s             ; A.S= number of digits left - 1
               gosub   ENCP00
               pt=     6
               c=regn  9             ; C[12:7]= outside state

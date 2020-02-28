@@ -166,7 +166,13 @@ Flag_IntervalTimer:  .equ  7           ; Set when we are using the interval time
 
 acceptAllValues: .equlab xargumentEntry
 
+// Flag number to permit EEX key, use ParseNumber_AllowEEX below in your code.
+#define	Flag_ParseNumber_AllowEEX:  0
 
-ParseNumber_AllowEEX: .equ    1    // flag used for permitted EEX key
+// Helper macro
+#define _ParseNumberMask(flag) (1 << (flag + 4))
+
+// Mask bit for permitting EEX key
+#define ParseNumber_AllowEEX  _ParseNumberMask(Flag_ParseNumber_AllowEEX)
 
 #endif // OS4_H

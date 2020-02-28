@@ -37,10 +37,7 @@
 ;;;              using multiple calls to the key sequence parser.
 ;;;    REG9[13] is used to keep track of the number of digits entered so far.
 ;;;
-;;; In: C.X= packed pointer to an input validator
-;;;          to accept any value:
-;;;              ldi .low12 acceptAllValues
-;;;              gosub parseDec2
+;;; In: Nothing
 ;;; Out: Returns to (P+1) if input was aborted.
 ;;;      Returns to (P+2) if final valid input with:
 ;;;        C.X= binary value entered

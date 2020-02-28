@@ -61,7 +61,7 @@ errorExit:    .equlab 0x4f2c
 clearSystemDigitEntry: .equlab 0x4f2e
 reclaimSystemBuffer .equlab 0x4f30
 displayDone:  .equlab 0x4f32
-extensionHandler .equlab 0x4f34
+sendMessage   .equlab 0x4f34
 activeApp:    .equlab 0x4f36
 shrinkBuffer: .equlab 0x4f38
 allocScratch: .equlab 0x4f3a

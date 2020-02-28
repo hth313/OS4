@@ -123,7 +123,8 @@ parseNumber10:
 25$:          gosub   ENCP00
               c=regn  9
               cstex
-              ?st=1   ParseNumber_AllowEEX ; EEX allowed ?
+              ?st=1   Flag_ParseNumber_AllowEEX + OffsetParseNumberFlag
+                                    ; EEX allowed ?
               gonc    24$           ; no
 
 ;;; * Handle a single digit, after we have one in place we stay

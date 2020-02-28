@@ -488,11 +488,11 @@ setMessl:     gosub   CLLCDE
 ;;; **********************************************************************
 
 ensureDrive:  c=0
-	      gosub   CHKCST
-	      ?c#0
+              gosub   CHKCST
+              ?c#0
               goc     ensureHPIL
-	      gosub   errorMessl
-	      .messl  "NO DRIVE"
+              gosub   errorMessl
+              .messl  "NO DRIVE"
 errorExitPop: spopnd                ; defensive measure
                                     ; not strictly needed, but probably a good
 errorExit:    gosub   LEFTJ
@@ -505,10 +505,10 @@ ensureHPIL:   ldi     28            ; HP-IL XROM Id
               lc      7             ; address 7000
               cxisa                 ; fetch XROM Id from 7000
               ?a#c    x
-	      rtnnc
-	      gosub errorMessl
+              rtnnc
+              gosub errorMessl
               .messl "NO HP-IL"
-	      goto    errorExitPop
+              goto    errorExitPop
 
 ;;; **********************************************************************
 ;;;
@@ -647,7 +647,7 @@ versionCheck: a=c     x
               golong  setTimeout    ; 0x4f62
               golong  clearTimeout  ; 0x4f64
               golong  keyDispatch   ; 0x4f66
-	      golong  ensureDrive   ; 0x4f68
+              golong  ensureDrive   ; 0x4f68
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

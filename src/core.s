@@ -269,7 +269,7 @@ checkXADR:    ldi     FirstGosub(partialKeyEntry)
 noTakeOver:   golong  toWKUP20_SS0
 
 ;;; * Check for partial key sequence secondary function. These are
-;;; * marked as XROM 6,0 (the header of BOOST module), but ensure
+;;; * marked as XROM 0,1 (an impossible XROM function), but ensure
 ;;; * that we are actually doing a prompting secondary.
 checkSecondaryTakeOver:
               gosub   sysbuf

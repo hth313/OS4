@@ -161,7 +161,7 @@ clearAssignment10:
 ;;;          A= contents of bitmap register
 ;;;          DADD= bitmap register selected
 ;;;          B.X= address of buffer header
-;;; Uses: A[13:12], A.X, C, B.X, PT, DADD, +2 sub levels
+;;; Uses: A[13:12], A.X, C, B.X, S0, S1, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
@@ -175,13 +175,13 @@ testAssignBit10:
               asl                   ; A[2]= column
               pt=     2
               lc      4             ; C[2]= 4
-              a=0     s             ; A.S= shift flag
+              s1=0                  ; assume unshifted
               lc      8
               pt=     1
               c=a-c   pt
               goc     1$
               a=c     pt            ; normalize keycode with no shift
-              a=a+1   s             ; shifted
+              s1=1                  ; shifted
 1$:           pt=     5             ; position ptr at column
               goto    2$
 3$:           incpt
@@ -205,8 +205,8 @@ testAssignBit10:
               c=0     x
               dadd=c
               c=regn  15            ; load shifted bits
-              ?a#0    s             ; shiftset?
-              goc     7$            ; nope
+              ?s1=1                 ; shiftset?
+              goc     7$            ; yes
               c=regn  10            ; load unshifted bits
 7$:           m=c                   ; M= bit map
               c=c&a                 ; row,col bit set?
@@ -219,11 +219,11 @@ testAssignBit10:
                                     ;   as not assigned
               b=a     x             ; B.X= address of buffer header
               acex                  ; A.X= assignment area
-                                    ; C.S= shift flag
               c=0     x
-              rcr     -1
-              c=a+c   x             ; C.X= bitmap register
-              dadd=c
+              ?s1=1                 ; shifted?
+              gonc    9$            ; no
+              c=c+1   x             ; yes, step to register with shifted bits
+9$:           dadd=c
               c=data
               a=c
               c=m

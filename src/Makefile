@@ -1,5 +1,5 @@
 
-SRCS = core.s buffer.s shell.s mainframe.s mainframe_cx.s keyboard.s \
+SRCS = core.s buffer.s shell.s keyboard.s \
        secondaryFAT.s semiMerged.s xmem.s partial.s assignment.s timer.s
 OBJS = $(SRCS:%.s=%.o)
 MOD = OS4.mod

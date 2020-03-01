@@ -357,7 +357,9 @@ unusedSlot:   pt=     6
 ;;;
 ;;; In: C.X - packed pointer to shell structure
 ;;; Out:
-;;; Uses: A, B.X, C, M, ST, S8, DADD, active PT, +1 sub level
+;;; Uses: A, B.X, C, M, ST, S8, DADD, active PT,
+;;;       +1 sub level if reclaimShell
+;;;       +3 sub levels if exitShell (due to exit via shellChanged)
 ;;;
 ;;; **********************************************************************
 

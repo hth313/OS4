@@ -1,6 +1,6 @@
 ;;; -*- mode: gas;-*-
-#ifndef OS4_H
-#define OS4_H
+#ifndef __OS4_H__
+#define __OS4_H__
 
 ;;; **********************************************************************
 ;;;
@@ -202,4 +202,4 @@ KeyEntry:     .macro  fun
 #define BuiltinKey(n)                 ((n) + 0x201)
 #define BuiltinKeyKeepDigitEntry(n)   ((n) + 0x300)
 
-#endif // OS4_H
+#endif // __OS4_H__

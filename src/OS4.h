@@ -176,4 +176,30 @@ acceptAllValues: .equlab xargumentEntry
 // Mask bit for permitting EEX key
 #define ParseNumber_AllowEEX  _ParseNumberMask(Flag_ParseNumber_AllowEEX)
 
+;;; **********************************************************************
+;;;
+;;; Key table support.
+;;;
+;;; **********************************************************************
+
+#define LFE(x)  `FAT entry: \x`
+#define FATOFF(x) (LFE(x) - FatStart) / 2
+
+;;; Make it easy to populate the key table with an XROM
+KeyEntry:     .macro  fun
+              .con   FATOFF(fun)
+              .endm
+
+;;; Builtin function in a key table.
+;;;
+;;; BuiltinKey - builtin function that ends digit entry.
+;;; This is the normal case and it is offsetted by 1 to allow for using CAT
+;;; which is 000, which means Text-15 is not possible.
+;;; 000 in the table means pass through to next system shell key table.
+;;;
+;;; BuiltinKeyKeepDigitEntry - builtin function (not ending digit entry)
+;;; Mainly used for SHIFT and USER.
+#define BuiltinKey(n)                 ((n) + 0x201)
+#define BuiltinKeyKeepDigitEntry(n)   ((n) + 0x300)
+
 #endif // OS4_H

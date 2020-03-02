@@ -322,7 +322,7 @@ checkSecondaryTakeOver:
 ;;; **********************************************************************
 
               .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5
-              .public jumpPacked, callInd
+              .public jumpPacked
 jumpC5:       c=c+1   m
 jumpC4:       c=c+1   m
 jumpC3:       c=c+1   m
@@ -593,6 +593,7 @@ versionCheck: a=c     x
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
               .extern setTimeout, clearTimeout, activeApp
+              .extern chkbufHosted, reclaimHostedBuffer, newHostedBuffer
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -648,6 +649,9 @@ versionCheck: a=c     x
               golong  clearTimeout  ; 0x4f64
               golong  keyDispatch   ; 0x4f66
               golong  ensureDrive   ; 0x4f68
+              golong  chkbufHosted  ; 0x4f6a
+              golong  reclaimHostedBuffer ; 0x4f6c
+              golong  newHostedBuffer ; 0x4f6e
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

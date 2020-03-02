@@ -49,7 +49,7 @@
 
               .section code, reorder
               .public parseNumber, parseNumberInput
-              .extern unpack, RTNP2, callInd
+              .extern unpack, RTNP2, jumpP0
 parseNumberInput:
               a=0     x
               a=a+1   x
@@ -156,7 +156,7 @@ parseNumber10:
               gonc    350$
               c=b     m             ; C[6:3]= validator
               s8=1                  ; incomplete input
-              gosub   callInd       ; validate value
+              gosub   jumpP0        ; validate value
               goto    37$           ; not accepted
               gosub   ENCP00
 
@@ -212,7 +212,7 @@ validateClear:
               gosub   ENCP00
               c=regn  9             ; C[6:3]= validator
               s8=0                  ; signal complete input
-              gosub   callInd
+              gosub   jumpP0
               goto    90$           ; not good
               spopnd                ; drop return to digit input
               golong  RTNP2         ; accept

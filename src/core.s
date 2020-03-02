@@ -337,7 +337,7 @@ jumpPacked:   c=c+c   x
               csr     m
               csr     m
               rcr     -3
-callInd:      gotoc
+              gotoc
 
 ;;; **********************************************************************
 ;;;
@@ -394,11 +394,11 @@ gosubAlign4:  c=stk
 ;;;
 ;;; **********************************************************************
 
-              .public dropRTNP2, RTNP2, jumpP1
+              .public dropRTNP2, RTNP2, jumpP0, jumpP1
 dropRTNP2:    spopnd
 RTNP2:        c=stk
 jumpP1:       c=c+1   m
-              gotoc
+jumpP0:       gotoc
 
 ;;; **********************************************************************
 ;;;

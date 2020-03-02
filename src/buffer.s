@@ -683,12 +683,14 @@ hostedBufferSetup:
 ;;; If it is not there, it can be created using createBufHosted.
 ;;; !! NOTE: This routine assumes that the hosted buffer does not exist !!
 ;;;
+;;; In: C[1:0] = size of buffer
+;;;     N[1:0] = buffer number 0-127
+;;;
 ;;; If out of memory, returns to (P+1)
 ;;; If successful, returns to (P+2) with:
-;;;      B.X= the location of the newly added space
-;;;      A.X= buffer header address
-;;;      DADD= buffer header address
-;;; Uses: A, B, C, G, DADD, S7, active PT, +2 sub levels
+;;;      A.X = hosted buffer header address
+;;;      DADD = hosted buffer header
+;;; Uses: A, B, C, N, G, DADD, S7, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
@@ -703,15 +705,28 @@ newHostedBuffer:
               rcr     4
               c=0     xs            ; C.X= size of shell stack
               c=c+1   x             ; add one for buffer header
-              golong  growBuffer
+              gosub   growBuffer
+              rtn
+              c=b     x
+              dadd=c                ; select header register
+              c=n
+              rcr     2             ; C[13:12]= buffer number
+              pt=     11
+              c=g                   ; C[11:10]= buffer size
+              data=c                ; write buffer header
+              abex    x             ; A.X= address of buffer header
+              golong  RTNP2
 
 ;;; **********************************************************************
 ;;;
 ;;; chkbufHosted - find a hosted buffer
 ;;;
 ;;; Locate a secondary buffer.
+;;;
 ;;; In: C[1:0]= buffer number
-;;; Out: A.X= buffer header address (selected)
+;;; If not found, return to (P+1)
+;;; If found, return to (P+2) with:
+;;;   A.X= buffer header address (selected)
 ;;; Uses: A, C, B.X, N, active PT=12, +1 sub level
 ;;;
 ;;; **********************************************************************

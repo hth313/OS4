@@ -140,6 +140,15 @@ RTNP2:        .equlab 0x4d18
 
 ;;; **********************************************************************
 ;;;
+;;; Hosted buffers.
+;;;
+;;; **********************************************************************
+
+#define SeedBuffer       0             ; Random number seed, used by Boost
+
+
+;;; **********************************************************************
+;;;
 ;;; System buffer status flags. These flags are held in the buffer
 ;;; header.
 ;;;

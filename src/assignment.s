@@ -218,12 +218,12 @@ testAssignBit10:
               rtn                   ; (P+1) no secondary assignments, return to (P+1)
                                     ;   as not assigned
               b=a     x             ; B.X= address of buffer header
-              acex                  ; A.X= assignment area
-              c=0     x
+              a=0     x
               ?s1=1                 ; shifted?
               gonc    9$            ; no
-              c=c+1   x             ; yes, step to register with shifted bits
-9$:           dadd=c
+              a=a+1   x             ; yes, step to register with shifted bits
+9$:           c=a+c   x
+              dadd=c
               c=data
               a=c
               c=m

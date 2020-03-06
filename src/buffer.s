@@ -723,10 +723,10 @@ newHostedBuffer:
 ;;;
 ;;; Locate a secondary buffer.
 ;;;
-;;; In: C[1:0]= buffer number
+;;; In: C.X= buffer number
 ;;; If not found, return to (P+1)
 ;;; If found, return to (P+2) with:
-;;;   A.X= buffer header address (selected)
+;;;   A.X= hosted buffer header address (selected)
 ;;; Uses: A, C, B.X, N, active PT=12, +1 sub level
 ;;;
 ;;; **********************************************************************

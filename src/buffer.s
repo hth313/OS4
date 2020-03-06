@@ -707,11 +707,19 @@ newHostedBuffer:
               c=c+1   x             ; add one for buffer header
               gosub   growBuffer
               rtn
-              c=b     x
+              c=0     m
+              pt=     8
+              c=g
+              a=c     m             ; A[9:8]= size of this buffer
+                                    ; rest of A.M cleared
+              c=data
+              c=a+c   m             ; update hosted buffer size
+              data=c
+              c=b     x             ; C.X= address of hosted buffer header
               dadd=c                ; select header register
               c=n
               rcr     2             ; C[13:12]= buffer number
-              pt=     11
+              pt=     10
               c=g                   ; C[11:10]= buffer size
               data=c                ; write buffer header
               abex    x             ; A.X= address of buffer header

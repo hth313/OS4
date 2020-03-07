@@ -91,7 +91,7 @@ Text1:        .equ    0xf1
 ;;;      S6=1 implies a secondary XROM was found:
 ;;;      N[6:3]= points to secondary FAT header
 ;;;      B[6:3]= points to the XROM page address (X000)
-;;;      C[2:0]= sequence number of secondary
+;;;      A[2:0]= sequence number of secondary
 ;;;      Note: Active bank set to where the secondary is!
 ;;;
 ;;; Uses: M, A, B, C, G, N, STATUS, ptr P, REG 9,
@@ -362,7 +362,7 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               c=c+1   m
               c=c+1   m             ; C[6:3]= point to start index
               cxisa
-              c=a+c   x             ; C.X= secondary index
+              a=a+c   x             ; A.X= secondary index
               rtn
 
 50$:

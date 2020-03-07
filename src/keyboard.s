@@ -487,7 +487,7 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
               a=c     x
               cxisa
               ?a#0    x             ; extended FAT?
-              gonc    invokeSecondary ; yes
+              gonc    invokeSecondary10 ; yes
               rcr     2             ; no, a 2-byte instruction
               acex    x
               rcr     -2            ; C[3:0]= complete 2-byte instruction
@@ -505,12 +505,13 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
 ;;; give NONEXISTENT error unless NULLed).
 ;;;
 ;;; In: C[6]= page address
-;;;     C.X - secondary function identity
+;;;     A.X - secondary function identity
 ;;;
 ;;; **********************************************************************
 
-invokeSecondary:
+invokeSecondary10:
               a=c     x             ; A.X= secondary index
+invokeSecondary:
               gosub   secondaryAddress
               goto    10$           ; (P+1) function not available(?)
               golong  foundXXROM

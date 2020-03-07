@@ -23,6 +23,9 @@ Text1:        .equ    0xf1
 ;;;   .con  .low12 next       ; points to next secondary FAT header,
 ;;;                           ;     or 0 to mark end
 ;;;   .con  entries           ; number of entries in this header table
+;;;                           ;  The table can be shorter, you can reserve
+;;;                           ;  entries for the future that way, also
+;;;                           ;  adjust startIndex for following tables!!
 ;;;   .con  jprefix           ; the XROM j that acts as the prefix for
 ;;;                           ;     this secondary FAT (when stored in program)
 ;;;   .con  startIndex        ; first entry is encoded as sub index # for XROM j
@@ -248,17 +251,15 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
               goto    XSARO22
 
 50$:          c=b     m
+              gosub   resetBank
+              c=b     m
               rcr     4             ; C[6:3]= secondary FAT header
               cxisa                 ; read the next word
               ?c#0    x             ; end?
-              gonc    55$           ; yes
+              gonc    SARO15        ; yes, look at next ROM
               gosub   unpack
               rcr     -4
               goto    30$
-
-55$:          c=b     m
-              gosub   resetBank
-              goto    SARO15        ; next ROM
 
 ;;; Look at next entry in the table
 SARO20:       pt=     1             ; C[6:3]_LBL addr
@@ -358,12 +359,15 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               csr                   ; C[2:0]= secondary instruction offset
               a=c     x             ; A[2:0]= secondary instruction offset
               c=n
+              gosub   resetBank
+              c=n
               c=c+1   m
               c=c+1   m
               c=c+1   m             ; C[6:3]= point to start index
               cxisa
               a=a+c   x             ; A.X= secondary index
-              rtn
+              c=c+1   m
+              gotoc                 ; enable bank again and return
 
 50$:
 ; * Next two instructions (PT=7,LC 0) may not be necessary.

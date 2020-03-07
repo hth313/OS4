@@ -460,18 +460,18 @@ unpack:       csr     m
 
               .section code, reorder
               .public noRoom, noSysBuf, ensureHPIL, ensure41CX
-noRoom:       gosub   errorMessl
+noRoom:       gosub   errorMessage
               .messl  "NO ROOM"
               goto    errorExit
 
-noSysBuf:     gosub   errorMessl
+noSysBuf:     gosub   errorMessage
               .messl  "NO SYSBUF"
               goto    errorExit
 
-              .public displayError, errorMessl, errorExit
+              .public displayError, errorMessage, errorExit
 displayError: gosub   MESSL
               .messl  " ERR"
-errorMessl:   gosub   ERRSUB
+errorMessage: gosub   ERRSUB
 setMessl:     gosub   CLLCDE
               golong  MESSL
 
@@ -491,7 +491,7 @@ ensureDrive:  c=0
               gosub   CHKCST
               ?c#0
               goc     ensureHPIL
-              gosub   errorMessl
+              gosub   errorMessage
               .messl  "NO DRIVE"
 errorExitPop: spopnd                ; defensive measure
                                     ; not strictly needed, but probably a good
@@ -506,7 +506,7 @@ ensureHPIL:   ldi     28            ; HP-IL XROM Id
               cxisa                 ; fetch XROM Id from 7000
               ?a#c    x
               rtnnc
-              gosub errorMessl
+              gosub errorMessage
               .messl "NO HP-IL"
               goto    errorExitPop
 
@@ -529,7 +529,7 @@ ensure41CX:   ldi     25
               cxisa                 ; fetch XROM Id from 3000
               ?a#c    x
               rtnnc
-              gosub   errorMessl
+              gosub   errorMessage
               .messl  "NO 41CX OS"
               goto    errorExitPop
 
@@ -555,7 +555,7 @@ versionCheck: a=c     x
               goc     10$           ; no
               a=a-c   x             ; check minor version
               rtnc                  ; OK
-10$:          gosub   errorMessl
+10$:          gosub   errorMessage
               .messl  "OLD OS4"
               goto    errorExitPop
 
@@ -616,7 +616,7 @@ versionCheck: a=c     x
               golong  NXBYTP        ; 0x4f24
               golong  NXBYT         ; 0x4f26
               golong  noRoom        ; 0x4f28
-              golong  errorMessl    ; 0x4f2a
+              golong  errorMessage  ; 0x4f2a
               golong  errorExit     ; 0x4f2c
               golong  clearSystemDigitEntry ; 0x4f2e
               golong  reclaimSystemBuffer ; 0x4f30

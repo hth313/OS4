@@ -731,29 +731,31 @@ newHostedBuffer:
 ;;;
 ;;; Locate a secondary buffer.
 ;;;
-;;; In: C.X= buffer number
+;;; In: C[1:0]= buffer number
 ;;; If not found, return to (P+1)
 ;;; If found, return to (P+2) with:
 ;;;   A.X= hosted buffer header address (selected)
-;;; Uses: A, C, B.X, N, active PT=12, +1 sub level
+;;; Uses: A, C, B.X, G, active PT, +1 sub level
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
               .public chkbufHosted
-chkbufHosted: n=c                   ; N.X= buffer number we are looking for
+chkbufHosted: pt=     0
+              g=c                   ; G= buffer number we are looking for
               gosub   hostedBufferSetup
               rtn                   ; no buffer
-              c=n                   ; C.X= buffer number we are looking for
-              bcex    x             ; B.X= buffer number we are looking for
+              pt=     0
+              c=g                   ; C[1:0]= buffer number we are looking for
+              bcex    x             ; B[1:0]= buffer number we are looking for
+              pt=     1
 10$:          acex    x             ; C.X= buffer header address
               dadd=c
               acex    x
               c=data                ; read a buffer header
-              rcr     12
-              c=0     xs            ; C.X= buffer identity
+              rcr     12            ; C[1:0]= buffer identity
               abex    x             ; A.X= buffer we are looking for
-              ?a#c    x             ; is this the buffer we are looking for?
+              ?a#c    wpt           ; is this the buffer we are looking for?
               gonc    20$           ; yes
               abex    x             ; A.X= buffer header address
                                     ; B.X= buffer we are looking for

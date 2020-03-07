@@ -93,7 +93,29 @@ reclaimHostedBuffer .equlab 0x4f6c
 newHostedBuffer .equlab 0x4f6e
 // Temporary until addresses are finally fixed
 //              .extern RTNP2
+jumpC5:       .equlab 0x4d00
+jumpC4:       .equlab 0x4d01
+jumpC3:       .equlab 0x4d02
+jumpC2:       .equlab 0x4d03
+jumpC1:       .equlab 0x4d04
+jumpC0:       .equlab 0x4d05
+jumpPacked:   .equlab 0x4d08
+golAlign4:    .equlab 0x4d0f
+gosubAlign4:  .equlab 0x4d12
+dropRTNP2     .equlab 0x4d17
 RTNP2:        .equlab 0x4d18
+jumpP1:       .equlab 0x4d19
+jumpP0:       .equlab 0x4d1a
+dropRTNP3:    .equlab 0x4d1b
+RTNP3:        .equlab 0x4d1c
+jumpP2:       .equlab 0x4d1d
+unpack5:      .equlab 0x4d1f
+unpack4:      .equlab 0x4d20
+unpack3:      .equlab 0x4d21
+unpack2:      .equlab 0x4d22
+unpack1:      .equlab 0x4d23
+unpack0:      .equlab 0x4d24
+unpack:       .equlab 0x4d25
 #endif
 
 ;;; **********************************************************************

@@ -102,7 +102,7 @@ Text1:        .equ    0xf1
 
               .section code, reorder
               .public XASRCH
-              .extern jumpP2, unpack, unpack0, unpack1, unpack3, unpack4
+              .extern jumpP1, jumpP2, unpack, unpack0, unpack1, unpack3, unpack4
               .extern NXBYTP, jumpC5, RTNP2, gotoFunction
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
@@ -233,13 +233,17 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
               bcex    m             ; B[10:7]= address of next secondary FAT header
               c=b     m
               rcr     4             ; C[6:3]= address of secondary FAT header
-              c=c+1   m             ; C[6:3] += 5
+              c=c+1   m             ; C[6:3] += 4
               c=c+1   m
               c=c+1   m
-              gosub   jumpP2        ; call bank switcher
-              c=c-1   m             ; step back to point to seconday
-                                    ;   FAT location entry
-              gosub   unpack0       ; C[6:3]= address of secondary FAT
+              c=c+1   m
+              cxisa
+              a=c                   ; A.X= packed address of secondary FAT
+                                    ; A[6]= page
+              gosub   jumpP1        ; call bank switcher
+              acex                  ; C.X= packed address of secondary FAT
+                                    ; C[6]= page
+              gosub   unpack        ; C[6:3]= address of secondary FAT
               pt=     1
               goto    XSARO22
 
@@ -473,31 +477,39 @@ secondaryAddress10:
               rtn                   ; (P+1) no secondaries
               acex    m
 10$:          c=c+1   m
-              cxisa                 ; C.X= number of entries on this secondary
+              cxisa                 ; C.X= number of entries on this secondary table
               ?a<c    x             ; in range?
               goc     20$           ; yes
-              a=a-c   x             ; deduct entries in this secondary
+              a=a-c   x             ; subtract entries in this secondary table
               c=c-1   m
               cxisa
-              ?c#0    x             ; do we have a next secondary?
+              ?c#0    x             ; do we have a next secondary table?
               rtnnc                 ; no, does not exist
               gosub   unpack        ; read next pointer
               goto    10$
 
 20$:          ?a#0    s             ; coming from secondaryProgram?
-              gonc    lookupFAT0    ; no
+              gonc    lookupFAT     ; no
               c=c-1   m             ; yes
               acex    m             ; A[6:3]= the secondary FAT header
               goto    toRTNP2
-lookupFAT0:   a=c     m             ; A[6:3]= FAT header pointer
+lookupFAT:    c=c+1   m
               c=c+1   m
               c=c+1   m
-              gosub   jumpP2        ; switch bank
-              acex
+              cxisa                 ; C.X= packed pointer to secondary FAT
+              c=c+c   x
+              c=c+c   x             ; C.X= page address of secondary FAT
+              a=c     m             ; A[6:3]= address in secondary FAT header
+              rcr     -3            ; C[5:3]= page address of secondary FAT
+              acex    m             ; A[5:3]= page address of secondary FAT
+                                    ; C[6:3]= address in secondary FAT header
+              gosub   jumpP1        ; switch bank
+              pt=     5
+              acex    wpt           ; C[6:3]= start of secondary FAT
+                                    ; C.X= index
               c=c+c   x             ; index * 2
               acex    x
-              gosub   unpack3       ; get start location of FAT
-lookupFAT:    rcr     3
+              rcr     3
               c=a+c   x             ; add offset to entry
               rcr     -3
               cxisa
@@ -581,6 +593,7 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               rtn                   ; (P+1) not found
               acex    m
 10$:          c=c+1   m
+              m=c                   ; M= secondary FAT header pointer + 1
               c=c+1   m
               cxisa
               ?a#c    x             ; the prefix we are looking for?
@@ -594,8 +607,6 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               goto    10$
 
 20$:          c=c+1   m
-              m=c                   ; M= secondary FAT pointer
-
               ?s13=1                ; running?
               goc     25$           ; yes
               ?s4=1                 ; no, single stepping?
@@ -608,7 +619,7 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               a=c     x
               ldi     Text1
               ?a#c    x             ; argument there?
-              golc    ERRNE         ; no, better flag it as an error
+              goc     toERRNE       ; no, better flag it as an error
               abex
               gosub   INCAD
               gosub   PUTPC         ; store new pc (skip over Text1 instruction)
@@ -621,12 +632,11 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               regn=c  15
 30$:          gosub   GTBYT         ; get argument
 35$:          c=0     xs
-              c=c+c   x
               a=c     x             ; A.X= index in FAT
-              c=m
-              gosub   jumpP2        ; switch bank
-              c=m
-              gosub   unpack1       ; location of the FAT
+              c=m                   ; C[6:3]= secondary FAT header pointer + 1
+              cxisa                 ; C.X= number of functions
+              ?a<c    x             ; in range?
+toERRNE:      golnc   ERRNE         ; no, flag as error
               gosub   lookupFAT
               nop                   ; needed as it returns to (P+2)
               golong  gotoFunction
@@ -695,4 +705,4 @@ inProgramSecondary:
               cxisa                 ; C.X= number of entries
               ?a<c    x
               rtnnc                 ; out of range
-              golong  lookupFAT0
+              golong  lookupFAT

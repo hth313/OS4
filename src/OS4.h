@@ -88,11 +88,12 @@ setTimeout:   .equlab 0x4f62
 clearTimeout: .equlab 0x4f64
 keyDispatch:  .equlab 0x4f66
 ensureDrive:  .equlab 0x4f68
-chkbufHosted  .equlab 0x4f6a
-reclaimHostedBuffer .equlab 0x4f6c
-newHostedBuffer .equlab 0x4f6e
-// Temporary until addresses are finally fixed
-//              .extern RTNP2
+chkbufHosted: .equlab 0x4f6a
+reclaimHostedBuffer: .equlab 0x4f6c
+newHostedBuffer: .equlab 0x4f6e
+growHostedBuffer: .equlab 0x4f70
+shrinkHostedBuffer: .equlab 0x4f72
+
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

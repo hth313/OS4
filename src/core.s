@@ -594,6 +594,7 @@ versionCheck: a=c     x
               .extern clearSecondaryAssignments, runSecondary
               .extern setTimeout, clearTimeout, activeApp
               .extern chkbufHosted, reclaimHostedBuffer, newHostedBuffer
+              .extern growHostedBuffer, shrinkHostedBuffer
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -652,6 +653,8 @@ versionCheck: a=c     x
               golong  chkbufHosted  ; 0x4f6a
               golong  reclaimHostedBuffer ; 0x4f6c
               golong  newHostedBuffer ; 0x4f6e
+              golong  growHostedBuffer ; 0x4f70
+              golong  shrinkHostedBuffer ; 0x4f72
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

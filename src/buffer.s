@@ -383,10 +383,10 @@ allocScratch: rcr     -7
 ;;;     C.X= offset where to add registers
 ;;;     G= number of registers to add
 ;;; Out: Returns to P+1 if it is not possible to grow the buffer
-;;;      Returns to P+2 if successful
-;;;      B.X= the location of the newly added space
-;;;      A.X= buffer header address
-;;;      DADD= buffer header address
+;;;      Returns to P+2 if successful with
+;;;        B.X= the location of the newly added space
+;;;        A.X= buffer header address
+;;;        DADD= buffer header address
 ;;; Uses: A, B, C, G, DADD, S7, active PT, +1 sub levels
 ;;;
 ;;; **********************************************************************
@@ -654,7 +654,8 @@ assignArea10: c=data                ; read buffer header
 ;;;      Returns to (P+1) if the hosted buffer area exists with:
 ;;;          A.X= start of hosted buffer area
 ;;;          A.M= number of registers in area - 1
-;;; Uses: A[12:0], C, PT, DADD, +1 sub level
+;;;          B.X= system header address
+;;; Uses: A[12:0], B.X, C, PT, DADD, +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -663,6 +664,7 @@ hostedBufferSetup:
               gosub   sysbuf
               rtn                   ; no system buffer
               c=data                ; read buffer header
+              b=a     x             ; B.X= system buffer header address
               rcr     4
               c=0     xs            ; C.X= size of shell stack
               c=c+1   x             ; add one for buffer header
@@ -735,7 +737,8 @@ newHostedBuffer:
 ;;; If not found, return to (P+1)
 ;;; If found, return to (P+2) with:
 ;;;   A.X= hosted buffer header address (selected)
-;;; Uses: A, C, B.X, G, active PT, +1 sub level
+;;;   B[5:3] = system buffer header address
+;;; Uses: A, B, C, G, active PT, +1 sub level
 ;;;
 ;;; **********************************************************************
 
@@ -745,9 +748,12 @@ chkbufHosted: pt=     0
               g=c                   ; G= buffer number we are looking for
               gosub   hostedBufferSetup
               rtn                   ; no buffer
+              bcex    x             ; C.X= system buffer header
+              rcr     -3            ; C[5:3]= system buffer header
               pt=     0
               c=g                   ; C[1:0]= buffer number we are looking for
-              bcex    x             ; B[1:0]= buffer number we are looking for
+              bcex                  ; B[1:0]= buffer number we are looking for
+                                    ; B[5:3]= system buffer header
               pt=     1
 10$:          acex    x             ; C.X= buffer header address
               dadd=c
@@ -768,7 +774,7 @@ chkbufHosted: pt=     0
               gonc    10$
               rtn                   ; no more
 
-20$:          abex    x             ; A.X= buffer header address
+20$:          abex    x             ; A.X= hosted buffer header address
               golong  RTNP2         ; done, return to (P+2)
 
 ;;; **********************************************************************
@@ -831,8 +837,98 @@ releaseHostedBuffers:
               gonc    10$
               rtn
 
+;;; **********************************************************************
+;;;
+;;; growHostedBuffer - add space to a hosted buffer
+;;;
+;;; This routine expects inputs as after a call to chkbufHosted.
+;;; In part this is because both chkbufHosted and growBuffer (which is the
+;;; work-horse) both takes input in G. It is not for sure if it is even
+;;; desirable to combine the routines, the user may need to consult the
+;;; buffer before deciding to grow it and decide on where.
+;;; As usual, we check for that there is space and the system buffer
+;;; does not grow too large, but there is no sanity checking done on
+;;; the actual input. You are expected to pass valid pointers and
+;;; offsets.
+;;;
+;;; In: A.X= hosted buffer header address
+;;;     B[5:3] = system buffer header address
+;;;     C.X= offset where to add registers
+;;;     G= number of registers to add
+;;; Out: Returns to P+1 if it is not possible to grow the buffer
+;;;      Returns to P+2 if successful with
+;;;        B.X= the location of the newly added space
+;;;        A.X= hosted buffer header address
+;;;        DADD= hosted buffer header address
+;;; Uses: A, B, C, G, N, DADD, S7, active PT, +2 sub levels
+;;;
+;;; **********************************************************************
 
-;;; growHostedBuffer
+              .section code, reorder
+              .public growHostedBuffer
+growHostedBuffer:
+              b=a     x             ; B.X= hosted buffer header address
+              a=a+c   x             ; A.X= address where to add space
+              c=b
+              n=c                   ; N.X= hosted buffer header address
+              rcr     3             ; C.X= system buffer header address
+              a=a-c   x             ; A.X= offset where to add space
+              acex    x             ; C.X= offset where to add space
+                                    ; A.X= system buffer header address
+              gosub   growBuffer
+              rtn                   ; failure
+              c=0
+              pt=     10
+              c=g
+              a=c                   ; A[11:10]= number of registers to add,
+                                    ; rest of A.M is zero
+              c=n
+              a=c     x             ; A.X= hosted buffer header address
+              dadd=c                ; select hosted buffer header
+              c=data                ; C= hosted buffer header
+              c=a+c   m             ; update size of hosted buffer
+              data=c
+              golong  RTNP2
 
+;;; **********************************************************************
+;;;
+;;; shrinkHostedBuffer - remove space from a hosted buffer
+;;;
+;;; In: A.X= hosted buffer header address
+;;;     B[5:3] = system buffer header address
+;;;     C.X= offset where to add registers
+;;;     G= number of registers to add
+;;; Out: Returns to P+1 if it is not possible to grow the buffer
+;;;      Returns to P+2 if successful with
+;;;        A.X= hosted buffer header address
+;;;        C= hosted buffer header
+;;;        DADD= hosted buffer header address
+;;; Uses: A, B, C, G, M, N, DADD, S7, active PT, +2 sub levels
+;;;
+;;; **********************************************************************
 
-;;; shrinkHostedBuffer
+              .section code, reorder
+              .public shrinkHostedBuffer
+shrinkHostedBuffer:
+              b=a     x             ; B.X= hosted buffer header address
+              a=a+c   x             ; A.X= address where to remove space
+              c=b
+              n=c                   ; N.X= hosted buffer header address
+              rcr     3             ; C.X= system buffer header address
+              a=a-c   x             ; A.X= offset where to remove space
+              acex    x             ; C.X= offset where to remove space
+                                    ; A.X= system buffer header address
+              gosub   shrinkBuffer
+              c=0
+              pt=     10
+              c=g
+              a=c                   ; A[11:10]= number of registers to add,
+                                    ; rest of A.M is zero
+              c=n
+              a=c     x             ; A.X= hosted buffer header address
+              dadd=c                ; select hosted buffer header
+              c=data                ; C= hosted buffer header
+              acex    m
+              c=a-c   m             ; update size of hosted buffer
+              data=c
+              rtn

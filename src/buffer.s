@@ -93,8 +93,8 @@
 
 ;;; **********************************************************************
 ;;;
-;;; sysbuf - locate the system buffer, number 15
-;;; chkbuf - locate buffer with ID in C.X
+;;; systemBuffer - locate the system buffer, number 15
+;;; findBuffer - locate buffer with ID in C.X
 ;;;
 ;;; If not found, return to (P+1)
 ;;; If found, return to (P+2) with:
@@ -105,7 +105,7 @@
 ;;;   C[2:0] = part of buffer header
 ;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +0 sub levels
 ;;;
-;;; Note: For chkbuf, buffer number in C[0] and C[2:1] must be zero!!!
+;;; Note: For findBuffer, buffer number in C[0] and C[2:1] must be zero!!!
 ;;;       Use 'ldi' or 'c=0 x' to ensure that.
 ;;;
 ;;; This routine is called at every light sleep wake up, so it has to
@@ -121,9 +121,9 @@
 ;;; **********************************************************************
 
               .section code, reorder
-              .public sysbuf, chkbuf
-sysbuf:       ldi     15
-chkbuf:       dadd=c                ; select chip 0
+              .public systemBuffer, findBuffer
+systemBuffer: ldi     15
+findBuffer:   dadd=c                ; select chip 0
               pt=     12
               rcr     2
               ldi     0xc0 - 1
@@ -157,9 +157,9 @@ chkbuf:       dadd=c                ; select chip 0
 ;;; **********************************************************************
 ;;;
 ;;; ensureBuffer - find or create an empty buffer
-;;; ensureSysBuf - same for system buffer
+;;; ensureSystemBuffer - same for system buffer
 ;;;
-;;; Like chkbuf, but will create the buffer with only a header if it
+;;; Like findBuffer, but will create the buffer with only a header if it
 ;;; does not previously exist.
 ;;;
 ;;; In: C.X - buffer ID
@@ -174,9 +174,10 @@ chkbuf:       dadd=c                ; select chip 0
 ;;;
 ;;; **********************************************************************
 
-              .public ensureBuffer, ensureSysBuf
-ensureSysBuf: ldi     15
-ensureBuffer: gosub   chkbuf
+              .public ensureBuffer, ensureSystemBuffer
+ensureSystemBuffer:
+              ldi     15
+ensureBuffer: gosub   findBuffer
               goto    10$           ; (P+1) need to create it
               goto    relayRTNP2    ; (P+2) already exists
 10$:          ?a<b    x             ; have we reched chainhead?
@@ -208,7 +209,7 @@ ensureBuffer: gosub   chkbuf
 
               .public findKAR2
               .extern RTNP2
-findKAR2:     gosub   sysbuf
+findKAR2:     gosub   systemBuffer
               rtn                   ; no system buffer, return to P+1
               c=data
               rcr     7
@@ -239,7 +240,7 @@ relayRTNP2:   golong  RTNP2         ; return to (P+2)
 
               .public reclaimSystemBuffer
 reclaimSystemBuffer:
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn
               c=data
               c=0     s
@@ -350,7 +351,7 @@ allocScratch: rcr     -7
               a=c
               rcr     8
               bcex    s             ; B.S= # of registers to allocate
-              gosub   ensureSysBuf
+              gosub   ensureSystemBuffer
               rtn                   ; (P+1) no room
               c=data                ; read buffer header
               pt=     7
@@ -487,7 +488,7 @@ growBuffer10: gosub   buffer1
               .public clearScratch
               .section code, reorder
 clearScratch:
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
               c=data                ; (P+2) read buffer header
               pt=     7
@@ -605,7 +606,7 @@ buffer2:      c=0     m
 
               .section code, reorder
               .public scratchArea
-scratchArea:  gosub   sysbuf
+scratchArea:  gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
               gosub   scratchOffset
               c=a+c   x
@@ -628,7 +629,7 @@ scratchArea:  gosub   sysbuf
 
               .section code, reorder
               .public assignArea, assignArea10
-assignArea:   gosub   sysbuf
+assignArea:   gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
               b=a     x             ; B.X= buffer header address
 assignArea10: c=data                ; read buffer header
@@ -661,7 +662,7 @@ assignArea10: c=data                ; read buffer header
 
               .section code, reorder
 hostedBufferSetup:
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn                   ; no system buffer
               c=data                ; read buffer header
               b=a     x             ; B.X= system buffer header address
@@ -681,7 +682,7 @@ hostedBufferSetup:
 ;;;
 ;;; newHostedBuffer - reserve space for a hosted buffer.
 ;;;
-;;; Typical use is to call chkbufHosted to find a specific buffer.
+;;; Typical use is to call findBufferHosted to find a specific buffer.
 ;;; If it is not there, it can be created using createBufHosted.
 ;;; !! NOTE: This routine assumes that the hosted buffer does not exist !!
 ;;;
@@ -701,7 +702,7 @@ hostedBufferSetup:
 newHostedBuffer:
               pt=     0
               g=c                   ; G= number of registers to reserve
-              gosub   ensureSysBuf
+              gosub   ensureSystemBuffer
               rtn
               c=data                ; read buffer header
               rcr     4
@@ -729,7 +730,7 @@ newHostedBuffer:
 
 ;;; **********************************************************************
 ;;;
-;;; chkbufHosted - find a hosted buffer
+;;; findBufferHosted - find a hosted buffer
 ;;;
 ;;; Locate a secondary buffer.
 ;;;
@@ -743,8 +744,9 @@ newHostedBuffer:
 ;;; **********************************************************************
 
               .section code, reorder
-              .public chkbufHosted
-chkbufHosted: pt=     0
+              .public findBufferHosted
+findBufferHosted:
+              pt=     0
               g=c                   ; G= buffer number we are looking for
               gosub   hostedBufferSetup
               rtn                   ; no buffer
@@ -793,7 +795,7 @@ chkbufHosted: pt=     0
               .section code, reorder
               .public reclaimHostedBuffer
 reclaimHostedBuffer:
-              gosub   chkbufHosted
+              gosub   findBufferHosted
               rtn
               c=data                ; clear upper bit in buffer
               rcr     -2
@@ -894,11 +896,11 @@ packHostedBuffers:
 ;;;
 ;;; growHostedBuffer - add space to a hosted buffer
 ;;;
-;;; This routine expects inputs as after a call to chkbufHosted.
-;;; In part this is because both chkbufHosted and growBuffer (which is the
-;;; work-horse) both takes input in G. It is not for sure if it is even
-;;; desirable to combine the routines, the user may need to consult the
-;;; buffer before deciding to grow it and decide on where.
+;;; This routine expects inputs as after a call to findBufferHosted.
+;;; In part this is because both findBufferHosted and growBuffer (which
+;;; is the work-horse) both takes input in G. It is not for sure if it is
+;;; even desirable to combine the routines, the user may need to consult
+;;; the buffer before deciding to grow it and decide on where.
 ;;; As usual, we check for that there is space and the system buffer
 ;;; does not grow too large, but there is no sanity checking done on
 ;;; the actual input. You are expected to pass valid pointers and

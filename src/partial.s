@@ -288,9 +288,9 @@ dispatch:     gosub   ENCP00
 
               .section code, reorder
               .public XABTSEQ
-              .extern sysbuf
+              .extern systemBuffer
 XABTSEQ:      gosub   ENCP00
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    10$
               c=data
               cstex

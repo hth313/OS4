@@ -29,7 +29,7 @@
 
               .section code, reorder
               .public setTimeout
-              .extern sysbuf, RTNP2
+              .extern systemBuffer, RTNP2
 setTimeout:   bcex                  ; B= timeout
               ldi     26            ; Time module XROM number
               a=c     x
@@ -56,7 +56,7 @@ setTimeout:   bcex                  ; B= timeout
 
               c=b
               wsint                 ; write & start interval timer
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    clearTimeout  ; (P+1) no system buffer
               c=data                ; set Flag_IntervalTimer
               cstex
@@ -76,7 +76,7 @@ setTimeout:   bcex                  ; B= timeout
               .public clearTimeout
 clearTimeout: gosub   ENTMR
               stpint                ; stop interval timer
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn
               c=data                ; read buffer header
               cstex                 ; clear Flag_IntervalTimer
@@ -99,7 +99,7 @@ clearTimeout: gosub   ENTMR
 
               .public checkTimeout
               .extern noTimeout, topShell, jumpC5
-checkTimeout: gosub   sysbuf
+checkTimeout: gosub   systemBuffer
               goto    50$           ; (P+1) no system buffer
               c=data                ; read buffer header
               cstex

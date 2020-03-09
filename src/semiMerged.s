@@ -30,11 +30,11 @@ Text1:        .equ    0xf1
 
               .section code, reorder
               .public doPRGM
-              .extern sysbuf, LocalMEMCHK, noSysBuf, jumpP1
+              .extern systemBuffer, LocalMEMCHK, noSysBuf, jumpP1
               .extern inProgramSecondary, resetBank, secondaryProgram
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    900$          ; (P+1) no system buffer
               c=data                ; (P+2) read buffer header
               st=c
@@ -414,7 +414,7 @@ noSysBuf0:    spopnd
               regn=c  14
               golong  noSysBuf
 
-argument:     gosub   sysbuf        ; ensure we have the system buffer
+argument:     gosub   systemBuffer  ; ensure we have the system buffer
               goto    noSysBuf0     ; (P+1) no buf
               c=data                ; read buffer header
               st=c                  ; ST= system buffer flags

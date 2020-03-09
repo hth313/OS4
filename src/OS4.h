@@ -38,7 +38,7 @@
 activateShell: .equlab 0x4f00
 exitShell:    .equlab 0x4f02
 reclaimShell: .equlab 0x4f04
-chkbuf:       .equlab 0x4f06
+findBuffer:   .equlab 0x4f06
 ensureBuffer: .equlab 0x4f08
 openSpace:    .equlab 0x4f0a
 findKAR2:     .equlab 0x4f0c
@@ -88,7 +88,7 @@ setTimeout:   .equlab 0x4f62
 clearTimeout: .equlab 0x4f64
 keyDispatch:  .equlab 0x4f66
 ensureDrive:  .equlab 0x4f68
-chkbufHosted: .equlab 0x4f6a
+findBufferHosted: .equlab 0x4f6a
 reclaimHostedBuffer: .equlab 0x4f6c
 newHostedBuffer: .equlab 0x4f6e
 growHostedBuffer: .equlab 0x4f70

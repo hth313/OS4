@@ -74,12 +74,12 @@
 
               .section code, reorder
               .public activateShell
-              .extern ensureSysBuf, insertShellB, insertShellC, noRoom
+              .extern ensureSystemBuffer, insertShellB, insertShellC, noRoom
 activateShell:
               c=stk                 ; get page
               stk=c
               gosub   shellHandle
-              gosub   ensureSysBuf
+              gosub   ensureSystemBuffer
               rtn                   ; (P+1) no room
 
 ;;; Search shell stack for shell handle in M[6:0]
@@ -365,7 +365,7 @@ unusedSlot:   pt=     6
 
               .section code, reorder
               .public exitShell, reclaimShell
-              .extern sysbuf
+              .extern systemBuffer
 
 exitShell:    s8=0
               goto exitReclaim10
@@ -376,7 +376,7 @@ exitReclaim10:
               c=stk                 ; get page
               stk=c
               gosub   shellHandle
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn                   ; no shell buffer, quick exit
               c=data                ; read buffer header
               pt=     13            ; reclaim system buffer
@@ -476,7 +476,7 @@ exitTransientApp:
               .section code, reorder
               .public hasActiveTransientApp
 hasActiveTransientApp:
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
               rcr     4
               c=0     xs
@@ -762,7 +762,7 @@ disableThisShell:
 ;;; **********************************************************************
 
               .section code, reorder
-shellSetup:   gosub   sysbuf
+shellSetup:   gosub   systemBuffer
               rtn                   ; no buffer, return to (P+1)
               c=data                ; read buffer header
               st=c
@@ -904,7 +904,7 @@ doDisplay:    gosub   topShell
 
               .section code, reorder
               .public displayDone
-displayDone:  gosub   sysbuf
+displayDone:  gosub   systemBuffer
               rtn
 setDisplayFlags:
               c=data                ; set display override flag
@@ -1043,7 +1043,7 @@ shellName:    gosub   unpack5
               .extern shrinkBuffer, clearScratch, packHostedBuffers
               .extern disableOrphanShellsDone
 disableOrphanShells:
-              gosub   sysbuf
+              gosub   systemBuffer
               rtn                   ; (P+1) no buffer
               st=c
               ?st=1   Flag_OrphanShells
@@ -1090,7 +1090,7 @@ disableOrphanShells:
 ;;; way (we do not take advantage of that we may be able to delete multiple
 ;;; registers in one shrinkBuffer operation), but it is not expected to
 ;;; happen all that often and is done once at power on.
-40$:          gosub   sysbuf
+40$:          gosub   systemBuffer
               goto    5$            ; (P+1) should not happen
 41$:          c=data                ; read buffer header
               rcr     3

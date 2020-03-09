@@ -18,7 +18,7 @@ CHKCST:       .equlab 0x7cdd
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              .extern sysbuf, doDisplay, doPRGM, disableOrphanShells
+              .extern systemBuffer, doDisplay, doPRGM, disableOrphanShells
 
               .section Header4
               rst kb                ; these three instructions
@@ -92,7 +92,7 @@ LocalMEMCHK:  gosub   MEMCHK
 ;;; Keep processing I/O and key down before going to light sleep
               .public noTimeout
               .extern checkTimeout
-ioLoop:       chk     kb            ; check key down while doing I/O
+ioLoop:       chk kb                ; check key down while doing I/O
               goc     bufferScan0
               ?f13=1                ; peripheral wants service?
               golc    checkTimeout  ; yes
@@ -276,7 +276,7 @@ noTakeOver:   golong  toWKUP20_SS0
 ;;; * marked as XROM 0,1 (an impossible XROM function), but ensure
 ;;; * that we are actually doing a prompting secondary.
 checkSecondaryTakeOver:
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    noTakeOver    ; (P+1) no system buffer
               st=c
               ?st=1   Flag_SEC_PROXY
@@ -583,7 +583,7 @@ versionCheck: a=c     x
 
               .section entry
               .extern activateShell, exitShell, reclaimShell
-              .extern chkbuf, ensureBuffer, growBuffer
+              .extern findBuffer, ensureBuffer, growBuffer
               .extern findKAR2
               .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
@@ -597,13 +597,13 @@ versionCheck: a=c     x
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
               .extern setTimeout, clearTimeout, activeApp
-              .extern chkbufHosted, reclaimHostedBuffer, newHostedBuffer
+              .extern findBufferHosted, reclaimHostedBuffer, newHostedBuffer
               .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
               golong  reclaimShell  ; 0x4f04
-              golong  chkbuf        ; 0x4f06
+              golong  findBuffer    ; 0x4f06
               golong  ensureBuffer  ; 0x4f08
               golong  growBuffer    ; 0x4f0a
               golong  findKAR2      ; 0x4f0c
@@ -654,7 +654,7 @@ versionCheck: a=c     x
               golong  clearTimeout  ; 0x4f64
               golong  keyDispatch   ; 0x4f66
               golong  ensureDrive   ; 0x4f68
-              golong  chkbufHosted  ; 0x4f6a
+              golong  findBufferHosted ; 0x4f6a
               golong  reclaimHostedBuffer ; 0x4f6c
               golong  newHostedBuffer ; 0x4f6e
               golong  growHostedBuffer ; 0x4f70

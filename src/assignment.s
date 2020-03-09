@@ -167,7 +167,8 @@ clearAssignment10:
 
               .section code, reorder
               .public testAssignBit
-              .extern assignArea, RTNP2, RTNP3, noRoom, ensureSysBuf, growBuffer
+              .extern assignArea, RTNP2, RTNP3, noRoom, ensureSystemBuffer
+              .extern growBuffer
 testAssignBit:
               s0=0                  ; usual behavior
 testAssignBit10:
@@ -248,7 +249,7 @@ testAssignBit10:
 ;;; * Create assignment area.
               .section code, reorder
 createAssignArea:
-              gosub   ensureSysBuf
+              gosub   ensureSystemBuffer
               goto    toNoRoom      ; (P+1) no room
               b=a     x             ; B.X= buffer header address
               c=data                ; read buffer header

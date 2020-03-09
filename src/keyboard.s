@@ -35,7 +35,7 @@ Text1:        .equ    0xf1
 
               .section code, reorder
               .public keyKeyboard, invokeSecondary
-              .extern sysbuf, jumpC1, jumpC2, jumpC4, jumpPacked
+              .extern systemBuffer, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell, unpack0, testAssignBit
               .extern secondaryAssignment, secondaryAddress
               .extern resetBank, secondaryProgram
@@ -338,7 +338,7 @@ foundXXROM:   acex                  ; C[6:3]= XADR
               acex    wpt
               rcr     4
               regn=c  8
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    noOperand     ; (P+1) should not happen
               c=data                ; set secondary proxy bit to indicate
               cstex                 ;  that we are doing secondary prompt handling
@@ -452,7 +452,7 @@ digitEntry:   a=c     x             ; A[1:0]= digit
 112$:         acex    x             ; C[1:0]= digit
               pt=     0
               g=c                   ; G= digit
-              gosub   sysbuf
+              gosub   systemBuffer
               goto    113$          ; (P+1) should not happen
               c=data                ; (P+2) set display override
               cstex

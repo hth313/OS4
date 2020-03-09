@@ -93,7 +93,7 @@ reclaimHostedBuffer: .equlab 0x4f6c
 newHostedBuffer: .equlab 0x4f6e
 growHostedBuffer: .equlab 0x4f70
 shrinkHostedBuffer: .equlab 0x4f72
-
+packHostedBuffers: .equlab 0x4f74
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

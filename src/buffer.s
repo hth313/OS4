@@ -784,7 +784,7 @@ chkbufHosted: pt=     0
 ;;; Reclaim a hosted buffer, typically called at power on by modules that
 ;;; want to retain a hosted buffer.
 ;;;
-;;; In: Nothing
+;;; In: C.X - buffer number bitwise ORed with 0x80
 ;;; Out: Nothing
 ;;; Uses: A, C, B.X, N, active PT=12, +2 sub levels
 ;;;
@@ -834,6 +834,59 @@ releaseHostedBuffers:
               c=0     m
               rcr     -3
               a=a-c   m             ; decrement register counter
+              gonc    10$
+              rtn
+
+;;; **********************************************************************
+;;;
+;;; packHostedBuffers - pack the hosted buffer area
+;;;
+;;; Remove all buffers marked for removal. Marking for removal is by
+;;; setting the highest bit in register to one.
+;;;
+;;; In: Nothing
+;;; Out: Nothing
+;;; Uses: A, B[12:0], C, M, G, DADD, PT, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public  packHostedBuffers
+packHostedBuffers:
+              gosub   hostedBufferSetup
+              rtn
+
+10$:          acex    x
+              dadd=c                ; select a hosted buffer header
+              acex    x
+              c=data                ; read hosted buffer header
+              a=c     s
+              a=a+c   s             ; is it marked for removal?
+              gonc    20$           ; no
+              pt=     10
+              g=c                   ; G= size of buffer to remove
+              c=b     x
+              dadd=c                ; select system buffer header
+              c=0
+              pt=     8
+              c=g
+              a=c     m             ; A[9:8]= size to reduce the area with
+              c=data
+              acex    m
+              c=a-c   m
+              data=c                ; write updated system buffer header
+              c=b     x
+              a=a-b   x
+              acex    x
+              gosub   shrinkBuffer
+              goto    packHostedBuffers
+
+20$:          rcr     10
+              c=0     xs            ; C.X= size of this buffer
+              a=a+c   x             ; advance pointer
+              c=0     m
+              rcr     -3
+              a=a-c   m
               gonc    10$
               rtn
 

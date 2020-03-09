@@ -79,6 +79,9 @@ lightWake:    ldi     0x2fd         ; PACH11
               golc    doPRGM        ; yes, we may need to display certain
                                     ; instructions in a custom way
               gosub   disableOrphanShells
+;;; Needed as all sub levels are consumed
+              .public disableOrphanShellsDone
+disableOrphanShellsDone:
               gosub   doDisplay     ; we may want to override the display
 
 ;;; This is a replacement for MEMCHK. It is called whenever we are going
@@ -111,7 +114,7 @@ toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              .extern releaseShells
+              .extern releaseShells, releaseHostedBuffers
 deepWake:     gosub   releaseShells
               goto    10$           ; no system buffer
               acex    x             ; C.X= system header address
@@ -132,6 +135,7 @@ deepWake:     gosub   releaseShells
               st=0    Flag_IntervalTimer
               cstex
               data=c
+              gosub   releaseHostedBuffers
 10$:          golong  DSWKUP+2
 
 
@@ -594,7 +598,7 @@ versionCheck: a=c     x
               .extern clearSecondaryAssignments, runSecondary
               .extern setTimeout, clearTimeout, activeApp
               .extern chkbufHosted, reclaimHostedBuffer, newHostedBuffer
-              .extern growHostedBuffer, shrinkHostedBuffer
+              .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -655,6 +659,7 @@ versionCheck: a=c     x
               golong  newHostedBuffer ; 0x4f6e
               golong  growHostedBuffer ; 0x4f70
               golong  shrinkHostedBuffer ; 0x4f72
+              golong  packHostedBuffers ; 0x4f74
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

@@ -1040,17 +1040,15 @@ shellName:    gosub   unpack5
 
               .section code, reorder
               .public disableOrphanShells
-              .extern shrinkBuffer, clearScratch
+              .extern shrinkBuffer, clearScratch, packHostedBuffers
+              .extern disableOrphanShellsDone
 disableOrphanShells:
               gosub   sysbuf
               rtn                   ; (P+1) no buffer
               st=c
               ?st=1   Flag_OrphanShells
-              goc     10$           ; yes
-5$:           gosub   clearScratch
-              golong  ENCP00        ; no, enable chip 0 and return
-
-10$:          c=data                ; load buffer header
+              gonc    5$            ; done
+              c=data                ; load buffer header
               st=0    Flag_OrphanShells
               c=st
               data=c                ; reset Flag_OrphanShells
@@ -1082,13 +1080,18 @@ disableOrphanShells:
 30$:          data=c                ; write back
               goto    20$
 
+;;; Power on cleanup. Tidy up after doing orphan shell removal.
+55$:          gosub   clearScratch
+              gosub   packHostedBuffers
+5$:           gosub   ENCP00
+              golong  disableOrphanShellsDone
 
 ;;; Prune unused shell registers. This is written in a somewhat inefficient
 ;;; way (we do not take advantage of that we may be able to delete multiple
 ;;; registers in one shrinkBuffer operation), but it is not expected to
 ;;; happen all that often and is done once at power on.
 40$:          gosub   sysbuf
-50$:          goto    5$            ; (P+1) should not happen (also relay)
+              goto    5$            ; (P+1) should not happen
 41$:          c=data                ; read buffer header
               rcr     3
               c=0     m
@@ -1139,4 +1142,4 @@ disableOrphanShells:
               gonc    60$           ; loop again
               gosub   shellChanged  ; send notification as all shells are not
                                     ;  in order
-              goto    50$           ; done
+              goto    55$           ; done

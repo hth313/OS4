@@ -519,7 +519,7 @@ invokeSecondary:
 
 ;;; **********************************************************************
 ;;;
-;;; clearSystemDigitEntry - reset the system digit entry flag
+;;; appClearDigitEntry - reset the system digit entry flag
 ;;;
 ;;; Uses: C, enables chip 0
 ;;;
@@ -535,6 +535,12 @@ appClearDigitEntry:
               rtnnc                 ; does not define any digit entry
               gosub   jumpPacked    ; tell app tor clear digit entry
                                     ; must preserve: B, N and M!!!
+              gosub   systemBuffer
+              c=data
+              cstex
+              st=0    Flag_Pause
+              cstex
+              data=c
 ;;; * fall into clearSystemDigitEntry
 clearSystemDigitEntry:
               c=0

@@ -751,9 +751,11 @@ disableThisShell:
 ;;; Out: Returns to (P_1) if no system buffer
 ;;;      Returns to (P+2) if no shells with
 ;;;          A.X - pointer to buffer header
+;;;          B.X - buffer header address
 ;;;      Returns to (P+3) with
 ;;;          A.X - pointer to buffer header
 ;;;          A.M - number of shell registers - 1
+;;;          B.X - buffer header address
 ;;;          ST= system buffer flags, Header[1:0]
 ;;;          PT= 6
 ;;;          DADD= buffer header
@@ -764,6 +766,7 @@ disableThisShell:
               .section code, reorder
 shellSetup:   gosub   systemBuffer
               rtn                   ; no buffer, return to (P+1)
+              b=a     x             ; B.X= buffer header address
               c=data                ; read buffer header
               st=c
               rcr     4
@@ -793,23 +796,8 @@ shellSetup:   gosub   systemBuffer
 
               .section code
               .public keyHandler
-keyHandler:   a=0     s             ; assume not user mode
-              gosub   LDSST0
-              ?s7=1                 ; alpha mode?
-              goc     20$           ; yes
-              rcr     7
-              st=c
-              ?s0=1                 ; user mode?
-              goc     14$           ; yes
-              a=a+1   s             ; no, set A.S= non-zero
-              goto    16$           ; normal mode
-
-20$:          a=a+1   m             ; alpha mode
-14$:          a=a+1   m             ; user mode
-16$:          a=a+1   m             ; normal mode
-              acex    m
-              goto    mayCall1
-
+keyHandler:   gosub   shellKeyboard
+              goto    mayCall
 
 ;;; **********************************************************************
 ;;;
@@ -1143,3 +1131,35 @@ disableOrphanShells:
               gosub   shellChanged  ; send notification as all shells are not
                                     ;  in order
               goto    55$           ; done
+
+;;; **********************************************************************
+;;;
+;;; shellKeyboard - get active keyboard
+;;;
+;;; Advance pointer to the field that holds the active keyboard handler.
+;;;
+;;; In: A[6:3] - pointer to shell
+;;; Out: C[6:3] - pointer to active keyboard handler entry
+;;; Uses: A[13:3], C, ST, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public shellKeyboard
+shellKeyboard:
+              a=0     s
+              gosub   LDSST0
+              ?s7=1
+              goc     alphaMode
+              rcr     7
+              st=c
+              ?s0=1
+              goc     userMode
+              a=a+1   s             ; no, set A.S= non-zero
+              goto    normalMode
+alphaMode:    a=a+1   m
+userMode:     a=a+1   m
+normalMode:   acex    m
+              c=c+1   m
+              c=c+1   m
+              rtn

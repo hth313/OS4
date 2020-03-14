@@ -72,8 +72,8 @@ hasActiveTransientApp:  .equlab 0x4f42
 ensureHPIL    .equlab 0x4f44
 ensure41CX    .equlab 0x4f46
 partialKey:   .equlab partialKeyEntry
-parseNumber:  .equlab 0x4f4a
-parseNumberInput: .equlab 0x4f4c
+noSysBuf:     .equlab 0x4f4a
+shellKeyboard: .equlab 0x4f4c
 XASRCH:       .equlab 0x4f4e
 secondaryAddress: .equlab 0x4f50
 clearAssignment: .equlab 0x4f52

@@ -61,14 +61,14 @@ lightWake:    ldi     0x2fd         ; PACH11
 ;;; ----------------------------------------------------------------------
 
               chk kb
-              goc     bufferScan    ; key is down, find active handler
+              golc    bufferScan    ; key is down, find active handler
 
 ;;; No key down, inspect various flags that should prevent
 ;;; us from showing an alternative display.
               ?s5=1                 ; message flag?
-              goc     LocalMEMCHK   ; yes, leave display alone
+              goc     checkPause    ; yes, leave display alone
               ?s7=1                 ; alpha mode?
-              goc     LocalMEMCHK   ; yes, leave display alone
+              goc     checkPause    ; yes, leave display alone
               c=regn 14
               c=c+c   xs
               c=c+c   xs
@@ -84,6 +84,13 @@ lightWake:    ldi     0x2fd         ; PACH11
 disableOrphanShellsDone:
               gosub   doDisplay     ; we may want to override the display
 
+;;; Check for OS4 style pause.
+checkPause:   gosub   systemBuffer
+              goto    LocalMEMCHK   ; (P+1) no system buffer
+              cstex
+              ?st=1   Flag_Pause    ; pause flag set?
+              golc    pause
+              cstex                 ; restore flags
 ;;; This is a replacement for MEMCHK. It is called whenever we are going
 ;;; to light sleep.
               .public LocalMEMCHK
@@ -137,7 +144,6 @@ deepWake:     gosub   releaseShells
               data=c
               gosub   releaseHostedBuffers
 10$:          golong  DSWKUP+2
-
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -218,9 +224,8 @@ resetFlags:   c=b     x
               cstex
               st=0    Flag_DisplayOverride
               st=0    Flag_Argument
-              st=0    Flag_Pause
-              st=0    Flag_SEC_PROXY
               st=0    Flag_SEC_Argument
+              st=0    Flag_SEC_PROXY
               cstex
               data=c
               rtn
@@ -286,6 +291,38 @@ checkSecondaryTakeOver:
               c=regn  8
               rcr     7
               goto    checkXADR
+
+;;; * Pause timer
+pause:        cstex                 ; restore flags
+              b=a     x             ; B.X= system buffer header address
+              gosub   PGMAON        ; turn on prgm annunciator
+              ldi     80            ; 41CX pause timer counter
+              a=c     x
+              .newt_timing_start
+10$:          chk kb
+              golc    bufferScan0
+              ldi     12
+              gosub   RMCK05
+              a=a-1   x
+              gonc    10$
+              .newt_timing_end
+              c=b     x             ; pause times out, clear OS4 pause flag
+              dadd=c
+              c=data
+              cstex
+              st=0    Flag_Pause
+              cstex
+              data=c
+              c=0
+              dadd=c
+              s13=1                 ; set running flag
+              c=regn  15            ; set line # TO FFF
+              c=0     x
+              c=c-1   x
+              regn=c  15
+              c=regn  14
+              st=c                  ; put up SS0
+              golong  0x7cc         ; PRT4 and join forces with RUN
 
 ;;; **********************************************************************
 ;;;
@@ -592,7 +629,7 @@ versionCheck: a=c     x
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
               .extern exitTransientApp, hasActiveTransientApp
               .extern parseNumber, parseNumberInput
-              .extern XASRCH, XSAROM, secondaryAddress
+              .extern shellKeyboard, XASRCH, secondaryAddress
               .extern clearAssignment, assignSecondary, secondaryAssignment
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
@@ -638,8 +675,8 @@ versionCheck: a=c     x
               golong  ensure41CX    ; 0x4f46
               rtn                   ; 0x4f48 partialKey (from program execution)
               nop                   ;        partialKey filler
-              golong  parseNumber   ; 0x4f4a
-              golong  parseNumberInput ; 0x4f4c
+              golong  noSysBuf      ; 0x4f4a
+              golong  shellKeyboard ; 0x4f4c
               golong  XASRCH        ; 0x4f4e
               golong  secondaryAddress ; 0x4f50
               golong  clearAssignment ; 0x4f52

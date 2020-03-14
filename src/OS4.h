@@ -177,11 +177,6 @@ unpack:       .equlab 0x4d25
 ;;;
 ;;; **********************************************************************
 
-Flag_NoApps:         .equ  0           ; Set if all application shells are
-                                       ; disabled, essentially meaning that
-                                       ; we have default behavior (no active
-                                       ; application). System shells still
-                                       ; have priority and are active.
 Flag_DisplayOverride .equ  1           ; Set when message flag really means that
                                        ; we override the display.
 Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shells.

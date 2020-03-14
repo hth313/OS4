@@ -644,10 +644,6 @@ ts05:         gosub   shellSetup
               goto    noActiveShell ; (P+2) no shells (though there is a buffer)
               b=a     x             ; (P+3)
               s9=0                  ; no app seen so far
-              ?st=1   Flag_NoApps   ; running without apps?
-              gonc    ts08          ; no
-              s9=1                  ; yes, do not accept any app
-
 ts08:         a=0     s             ; at first slot
               a=a+1   x
               acex    x

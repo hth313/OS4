@@ -32,6 +32,7 @@ Text1:        .equ    0xf1
               .public doPRGM
               .extern systemBuffer, LocalMEMCHK, noSysBuf, jumpP1
               .extern inProgramSecondary, resetBank, secondaryProgram
+              .extern XABTSEQ
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
               gosub   systemBuffer
@@ -714,7 +715,7 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               goc     parseStack    ; yes
 10$:          golong  PAR111 + 1
 
-ABTSEQ_J1:    golong  ABTSEQ
+ABTSEQ_J1:    golong  XABTSEQ
 
 parseIndirect:
               gosub   ENCP00

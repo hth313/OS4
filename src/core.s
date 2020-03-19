@@ -283,9 +283,13 @@ noTakeOver:   golong  toWKUP20_SS0
 checkSecondaryTakeOver:
               gosub   systemBuffer
               goto    noTakeOver    ; (P+1) no system buffer
+              c=data
               st=c
               ?st=1   Flag_SEC_PROXY
               gonc    noTakeOver    ; not doing secondary
+              st=0    Flag_SEC_PROXY ; clear the secondary proxy flag
+              c=st
+              data=c
               c=0     x
               dadd=c
               c=regn  8

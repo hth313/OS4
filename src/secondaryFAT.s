@@ -450,8 +450,8 @@ secondary:    pt=     5
               ?c#0    xs            ; is there any secondary FAT?
               rtnnc                 ; no
               pt=     4
-              lc      0xc           ; build page address XFC6
-              lc      6
+              lc      0xc           ; build page address XFC2
+              lc      2
               gosub   unpack0       ; fetch and unpack
               a=c     m
               golong  RTNP2

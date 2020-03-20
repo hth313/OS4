@@ -60,7 +60,7 @@ identity and finally 2 nibbles for the key code. Thus, seven nibbles,
 or half a register is needed which means that two assignments share a
 single registers. All bits (14 nibbles) in the register is used for
 the two assignments and there is no leading ``F0`` marker. This works
-as they are stored inside the buffer. 
+as they are stored inside the buffer.
 
 Similar to ordinary assignments, bitmaps for these assignments are
 also stored in the OS4 system buffer. These take up two registers.
@@ -154,17 +154,17 @@ The secondary FAT structure is different to the ordinary FAT and
 consists of several parts.
 
 # The root pointer to the secondary FAT start is a packed pointer
-located at `FC6` hexadecimal in the module page. As this location may
+located at ``FC2`` hexadecimal in the module page. As this location may
 contain other data in modules that are not OS4 aware, the module page
 image must also set some upper bits in the module ID field at the end
 of the page, which is described next.
 
-# The module Id area consists of 4 words located at `FFB`-`FFE` in the
+# The module Id area consists of 4 words located at ``FFB``-``FFE`` in the
 module page. It contains a four letter module identity. The upper two
-bits have special meaning as follows. `FFD` tells whether the module
+bits have special meaning as follows. ``FFD`` tells whether the module
 is banked (this is defined and recommended by HP). The upper two bits
-in the `FFE` words tells whether there are OS4 secondaries or not. If
-any of these two bits are set, the word at `FC6` is assumed to be a
+in the ``FFE`` words tells whether there are OS4 secondaries or not. If
+any of these two bits are set, the word at ``FC2`` is assumed to be a
 packed pointer to the start of the secondary FAT header structure.
 
 # The secondary FAT headers are small records that need to be located
@@ -175,7 +175,7 @@ pointer to the actual secondary FAT table and a bank switcher routine.
 
 # The actual secondary FAT is pointed to from the secondary FAT
 header. This FAT is defined in the same way as the ordinary XROM FAT,
-except that is does not need any `000` end marker. It can also be
+except that is does not need any ``000`` end marker. It can also be
 located in any bank, but all functions in it must be (or at least
 start) in the same bank. This bank is enabled by the bank switcher
 routine in its secondary FAT header. This routine should either be
@@ -201,12 +201,25 @@ Enabling the appropriate bank for secondary functions is done
 automatically once you have set up the secondary FAT
 structure. Switching back to the primary bank is done by calling the
 ``ENBNK1`` routine as defined by HP, it exists at page offset address
-``FC7`` in the page:
+``FC7`` in the page. As HP only defined two bank switchers and this
+was later expanded to four, the layout is as follows:
 
+    ENBNK3:       enrom3
+                  rtn
+    ENBNK4:       enrom4
+                  rtn
     ENBNK1:       enrom1
                   rtn
     ENBNK2:       enrom2
                   rtn
 
+This block of code should at page address ``FC3`` to ``FCA``. If you
+are not using all banks, replace the unused switchers with two ``RTN``
+instructions (or ``NOP`` and ``RTN``).
 
-
+In addition to setting up this area you need to set at least one of
+the two upper bits in page address ``FFD`` to mark that the page is bank
+switched. Other ROMs that want to enable different pages in you module
+shall inspect these bits to determine if the page has multiple banks
+and may then use the page switch routines above to switch banks. OS4
+uses this technique to inspect secondary FATs located in other banks.

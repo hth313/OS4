@@ -95,7 +95,8 @@ Text1:        .equ    0xf1
 ;;;      N[6:3]= points to secondary FAT header
 ;;;      B[6:3]= points to the XROM page address (X000)
 ;;;      A[2:0]= sequence number of secondary
-;;;      Note: Active bank set to where the secondary is!
+;;;      Note: Active bank is primary bank, which may not be the same
+;;;            bank as the secondary.
 ;;;
 ;;; Uses: M, A, B, C, G, N, STATUS, ptr P, REG 9,
 ;;;       status bits 2,3,5,6,8,9
@@ -366,8 +367,7 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               c=c+1   m             ; C[6:3]= point to start index
               cxisa
               a=a+c   x             ; A.X= secondary index
-              c=c+1   m
-              gotoc                 ; enable bank again and return
+              rtn
 
 50$:
 ; * Next two instructions (PT=7,LC 0) may not be necessary.

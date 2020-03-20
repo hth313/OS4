@@ -190,7 +190,6 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               n=c                   ; save it in case we need it
               ?s2=1                 ; secondary?
               gsubnc  DFRST8        ; no, display normal line
-              gosub   ENLCD
               gosub   RightJustify
               acex                  ; add a blank
               slsabc
@@ -364,7 +363,7 @@ NXBYT:        gosub   INCAD
 ;;;
 ;;; **********************************************************************
 
-RightJustify:
+RightJustify: gosub   ENLCD
               ldi     ' '
               pt=     1
               a=c     x
@@ -404,7 +403,7 @@ RightJustify:
 ;;; ----------------------------------------------------------------------
 
               .section code, reorder
-              .public argument
+              .public argument, dualArgument
 noSysBuf0:    spopnd
               gosub   LDSST0        ; need to reset partial key flag
               rcr     2             ;  as not done by ordinary error handlers
@@ -415,7 +414,23 @@ noSysBuf0:    spopnd
               regn=c  14
               golong  noSysBuf
 
-argument:     gosub   systemBuffer  ; ensure we have the system buffer
+dualReady:    c=0     s
+              c=c+1   s
+              st=0    Flag_ArgumentDual
+              c=st
+              data=c
+              pt=     0
+              c=g
+              a=c                   ; A[3:2]= first argument
+                                    ; A[1:0]= second argument
+              c=stk
+              c=c+1   m
+              gotoc
+
+dualArgument: s8=1
+              goto    argument10
+argument:     s8=0
+argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               goto    noSysBuf0     ; (P+1) no buf
               c=data                ; read buffer header
               st=c                  ; ST= system buffer flags
@@ -423,7 +438,12 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               pt=     0
               cnex                  ; N.X= system buffer header address
               g=c                   ; G= potential entered postfix argument
-              ?s13=1                ; running?
+              ?s8=1                 ; dual argument?
+              gonc    1$            ; no
+              c=data                ; C[13]= high nibble of buffer header
+              c=c+c   s             ; do we have a second argument ready?
+              goc     dualReady     ; yes
+1$:           ?s13=1                ; running?
               goc     3$            ; yes
               c=0     x
               dadd=c
@@ -432,7 +452,7 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               c=regn  14
               cstex
               ?s4=1                 ; single step?
-              gonc    9$            ; no
+              golnc   9$            ; no
               cstex                 ; ST= system buffer flags
 
 ;;; We are executing the instruction from program memory
@@ -442,15 +462,37 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               st=0    Flag_Argument ; argument not known yet
 
 ;;; Entry point for executing from keyboard, in which case Flag_Argument
-;;; must be set and the argument is in A[1:0]
+;;; must be set and the argument is in G
 50$:          c=stk
               cxisa                 ; get default argument
               m=c                   ; save for possible use
               c=c+1   m             ; update return address (skip over default argument)
               stk=c
-              ?st=1   Flag_Argument   ; argument already known (before coming here)?
+              ?st=1   Flag_Argument ; argument already known (before coming here)?
               gonc    2$            ; no
-              c=g                   ; yes, move argument to C[1:0]
+              ?s8=1                 ; dual argument?
+              gonc    69$           ; no
+              c=data                ; yes, store first argument in buffer header[3:2]
+              pt=     13
+              lc      9             ; set highest bit, indicating we have first
+                                    ; argument
+
+              pt=     2
+              c=g
+              data=c
+              c=0     x
+              dadd=c
+              c=regn  15
+              rcr     3
+              pt=     0
+              g=c                   ; G= PTEMP2
+              st=c                  ; ST= PTEMP2
+              gosub   RightJustify  ; output a space
+              acex    x
+              slsabc
+              golong  53$
+
+69$:          c=g                   ; yes, move argument to C[1:0]
               goto    8$
 
 2$:           ldi     Text1
@@ -505,10 +547,13 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               st=1    Flag_Argument
               goto    13$
 12$:          st=0    Flag_Argument
-13$:          cstex
+13$:          ?s8=1                 ; are we doing two arguments?
+              gonc    130$          ; no
+              st=1    Flag_ArgumentDual ; remember argument2
+130$:         cstex
               data=c                ; save back toggled flag
               ?st=1   Flag_Argument ; (inspecting previous value of flag)
-              goc     50$           ; with Flag_Argument set indicating found
+              golc    50$           ; with Flag_Argument set indicating found
               a=c
               c=n
               rcr     3             ; C[13:11]= buffer address
@@ -527,9 +572,11 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               g=c
               acex                  ; get header again
               pt=     2
-              c=g                   ; put default arg into 'pf' field
-              data=c                ; write back
-              c=0     x
+              c=g                   ; put default arg into 'DF' field
+              ?s8=1                 ; doing 2 arguments?
+              goc     132$          ; yes, DF field does not store default
+              data=c                ; write back (if doing single argument)
+132$:         c=0     x
               dadd=c
               a=0     x
               a=a+1   x             ; 001, lower 3 nibbles of A001
@@ -688,7 +735,7 @@ argument:     gosub   systemBuffer  ; ensure we have the system buffer
               pt=     0             ; restore PTEMP2
               c=g
               st=c
-              ?s4=1                 ; program mode?
+53$:          ?s4=1                 ; program mode?
               golc    PAR110        ; yes, use ordinary prompt handler as we
                                     ;  are really entering a SIGMA-REG
                                     ;  instruction.

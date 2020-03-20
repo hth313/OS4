@@ -640,6 +640,7 @@ versionCheck: a=c     x
               .extern setTimeout, clearTimeout, activeApp
               .extern findBufferHosted, reclaimHostedBuffer, newHostedBuffer
               .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
+              .extern dualArgument
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -701,6 +702,7 @@ versionCheck: a=c     x
               golong  growHostedBuffer ; 0x4f70
               golong  shrinkHostedBuffer ; 0x4f72
               golong  packHostedBuffers ; 0x4f74
+              golong  dualArgument  ; 0x4f76
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

@@ -26,6 +26,7 @@
 ;;; **********************************************************************
 
 #define argumentEntry      0x4f1e
+#define dualArgumentEntry  0x4f76
 #define xargumentEntry     0x4f20
 #define partialKeyEntry    0x4f48
 #define runSecondaryEntry  0x4f60
@@ -94,6 +95,7 @@ newHostedBuffer: .equlab 0x4f6e
 growHostedBuffer: .equlab 0x4f70
 shrinkHostedBuffer: .equlab 0x4f72
 packHostedBuffers: .equlab 0x4f74
+dualArgument: .equlab dualArgumentEntry
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02
@@ -177,6 +179,9 @@ unpack:       .equlab 0x4d25
 ;;;
 ;;; **********************************************************************
 
+Flag_ArgumentDual:   .equ  0           ; Dual semi-merged argument in
+                                       ; progress.
+                                       ; have priority and are active.
 Flag_DisplayOverride .equ  1           ; Set when message flag really means that
                                        ; we override the display.
 Flag_OrphanShells:   .equ  2           ; Set when we should release orphan shells.

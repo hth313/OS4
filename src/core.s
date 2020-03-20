@@ -270,7 +270,7 @@ checkXADR:    ldi     FirstGosub(partialKeyEntry)
               stk=c                 ; push it instead
               c=0                   ; reset the XROM bit in ptemp2 to do this
               pt=     4             ;    only once
-              lc      8             ; C= 0x80000 (the XROM bit)
+              lc      8             ; C= 0x80000 (the XXROM bit)
               a=c
               c=regn  15
               c=a+c

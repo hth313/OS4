@@ -95,6 +95,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               acex
               cmex
               pt=     1
+              ?st=1   Flag_ArgumentDual
+              golc    210$          ; dual argument
               ?a#c    wpt           ; same as default?
               goc     6$            ; no
               cmex                  ; yes, restore address to postfix byte
@@ -106,43 +108,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   PTBYTA        ; clear it too
               gosub   PUTPC         ; go to previous line
               gosub   BSTEP
-              goto    5$
+              goto    10$
 
 6$:           ?st=1   Flag_SEC_Argument ; are we dealing with a secondary?
-              gonc    5$            ; no
-              gosub   GETPC
-              gosub   NXBYTA        ; read Text1 (postfix operand)
-              b=a
-              a=c     x
-              ldi     Text1
-              pt=     1
-              ?a#c    wpt
-              goc     5$            ; hmm, not Text1
-              c=0     x             ; clear it
-              abex
-              gosub   PTBYTA
-              gosub   INCADA
-              c=0     x
-              gosub   PTBYTA
-              gosub   PUTPC
-              gosub   BSTEP         ; step back to Text1 for secondary
-              gosub   GETPC
-              gosub   NXBYTA        ; read Text1 (secondary suffix)
-              abex
-              a=c     x
-              ldi     Text1
-              pt=     1
-              ?a#c    wpt
-              goc     5$            ; hmm, not Text1
-              c=c+1   x             ; now it is Text2 !
-              abex
-              gosub   PTBYTA
-              gosub   INCADA
-              gosub   INCADA
-              c=n
-              gosub   PTBYTA        ; write postfix byte
-
-5$:           gosub   DFRST8        ; bring instruction line up
+              gsubc   mergeTextLiterals ; yes, merge text literals
 
 ;;; ***********************************************
 ;;; See if current line is an MCODE prompt function
@@ -338,6 +307,48 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   resetBank     ; restore to primary bank
 90000000$:    golong  9000000$
 
+
+;;; **********************************************************************
+;;;
+;;; Dual argument.
+;;; When requesting the second argument the entire LCD needs to be
+;;; recreated as it shows SIGMA-REG at this point!
+;;;
+;;; **********************************************************************
+
+210$:         gosub   systemBuffer
+              nop                   ; (P+1) filler, we know it exists
+              c=data
+              pt=     13
+              c=c+c   s             ; second argument?
+              goc     220$          ; yes
+              lc      9             ; no, we need second argument
+              cstex
+              st=1    Flag_Argument ; need another argument
+              cstex
+              data=c
+              rcr     2             ; C[1:0]= first argument
+              bcex    x             ; B[1:0]= first argument
+              c=0     x
+              dadd=c
+              c=regn  15            ; display line number
+              a=c     x             ; A.X= line number
+              c=regn  9
+              bcex    m             ; B[6:3]= XADR
+              gosub   CLLCDE
+              gosub   DSPLN+8       ; display line number
+              c=b     m             ; C[6:3]= XADR
+              gosub   PROMF2        ; prompt string
+              bcex    x             ; C[1:0]= first postfix argument
+              s0=0                  ; 2 digit argument
+              gosub   0x464         ; display first argument (ROW931+1)
+              golong  requestArgument
+
+220$:         lc      1             ; second argument entered, reset
+              data=c                ; intermediate flag
+              gosub   mergeTextLiterals
+              golong  10$
+
 ;;; **********************************************************************
 ;;;
 ;;; Increment and get next byte from program memory.
@@ -452,7 +463,7 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               c=regn  14
               cstex
               ?s4=1                 ; single step?
-              golnc   9$            ; no
+              golnc   xeqRunMode    ; no
               cstex                 ; ST= system buffer flags
 
 ;;; We are executing the instruction from program memory
@@ -463,15 +474,15 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
 
 ;;; Entry point for executing from keyboard, in which case Flag_Argument
 ;;; must be set and the argument is in G
-50$:          c=stk
+xeqWithArg:   c=stk
               cxisa                 ; get default argument
               m=c                   ; save for possible use
               c=c+1   m             ; update return address (skip over default argument)
               stk=c
               ?st=1   Flag_Argument ; argument already known (before coming here)?
-              gonc    2$            ; no
+              gonc    argNotKnown   ; no
               ?s8=1                 ; dual argument?
-              gonc    69$           ; no
+              gonc    singleArg     ; no
               c=data                ; yes, store first argument in buffer header[3:2]
               pt=     13
               lc      9             ; set highest bit, indicating we have first
@@ -480,8 +491,8 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               pt=     2
               c=g
               data=c
-              c=0     x
-              dadd=c
+requestArgument:
+              gosub   ENCP00
               c=regn  15
               rcr     3
               pt=     0
@@ -490,16 +501,16 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               gosub   RightJustify  ; output a space
               acex    x
               slsabc
-              golong  53$
+              golong  requestArgument10
 
-69$:          c=g                   ; yes, move argument to C[1:0]
-              goto    8$
+singleArg:    c=g                   ; yes, move argument to C[1:0]
+              goto    finalize
 
-2$:           ldi     Text1
+argNotKnown:  ldi     Text1
               ?a#c    x             ; argument?
               gonc    7$            ; yes
               c=m                   ; no, use default argument instead
-              goto    8$
+              goto    finalize
 7$:           abex    wpt           ; argument follows in program
               gosub   INCAD
               gosub   PUTPC         ; store new pc (skip over Text1 instruction)
@@ -511,7 +522,7 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               c=c+1   x
               regn=c  15
 71$:          gosub   GTBYT         ; get argument
-8$:           pt=     0
+finalize:     pt=     0
               g=c                   ; put in G
               c=0
               dadd=c                ; select chip 0
@@ -525,11 +536,11 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
 
 ;;; ----------------------------------------------------------------------
 ;;;
-;;; User executes the instruction from the keyboard
+;;; User executes the instruction in run-mode
 ;;;
 ;;; ----------------------------------------------------------------------
 
-9$:
+xeqRunMode:
 
 ;;; Load Flag_Argument flag to ST register. If it is set, then we are coming
 ;;; here the second time knowing the argument byte.
@@ -553,7 +564,7 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
 130$:         cstex
               data=c                ; save back toggled flag
               ?st=1   Flag_Argument ; (inspecting previous value of flag)
-              golc    50$           ; with Flag_Argument set indicating found
+              golc    xeqWithArg    ; with Flag_Argument set indicating found
               a=c
               c=n
               rcr     3             ; C[13:11]= buffer address
@@ -718,15 +729,18 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               acex    wpt
               regn=c  10            ; REGN10[4:1]= XROM prefix
               gosub   ENLCD
-              c=n                   ; C[6:2]= XADR
+              c=n                   ; C[6:3]= XADR
               goto    52$
 
 51$:          c=m                   ; primary XROM
               rcr     1
               gosub   GTRMAD
               nop
+              gosub   ENCP00
               acex
               rcr     11
+              regn=c  9             ; REGN9[6:3]= XADR (ordinary XROM)
+              gosub   ENLCD
 52$:          gosub   PROMF2        ; prompt string
               c=n
               ?c#0    m             ; secondary XADR?
@@ -735,7 +749,8 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               pt=     0             ; restore PTEMP2
               c=g
               st=c
-53$:          ?s4=1                 ; program mode?
+requestArgument10:
+              ?s4=1                 ; program mode?
               golc    PAR110        ; yes, use ordinary prompt handler as we
                                     ;  are really entering a SIGMA-REG
                                     ;  instruction.
@@ -877,3 +892,45 @@ isArgument:   cxisa
               stk=c
               acex    m
               rtn
+
+;;; **********************************************************************
+;;;
+;;; Merge two text literals.
+;;;
+;;; Uses: A, B, C
+;;;
+;;; **********************************************************************
+
+mergeTextLiterals:
+              gosub   GETPC
+              gosub   NXBYTA        ; read Text1 (postfix operand)
+              b=a
+              a=c     x
+              ldi     Text1
+              pt=     1
+              ?a#c    wpt
+              rtnc                  ; hmm, not Text1
+              c=0     x             ; clear it
+              abex
+              gosub   PTBYTA
+              gosub   INCADA
+              c=0     x
+              gosub   PTBYTA
+              gosub   PUTPC
+              gosub   BSTEP         ; step back to Text1 for secondary
+              gosub   GETPC
+              gosub   NXBYTA        ; read Text1 (secondary suffix)
+              abex
+              a=c     x
+              ldi     Text1
+              pt=     1
+              ?a#c    wpt
+              rtnc                  ; hmm, not Text1
+              c=c+1   x             ; now it is Text2 !
+              abex
+              gosub   PTBYTA
+              gosub   INCADA
+              gosub   INCADA
+              c=n
+              gosub   PTBYTA        ; write postfix byte
+              golong  DFRST8        ; bring instruction line up

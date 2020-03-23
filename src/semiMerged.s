@@ -13,8 +13,10 @@
 DSPLN:        .equlab 0xFC7
 PAR110:       .equlab 0xCEB
 ROW930:       .equlab 0x460
+DF050         .equlab 0x584
 
 Text1:        .equ    0xf1
+Text2:        .equ    0xf2
 
 ;;; **********************************************************************
 ;;;
@@ -145,7 +147,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               rcr     11
               s2=0                  ; not a secondary
               gosub   isArgument
-              goto    200$
+              goto    2000$         ; not semi-merged (must be short branch)
 
 ;;; **********************************************************************
 ;;;
@@ -157,6 +159,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 400$:         c=c+1   m             ; step to default argument
               cxisa                 ; get default argument
               n=c                   ; save it in case we need it
+              ?s7=1                 ; dual argument function?
+              goc     470$          ; yes
               ?s2=1                 ; secondary?
               gsubnc  DFRST8        ; no, display normal line
               gosub   RightJustify
@@ -191,7 +195,64 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   ROW930        ; display argument
               golong  320$
 
-900000$:      goto    90000$
+2000$:        golong  200$
+
+470$:         s8=     0             ; say no prompt, scrolling
+              s1=     0             ; say lcd notl full yet
+              gosub   ENCP00
+              gosub   LINNUM        ; load line #
+              a=c     x             ; A.X _ line #
+              b=a     x             ; save line # in B.X
+              gosub   CLLCDE
+              a=0     s
+              gosub   GENNUM        ; output line #
+              ldi     ' '
+              slsabc                ; and a space
+;               ?s2=1                 ; secondary?  @@@
+              gosub   ENCP00
+              gosub   NXBYTP
+              gosub   INCAD
+              gosub   NXBYT         ; get next byte
+              b=a
+              a=c     x
+              ldi     Text2
+              ?a#c    x             ; is it a text 2?
+              goc     480$          ; no, we do not have default for duals
+              abex
+              gosub   INCAD
+              gosub   GTBYT
+              acex
+              rcr     -3            ; save program address on stack
+              stk=c
+              acex
+              s0=0
+              s1=1
+              gosub   ROW930        ; first argument
+              gosub   ENLCD
+              gosub   DF050         ; display instruction
+              gosub   RightJustify
+              acex    x             ; add a space
+              slsabc
+              gosub   ENCP00
+              c=stk                 ; restore program address
+              rcr     3
+              pt=     3
+              a=c     wpt
+              gosub   INCAD         ; step to second argument
+              gosub   GTBYT
+              gosub   ROW930
+              gosub   RightJustify
+              c=n
+              c=0     xs
+              ?c#0    x             ; postfix character?
+              gonc    3200$         ; no (also relay)
+              slsabc                ; yes
+              goto    3200$
+
+480$:         gosub   DFRST8        ; display normal line (when no text literal)
+3200$:        golong  320$
+
+900000$:      golong  900$
 
 ;;; **********************************************************************
 ;;;
@@ -860,8 +921,10 @@ parseStack:   gosub   MESSL
 ;;;
 ;;; In: C[6:3] - XADR
 ;;; Out: Returns to (P+1) if not an argument style function
-;;;      Returns to (P+1) if it is argument, with
-;;;     C[6:3] - points to second byte of 'gosub argument'
+;;;      Returns to (P+2) if it is single argument, with
+;;;        C[6:3] - points to second byte of 'gosub argument'
+;;;        S7=0 indicates one argument
+;;;        S7=1 indicates dual arguments
 ;;; Uses: A, C
 ;;;
 ;;; **********************************************************************
@@ -875,23 +938,39 @@ isArgument:   cxisa
               rtnc                  ; no XROM XKD
               c=c+1   m             ; inspect next word which should be
                                     ;  gosub Argument for a semi-merged
+              cxisa
+              a=c     x
               ldi     FirstGosub(argumentEntry)
-              a=c     x
-              cxisa
               ?a#c    x
-              rtnc                  ; not normal semi-merged
+              goc     10$           ; not normal semi-merged
               c=c+1   m
-              ldi     SecondGosub(argumentEntry)
-              a=c     x
               cxisa
+              a=c     x
+              ldi     SecondGosub(argumentEntry)
               ?a#c    x
-              rtnc                  ; not normal semi-merged
-              acex    m             ; match, return to P+2, preserving C.M
+              goc     8$            ; not normal semi-merged
+              s7=0
+5$:           acex    m             ; match, return to P+2, preserving C.M
               c=stk
               c=c+1   m
               stk=c
               acex    m
               rtn
+
+8$:           c=c-1   m
+              cxisa
+              a=c     x
+10$:          ldi     FirstGosub(dualArgumentEntry)
+              ?a#c    x
+              rtnc
+              c=c+1   m
+              cxisa
+              a=c     x
+              ldi     SecondGosub(dualArgumentEntry)
+              ?a#c    x
+              rtnc
+              s7=1
+              goto    5$
 
 ;;; **********************************************************************
 ;;;

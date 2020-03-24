@@ -519,9 +519,13 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
               goc     3$            ; yes
               c=0     x
               dadd=c
+              ?st=1   Flag_ArgumentDual
+              goc     2$            ; skip saving secondary second time for duals,
+                                    ;  it is already in place and second time we
+                                    ;  come here M is most likely clobbered!
               c=m                   ; save potential secondary function in REG9/Q
               regn=c  9             ; needed when doing direct execution
-              c=regn  14
+2$:           c=regn  14
               cstex
               ?s4=1                 ; single step?
               golnc   xeqRunMode    ; no

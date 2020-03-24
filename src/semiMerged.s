@@ -569,10 +569,16 @@ singleArg:    c=g                   ; yes, move argument to C[1:0]
 
 argNotKnown:  ldi     Text1
               ?a#c    x             ; argument?
-              gonc    7$            ; yes
+              gonc    fetch10       ; yes
+              ?s8=1                 ; dual argument
+              goc     fetchDual     ; yes
               c=m                   ; no, use default argument instead
               goto    finalize
-7$:           abex    wpt           ; argument follows in program
+
+fetchDual:    c=c+1   x             ; make Text2
+              ?a#c    x             ; is it Text2?
+              golc    ERRNE         ; missing dual argument literal
+fetch10:      abex    wpt           ; argument follows in program
               gosub   INCAD
               gosub   PUTPC         ; store new pc (skip over Text1 instruction)
               c=regn  14
@@ -582,7 +588,19 @@ argNotKnown:  ldi     Text1
               c=regn  15            ; yes, bump line number
               c=c+1   x
               regn=c  15
-71$:          gosub   GTBYT         ; get argument
+71$:          gosub   GTBYT         ; get (first) argument
+              ?s8=1                 ; dual?
+              gonc    finalize      ; no
+              pt=     0             ; yes
+              g=c                   ; G= first argument
+              gosub   INCAD         ; step ahead
+              gosub   PUTPC
+              gosub   GTBYT
+              pt=     2
+              c=g
+              a=c                   ; A[3:2]= argument 1
+                                    ; A[1:0]= argument 2
+              golong  ENCP00
 finalize:     pt=     0
               g=c                   ; put in G
               c=0

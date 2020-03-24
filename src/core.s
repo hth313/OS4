@@ -129,6 +129,7 @@ deepWake:     gosub   releaseShells
               c=data
               cstex
               st=0    Flag_Argument ; no argument handling going on
+              st=0    Flag_ArgumentDual
               st=0    Flag_Pause    ; no pause
               st=0    Flag_SEC_PROXY ; no secondary proxy in progress
               st=1    Flag_OrphanShells
@@ -224,6 +225,7 @@ resetFlags:   c=b     x
               cstex
               st=0    Flag_DisplayOverride
               st=0    Flag_Argument
+              st=0    Flag_ArgumentDual
               st=0    Flag_SEC_Argument
               st=0    Flag_SEC_PROXY
               cstex

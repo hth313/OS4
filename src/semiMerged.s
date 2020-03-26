@@ -159,7 +159,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   ENCP00
               ?s2=1                 ; secondary?
               gonc    410$          ; no
-              ?s0=1                 ; do we have a text 2?
+              ?s0=1                 ; do we have a text 2 (or 3)?
               gonc    420$          ; no, default argument
               c=m                   ; C[3:0]= get address of text2 line (plus 1)
               rcr     4
@@ -198,7 +198,6 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   GENNUM        ; output line #
               ldi     ' '
               slsabc                ; and a space
-;               ?s2=1                 ; secondary?  @@@
               gosub   ENCP00
               gosub   NXBYTP
               gosub   INCAD
@@ -206,9 +205,14 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               b=a
               a=c     x
               ldi     Text2
-              ?a#c    x             ; is it a text 2?
+              ?s2=1                 ; secondary?
+              gonc    472$          ; no
+              c=c+1   x             ; yes, make it a Text 3
+472$:         ?a#c    x             ; is it a text 2?
               goc     480$          ; no, we do not have default for duals
               abex
+              ?s2=1
+              gsubc   INCAD         ; skip past secondary function #
               gosub   INCAD
               gosub   GTBYT
               acex
@@ -219,7 +223,14 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               s1=1
               gosub   ROW930        ; first argument
               gosub   ENLCD
-              gosub   DF050         ; display instruction
+              ldi     ' '
+              slsabc
+              c=n                   ; yes, pick up the right XADR
+              c=c-1   m
+              c=c-1   m
+              c=c-1   m
+              c=c-1   m
+              gosub   PROMF2
               gosub   RightJustify
               acex    x             ; add a space
               slsabc
@@ -289,12 +300,16 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               a=0     s             ; say no argument
               ?a#c    x             ; is it a text 1?
               gonc    310$          ; yes
-              c=c+1                 ; opcode for text 2
+              c=c+1   x             ; opcode for text 2
               a=a+1   s             ; say argument in text 2
               ?a#c    x             ; is it a text 2?
+              gonc    310$          ; yes
+              c=c+1   x             ; opcode for text 3
+              a=a+1   s             ; say argument in text 3
+              ?a#c    x             ; is it a text 3?
               goc     900000$       ; no
-310$:         b=a     s             ; B.S= text1/2 flag
-              bsr                   ; B[12]= text1/2 flag
+310$:         b=a     s             ; B.S= text1/2/3 flag
+              bsr                   ; B[12]= text1/2/3 flag
                                     ; B[7:4]= program memory address
                                     ; B[11:8]= ROM page pointer
               s8=     0             ; say no prompt, scrolling
@@ -306,9 +321,9 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               c=b
               rcr     4             ; C[3:0]= program memory address
               a=c                   ; A[3:0]= program memory address
-              rcr     -5            ; C[13]= text 1/2 flag
+              rcr     -5            ; C[13]= text 1/2/3 flag
               s0=0
-              ?c#0    s             ; text2?
+              ?c#0    s             ; text 2 or 3?
               gonc    312$          ; no
               s0=1                  ; yes
 312$:         gosub   INCAD

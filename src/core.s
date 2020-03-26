@@ -122,7 +122,8 @@ toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed
 ;;; ----------------------------------------------------------------------
 
               .extern releaseShells, releaseHostedBuffers
-deepWake:     gosub   releaseShells
+deepWake:     gosub   MEMCHK
+              gosub   releaseShells
               goto    10$           ; no system buffer
               acex    x             ; C.X= system header address
               dadd=c

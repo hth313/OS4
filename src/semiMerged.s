@@ -43,8 +43,6 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               st=c
               st=0    Flag_Pause    ; always reset pause flag when entering
                                     ;  program mode
-              st=0    Flag_Argument ; reset argument flag
-              st=0    Flag_SEC_Argument
               cstex                 ; keep old argument flag in ST
               data=c                ; write back
 
@@ -377,14 +375,16 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 ;;;
 ;;; **********************************************************************
 
-210$:         gosub   systemBuffer
+210$:         ?st=1   Flag_SEC_Argument ; are we dealing with a secondary?
+              gsubc   mergeTextLiterals ; yes, merge text literals
+              gosub   systemBuffer
               nop                   ; (P+1) filler, we know it exists
               c=data
+              st=c
               pt=     13
               c=c+c   s             ; second argument?
               goc     220$          ; yes
               lc      9             ; no, we need second argument
-              cstex
               st=1    Flag_Argument ; need another argument
               cstex
               data=c
@@ -406,8 +406,11 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               golong  requestArgument
 
 220$:         lc      1             ; second argument entered, reset
+              st=0    Flag_SEC_Argument
+              cstex
               data=c                ; intermediate flag
-              gosub   mergeTextLiterals
+              ?st=1   Flag_SEC_Argument
+              gsubnc  mergeTextLiterals
               golong  10$
 
 ;;; **********************************************************************
@@ -528,7 +531,7 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
 2$:           c=regn  14
               cstex
               ?s4=1                 ; single step?
-              golnc   xeqRunMode    ; no
+              golnc   xeqKeyboard   ; no
               cstex                 ; ST= system buffer flags
 
 ;;; We are executing the instruction from program memory
@@ -619,11 +622,11 @@ finalize:     pt=     0
 
 ;;; ----------------------------------------------------------------------
 ;;;
-;;; User executes the instruction in run-mode
+;;; User executes the instruction from the keyboard
 ;;;
 ;;; ----------------------------------------------------------------------
 
-xeqRunMode:
+xeqKeyboard:
 
 ;;; Load Flag_Argument flag to ST register. If it is set, then we are coming
 ;;; here the second time knowing the argument byte.
@@ -936,7 +939,6 @@ parseStack:   gosub   MESSL
               gonc    05$
               goto    15$
 
-
 ;;; **********************************************************************
 ;;;
 ;;; It this a postfix argument?
@@ -998,6 +1000,12 @@ isArgument:   cxisa
 ;;;
 ;;; Merge two text literals.
 ;;;
+;;; Expects that we are standing at the second one which is a Text1.
+;;; Its postfix byte is already in N[1:0]. This instruction is removed
+;;; and we step back to the preceeding instruction which is either a
+;;; Text1 or Text2 to which the postfix byte is added.
+;;;
+;;; In: N[1:0] - the byte of the latest postfix argument
 ;;; Uses: A, B, C
 ;;;
 ;;; **********************************************************************
@@ -1023,15 +1031,22 @@ mergeTextLiterals:
               gosub   NXBYTA        ; read Text1 (secondary suffix)
               abex
               a=c     x
+              a=0     s             ; Text1 or Text2 flag
               ldi     Text1
               pt=     1
               ?a#c    wpt
-              rtnc                  ; hmm, not Text1
-              c=c+1   x             ; now it is Text2 !
+              gonc    10$
+              c=c+1   x             ; C[1:0]= Text2
+              a=a+1   s
+              ?a#c    wpt
+              rtnc                  ; hmm, not Text1 or Text2
+10$:          c=c+1   x             ; now it is TextN + 1
               abex
               gosub   PTBYTA
               gosub   INCADA
               gosub   INCADA
+              ?b#0    s             ; is it a Text3 (previously Text2)?
+              gsubc   INCADA        ; yes, step one further
               c=n
               gosub   PTBYTA        ; write postfix byte
               golong  DFRST8        ; bring instruction line up

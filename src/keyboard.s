@@ -1,12 +1,8 @@
 #include "mainframe.h"
+#include "internals.h"
 
 #define IN_OS4
 #include "OS4.h"
-
-PARS60:       .equlab 0xcb4
-PRT5:         .equlab 0x6fe5
-
-Text1:        .equ    0xf1
 
 ;;; **********************************************************************
 ;;;

@@ -6,17 +6,9 @@
 ;;; **********************************************************************
 
 #include "mainframe.h"
-
+#include "internals.h"
 #define IN_OS4
 #include "OS4.h"
-
-DSPLN:        .equlab 0xFC7
-PAR110:       .equlab 0xCEB
-ROW930:       .equlab 0x460
-DF050         .equlab 0x584
-
-Text1:        .equ    0xf1
-Text2:        .equ    0xf2
 
 ;;; **********************************************************************
 ;;;

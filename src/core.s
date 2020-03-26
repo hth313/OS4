@@ -128,21 +128,22 @@ deepWake:     gosub   MEMCHK
               acex    x             ; C.X= system header address
               dadd=c
               c=data
-              cstex
-              st=0    Flag_Argument ; no argument handling going on
-              st=0    Flag_ArgumentDual
-              st=0    Flag_Pause    ; no pause
-              st=0    Flag_SEC_PROXY ; no secondary proxy in progress
-              st=1    Flag_OrphanShells
-                                    ; set Flag_OrphanShells flag to signal that
-                                    ;  we need to check for orphaned shells
-                                    ;  when power on processing is done
-                                    ;  (releaseShells above has already marked
-                                    ;   it properly)
-              st=0    Flag_DisplayOverride
-              st=0    Flag_SEC_Argument
-              st=0    Flag_IntervalTimer
-              cstex
+;;; Set flags at power on:
+;;; Flag_Argument        = 0     no argument handling going on
+;;; Flag_ArgumentDual    = 0
+;;; Flag_Pause           = 0     no pause
+;;; Flag_SEC_PROXY       = 0     no secondary proxy in progress
+;;; Flag_OrphanShells    = 1     set Flag_OrphanShells flag to signal that
+;;;                              we need to check for orphaned shells
+;;;                              when power on processing is done
+;;;                              (releaseShells above has already marked
+;;;                               it properly)
+;;; Flag_DisplayOverride = 0
+;;; Flag_SEC_Argument    = 0
+;;; Flag_IntervalTimer   = 0
+              pt=     1
+              lc      0
+              lc      4
               data=c
               gosub   releaseHostedBuffers
 10$:          golong  DSWKUP+2

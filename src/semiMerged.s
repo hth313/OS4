@@ -394,7 +394,9 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               lc      9             ; no, we need second argument
               st=1    Flag_Argument ; need another argument
               cstex
-              data=c
+              pt=     2
+              c=g                   ; C[3:2]= first argument
+              data=c                ; update buffer header
               rcr     2             ; C[1:0]= first argument
               bcex    x             ; B[1:0]= first argument
               c=0     x

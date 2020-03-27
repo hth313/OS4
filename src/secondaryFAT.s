@@ -659,7 +659,7 @@ toERRNE:      golnc   ERRNE         ; no, flag as error
               gosub   isArgument
               goto    75$           ; not semi-merged
               ?s9=1                 ; semi-merged, fetching from program memory?
-              gonc    toERRNE       ; no, we do not have any argument
+              gonc    78$           ; no
               c=b     s             ; C.S= Text literal count - 1
               ?s7=1                 ; dual arguments?
               gonc    72$           ; no

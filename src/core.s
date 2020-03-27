@@ -6,6 +6,7 @@
 ;;; **********************************************************************
 
 #include "mainframe.h"
+#include "internals.h"
 
 #define IN_OS4
 #include "OS4.h"
@@ -25,17 +26,17 @@ CHKCST:       .equlab 0x7cdd
               chk kb                ; necessary because of
               sethex                ; problems with CPU wakeup
 
+              ldi     0x2fd         ; PACH11 (minus call to MEMCHK)
+              dadd=c                ; enable nonexistent data chip 2FD
+              pfad=c                ; enable display
+              flldc                 ; non-destructive read
+
               c=stk                 ; inspect return address (and drop it)
               rcr     1             ; C.XS= lower nibble
               c=c+c   xs
               goc     deepWake      ; deep wake up
 
-lightWake:    ldi     0x2fd         ; PACH11
-              dadd=c                ; enable nonexistent data chip 2FD
-              pfad=c                ; enable display
-              flldc                 ; non-destructive read
-
-              c=0     x
+lightWake:    c=0     x
               pfad=c                ; disable LCD
               dadd=c                ; select chip 0
 
@@ -100,7 +101,7 @@ LocalMEMCHK:  gosub   MEMCHK
               .public noTimeout
               .extern checkTimeout
 ioLoop:       chk kb                ; check key down while doing I/O
-              goc     bufferScan0
+              golc    bufferScan0
               ?f13=1                ; peripheral wants service?
               golc    checkTimeout  ; yes
 noTimeout:    ldi     8             ; I/O service
@@ -109,8 +110,6 @@ noTimeout:    ldi     8             ; I/O service
               goc     ioLoop        ; yes, keep going
 
               golong  0x18c         ; go to light sleep
-
-toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -122,8 +121,48 @@ toWKUP20:     golong  0x1a6         ; WKUP20, ordinary check key pressed
 ;;; ----------------------------------------------------------------------
 
               .extern releaseShells, releaseHostedBuffers
-deepWake:     gosub   MEMCHK
-              gosub   releaseShells
+              .newt_timing_start    ; to synchronize NEWT Time clone at start up
+deepWake:     disoff                ; get the display to a known
+                                    ; state
+              gosub   MEMCHK
+              chk kb                ; did the ON key wake us up?
+              goc     3$            ; yes
+              ldi     10            ; no
+              gosub   ROMCHK
+              .newt_timing_end
+
+              ?s2=1                 ; I/O flag?
+              golnc   DRSY50        ; nope - go back to sleep
+
+3$:           c=regn  14
+              c=0     x             ; PACH12
+              regn=c  14
+              gosub   DECMPL
+              rcr     6
+              cstex                 ; put up SS3
+              s1=     0             ; clear catalog flag
+              s5=     1             ; set audio enable flag
+              s6=     0             ; clear error ignore flag
+              s7=     0             ; clear out-of-range flag
+              cstex
+              rcr     2             ; clear flags 12-23
+              c=0     x
+              rcr     6
+              regn=c  14
+              s13=    0             ; clear running flag
+              gosub   RSTKB
+; * Check for master clear here
+              chk kb                ; another key down?
+              gonc    5$            ; no
+              ldi     0xc3          ; yes. see if it is BKARROW (KC FOR BKARROW)
+              a=c     x
+              c=keys
+              rcr     3
+              pt=     1
+              ?a#c    wpt
+              golnc   WKUP90        ; master clear
+
+5$:           gosub   releaseShells
               goto    10$           ; no system buffer
               acex    x             ; C.X= system header address
               dadd=c
@@ -146,7 +185,7 @@ deepWake:     gosub   MEMCHK
               lc      4
               data=c
               gosub   releaseHostedBuffers
-10$:          golong  DSWKUP+2
+10$:          golong  WKUP60
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -187,7 +226,7 @@ bufferScan10: pt=     3
 
 30$:          gosub   resetFlags
 toWKUP20_SS0: gosub   LDSST0        ; bring up SS0
-              goto    toWKUP20
+              golong  WKUP20        ; ordinary check key pressed
 
 ;;; Should really check for reassigned keys here as that is done by the OS!
 ;;; However, we settle for assuming that we just use default behavior for

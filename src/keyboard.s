@@ -412,6 +412,7 @@ nullTest:     ldi     200
               a=c     m
               .public gotoFunction
 gotoFunction: c=0
+              dadd=c                ; select chip 0 for function invocation
               pt=     4
               lc      15            ; put NFRPU (0x00f0)
               stk=c                 ;  on the subroutine stack

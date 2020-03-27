@@ -582,19 +582,33 @@ singleArg:    c=g                   ; yes, move argument to C[1:0]
               goto    finalize
 
 argNotKnown:  ldi     Text1
-              ?a#c    x             ; argument?
+              ?st=1   Flag_SEC_Argument ; secondary?
+              gonc    10$           ; no
+              c=n
+              dadd=c                ; select system buffer header
+              st=0    Flag_SEC_Argument ; reset flag
+              c=data
+              c=st
+              data=c
+              abex                  ; yes, step over the secondary identifier
+              gosub   INCAD
+              abex
+              ldi     Text2
+10$:          ?s8=1                 ; dual argument?
+              gonc    15$           ; no
+              c=c+1   x
+15$:          ?a#c    x             ; expected text literal follows?
               gonc    fetch10       ; yes
-              ?s8=1                 ; dual argument
-              goc     fetchDual     ; yes
-              c=m                   ; no, use default argument instead
+              ?s8=1                 ; no, dual argument?
+              goc     toERRNE       ; yes, these have no default so it must match
+              c=c-1   x             ; check one less
+              ?a#c    x             ; default single argument?
+toERRNE:      golnc   ERRNE         ; no
+              c=m                   ; yes, use default argument instead
               goto    finalize
-
-fetchDual:    c=c+1   x             ; make Text2
-              ?a#c    x             ; is it Text2?
-              golc    ERRNE         ; missing dual argument literal
 fetch10:      abex    wpt           ; argument follows in program
               gosub   INCAD
-              gosub   PUTPC         ; store new pc (skip over Text1 instruction)
+              gosub   PUTPC         ; store new pc (skip over Text instruction)
               c=regn  14
               st=c
               ?s4=1                 ; single step?
@@ -960,6 +974,7 @@ parseStack:   gosub   MESSL
 ;;;
 ;;; **********************************************************************
 
+              .public isArgument
 isArgument:   cxisa
               ?c#0    x             ; check if 2 nops
               rtnc                  ; no

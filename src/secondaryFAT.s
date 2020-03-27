@@ -1,6 +1,9 @@
 #include "mainframe.h"
 #include "internals.h"
 
+#define IN_OS4
+#include "OS4.h"
+
 ;;; **********************************************************************
 ;;;
 ;;; Secondary function address tables (FAT).
@@ -106,7 +109,8 @@
               .section code, reorder
               .public XASRCH
               .extern jumpP1, jumpP2, unpack, unpack0, unpack1, unpack3, unpack4
-              .extern NXBYTP, jumpC5, RTNP2, gotoFunction
+              .extern NXBYTP, jumpC5, RTNP2, gotoFunction, isArgument
+              .extern systemBuffer
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
               lc      4             ; C[2:0]_END link
@@ -525,7 +529,7 @@ lookupFAT:    c=c+1   m
               rcr     9             ; restore address
               c=c+1   m             ; C[6:3]= point to low word
               cxisa
-              a=c    wpt            ; A[3:0]= address of secondary function
+              a=c     wpt           ; A[3:0]= address of secondary function
               asl
               asl
               asl                   ; A[6:3]= address of secondary function
@@ -589,7 +593,9 @@ secondaryProgram:
 
               .section code, reorder
               .public runSecondary
-runSecondary: c=stk                 ; C[6:3]= some page address
+runSecondary: s8=0                  ; not Text 1
+              s9=0                  ; no text literal consulted
+              c=stk                 ; C[6:3]= some page address
               cxisa
               a=c     x             ; A.X= XROM prefix code
               gosub   secondary
@@ -617,23 +623,29 @@ runSecondary: c=stk                 ; C[6:3]= some page address
               c=regn  9             ; read function code
               goto    35$
 
-25$:          gosub   NXBYTP
+25$:          s9=1                  ; secondary identifier from program memory
+              gosub   NXBYTP
               b=a
-              a=c     x
+              a=c     x             ; A.X= instruction byte
+              pt=     1
+              c=c+1   pt            ; is it a text literal?
+              gonc    toERRNE       ; no
+              rcr     1
+              c=c-1   s             ; is it Text 0?
+              goc     toERRNE       ; yes
+              acex    s             ; A.S= Text # literal - 1
               ldi     Text1
-              ?a#c    x             ; argument there?
-              goc     toERRNE       ; no, better flag it as an error
-              abex
-              gosub   INCAD
-              gosub   PUTPC         ; store new pc (skip over Text1 instruction)
-              c=regn  14
-              st=c
-              ?s4=1                 ; single step?
-              gonc    30$           ; no
-              c=regn  15            ; yes, bump line number
-              c=c+1   x
-              regn=c  15
-30$:          gosub   GTBYT         ; get argument
+              ?a#c    x             ; is it actually Text 1?
+              goc     27$           ; no
+              s8=1                  ; yes (if accepted we step over this later)
+27$:          abex                  ; B.S= Text # literal - 1
+                                    ; A[3:0]= address
+              gosub   INCAD         ; step to secondary identifier
+              gosub   GTBYT         ; read identifier
+              acex
+              n=c                   ; N= address
+              acex
+
 35$:          c=0     xs
               a=c     x             ; A.X= index in FAT
               c=m                   ; C[6:3]= secondary FAT header pointer + 1
@@ -642,8 +654,39 @@ runSecondary: c=stk                 ; C[6:3]= some page address
 toERRNE:      golnc   ERRNE         ; no, flag as error
               gosub   lookupFAT
               nop                   ; needed as it returns to (P+2)
-              golong  gotoFunction
+              b=a     m             ; B[6:3]= XADR
+              c=b     m             ; C[6:3]= XADR
+              gosub   isArgument
+              goto    75$           ; not semi-merged
+              ?s9=1                 ; semi-merged, fetching from program memory?
+              gonc    toERRNE       ; no, we do not have any argument
+              c=b     s             ; C.S= Text literal count - 1
+              ?s7=1                 ; dual arguments?
+              gonc    72$           ; no
+              c=c-1   s
+72$:          c=c-1   s
+              ?c#0    s             ; correct text literal length?
+              goc     toERRNE       ; no
+              gosub   systemBuffer
+              goto    78$           ; (P+1) no system buffer, this will cause
+                                    ;  and error later in argument handling
+              c=data                ; tell argument handling that we are
+              cstex                 ;  executing a secondary
+              st=1    Flag_SEC_Argument
+              cstex
+              data=c
 
+              goto    78$           ; yes, we will need the text literal when
+                                    ;  fetching semi-merged operands, so we do
+                                    ;  not skip over it now
+
+75$:          ?s8=1
+              gonc    toERRNE       ; not Text1
+              c=n
+              a=c                   ; A= address
+              gosub   PUTPC         ; step over Text1
+78$:          abex    m             ; A[6:3]= XADR
+              golong  gotoFunction
 
 ;;; **********************************************************************
 ;;;

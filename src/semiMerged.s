@@ -51,17 +51,30 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 ;;; Abort entry of semi-merged instruction, remove XROM instruction as well.
 ;;; This has to done expanded as DELLIN cannot be called from a subroutine.
 
-8$:           ?st=1   Flag_SEC_Argument
-              gonc    7$
-              gosub   GETPC
+8$:           ?st=1   Flag_SEC_Argument ; secondary?
+              goc     88$           ; yes, delete 2 instructions
+              ?st=1   Flag_ArgumentDual ; dual?
+              gonc    7$            ; no
+88$:          gosub   GETPC         ; delete 2 instructions
               gosub   DELLIN
               gosub   PUTPC
               gosub   BSTEP
-7$:           gosub   GETPC
+7$:           gosub   GETPC         ; delete 1 intruction
               gosub   DELLIN
               gosub   PUTPC
               gosub   BSTEP
               gosub   DFRST8
+              gosub   systemBuffer
+              nop
+              c=data
+              pt=     13
+              lc      1
+              cstex
+              st=0    Flag_Argument
+              st=0    Flag_ArgumentDual
+              st=0    Flag_SEC_Argument
+              cstex
+              data=c
 900$:         golong  LocalMEMCHK
 
 4$:           ?s10=1                ; ROM?

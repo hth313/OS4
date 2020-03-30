@@ -92,8 +92,7 @@ checkPause:   gosub   systemBuffer
               ?st=1   Flag_Pause    ; pause flag set?
               golc    pause
               cstex                 ; restore flags
-;;; This is a replacement for MEMCHK. It is called whenever we are going
-;;; to light sleep.
+;;; Do MEMCHK, process keys or go to light sleep.
               .public LocalMEMCHK
 LocalMEMCHK:  gosub   MEMCHK
 

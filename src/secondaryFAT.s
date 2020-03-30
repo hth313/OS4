@@ -106,11 +106,12 @@
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public XASRCH
-              .extern jumpP1, jumpP2, unpack, unpack0, unpack1, unpack3, unpack4
-              .extern NXBYTP, jumpC5, RTNP2, gotoFunction, isArgument
-              .extern systemBuffer
+              .extern jumpP1_B2, jumpP2_B2
+              .extern unpack_B2, unpack0_B2, unpack1_B2, unpack3_B2, unpack4_B2
+              .extern NXBYTP_B2, RTNP2_B2, RTNP2
+              .extern gotoFunction, isArgument
 XASRCH:       c=regn  13            ; A[3:0]_END addr (RAM 1st)
               pt=     3
               lc      4             ; C[2:0]_END link
@@ -167,7 +168,7 @@ SARA50:       ?a#0    wpt           ; end str chars?
               rcr     4
               s2=     0             ; RAM
               s9=     0             ; usercode_true
-              rtn                   ; return
+              golong  enableBank1   ; return
 
 ;;; **********************************************************************
 ;;;
@@ -224,7 +225,7 @@ SARO15:       s6=0                  ; not looking at secondary FAT
 
 ;;; Join forces with mainframe to look at page 3 (41CX) and mainframe
 ;;; table (catalog 3).
-              golong  0x263a
+              golong  to_0x263a
 
 ;;;  Handle secondary FATs
 SEC00:        ?s6=1                 ; already looking at a secondaries?
@@ -233,7 +234,6 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
               gosub   secondary
               goto    SARO15        ; (P+1) no secondaries
               s6=1                  ; yes, we are going to look at secondaries
-              acex    m
               rcr     -4            ; C[10:7]= address of next secondary
 30$:          pt=     6
               c=b     wpt
@@ -247,21 +247,21 @@ SEC00:        ?s6=1                 ; already looking at a secondaries?
               cxisa
               a=c                   ; A.X= packed address of secondary FAT
                                     ; A[6]= page
-              gosub   jumpP1        ; call bank switcher
+              gosub   jumpP1_B2     ; call bank switcher
               acex                  ; C.X= packed address of secondary FAT
                                     ; C[6]= page
-              gosub   unpack        ; C[6:3]= address of secondary FAT
+              gosub   unpack_B2     ; C[6:3]= address of secondary FAT
               pt=     1
               goto    XSARO22
 
 50$:          c=b     m
-              gosub   resetBank
+              gosub   resetBank_B2
               c=b     m
               rcr     4             ; C[6:3]= secondary FAT header
               cxisa                 ; read the next word
               ?c#0    x             ; end?
               gonc    SARO15        ; yes, look at next ROM
-              gosub   unpack
+              gosub   unpack_B2
               rcr     -4
               goto    30$
 
@@ -354,7 +354,7 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               c=b
               rcr     4             ; C[6:3]= secondary FAT header
               n=c                   ; N[6:3]= secondary FAT header
-              gosub   unpack4
+              gosub   unpack4_B2
               rcr     3             ; C[3:0]= secondary FAT start
               c=a-c                 ; C[3:0]= offset to instruction in table
               c=c+c
@@ -363,14 +363,14 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               csr                   ; C[2:0]= secondary instruction offset
               a=c     x             ; A[2:0]= secondary instruction offset
               c=n
-              gosub   resetBank
+              gosub   resetBank_B2
               c=n
               c=c+1   m
               c=c+1   m
               c=c+1   m             ; C[6:3]= point to start index
               cxisa
               a=a+c   x             ; A.X= secondary index
-              rtn
+              goto    toBank1
 
 50$:
 ; * Next two instructions (PT=7,LC 0) may not be necessary.
@@ -395,17 +395,25 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               pt=     3
               acex    wpt           ; C[3:0]_ROM ADDR & C[5:4]_F.C.
               s2=     1
-              rtn
+toBank1:      golong  enableBank1
+
+;;; * Switch bank and jump to mainfram routine
+              .section code2
+to_0x263a:    switchBank 1
+              golong  0x263a
 
 ;;; **********************************************************************
 ;;;
-;;; resetBank - reset to primary bank
+;;; resetBank    - reset to primary bank (routine in bank 1)
+;;; resetBank_B2 - reset to primary bank (routine in bank 2)
 ;;;
 ;;; Call the XFC7 entry in given bank to reset to bank 1. This routine is "safe"
 ;;; in that it is guarded by looking at the bank bit presence in the
 ;;; ROM identifier.
 ;;; The bankswitcher is assumed to be an enromX instruction followed
 ;;; by RTN, if not the 'Uses' statement here may not apply!
+;;; This routine is in bank 1, the resetBank_B2 is a duplicate version
+;;; in bank 2.
 ;;;
 ;;; In: C[6]= page
 ;;; Out: Primary bank selected, PT=2
@@ -413,9 +421,8 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
-              .public resetBank
-resetBank:    pt=     5
+resetBankM:   .macro
+              pt=     5
               lc      0xf           ; xFFD
               lc      0xf
               lc      0xd
@@ -427,6 +434,14 @@ resetBank:    pt=     5
               lc      0xc           ; xFC7
               lc      7
               gotoc
+              .endm
+
+              .section code1, reorder
+              .public resetBank
+resetBank:    resetBankM
+
+              .section code2, reorder
+resetBank_B2: resetBankM
 
 ;;; **********************************************************************
 ;;;
@@ -435,16 +450,17 @@ resetBank:    pt=     5
 ;;; Check if there are secondary functions and return the address to the
 ;;; first secondaty FAT header.
 ;;;
+;;; Note: This routine is in bank 2 and returns without switching bank.
+;;;
 ;;; In: C[6]= page
 ;;; Out: Returns to (P+1) if no secondaries exist
 ;;;      Returns to (P+2) if there are secondaries with:
-;;;        A[6:3]= first secondary FAT header
-;;; Uses: A.M, C[6:0], +1 sub level
+;;;        C[6:3]= first secondary FAT header
+;;; Uses: A.M, C[6:0], +0 sub levels
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
-              .public secondary
+              .section code2, reorder
 secondary:    pt=     5
               lc      0xf           ; build page address XFFE
               lc      0xf
@@ -452,37 +468,44 @@ secondary:    pt=     5
               cxisa
               ?c#0    xs            ; is there any secondary FAT?
               rtnnc                 ; no
+              a=c     m
+              c=stk                 ; bump return address (save one sub level)
+              c=c+1   m
+              stk=c
+              acex    m
               pt=     4
               lc      0xc           ; build page address XFC2
               lc      2
-              gosub   unpack0       ; fetch and unpack
-              a=c     m
-              golong  RTNP2
+              golong  unpack0_B2    ; fetch and unpack
 
 ;;; **********************************************************************
 ;;;
 ;;; secondaryAddress - look up a secondary function
 ;;;
+;;; Note: This routine is in bank 2 and returns without switching bank.
+;;;
 ;;; In: C[6]= page address
 ;;;     A.X= secondary function identity
-;;; Out: Returns to (P+1) if function does not exist
-;;;      Returns to (P+2) if exists and:
+;;; Out: If function does not exist:
+;;;        A.M= 0
+;;;      If function exists:
 ;;;        A[6:3]= address of secondary function
+;;;        A.M= non-zero ([6:3] is the address which is non-zero if valid)
 ;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
-;;; Uses: A, B.X, C, active PT, +2 sub levels
+;;; Uses: A, B.X, C, active PT
+;;;       +1 sub levels, or +2 sub levels called from outside OS4
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public secondaryAddress
 secondaryAddress:
               b=a     x             ; B.X= secondary function identity
               a=0     s
 secondaryAddress10:
               gosub   secondary
-              rtn                   ; (P+1) no secondaries
-              acex    m
+              goto    notFound      ; (P+1) no secondaries
 10$:          c=c+1   m
               cxisa                 ; C.X= number of entries on this secondary table
               ?a<c    x             ; in range?
@@ -491,15 +514,15 @@ secondaryAddress10:
               c=c-1   m
               cxisa
               ?c#0    x             ; do we have a next secondary table?
-              rtnnc                 ; no, does not exist
-              gosub   unpack        ; read next pointer
+              gonc    notFound      ; no, does not exist
+              gosub   unpack_B2     ; read next pointer
               goto    10$
 
 20$:          ?a#0    s             ; coming from secondaryProgram?
               gonc    lookupFAT     ; no
               c=c-1   m             ; yes
               acex    m             ; A[6:3]= the secondary FAT header
-              goto    toRTNP2
+              rtn
 lookupFAT:    c=c+1   m
               c=c+1   m
               c=c+1   m
@@ -510,7 +533,7 @@ lookupFAT:    c=c+1   m
               rcr     -3            ; C[5:3]= page address of secondary FAT
               acex    m             ; A[5:3]= page address of secondary FAT
                                     ; C[6:3]= address in secondary FAT header
-              gosub   jumpP1        ; switch bank
+              gosub   jumpP1_B2     ; switch bank
               pt=     5
               acex    wpt           ; C[6:3]= start of secondary FAT
                                     ; C.X= index
@@ -534,7 +557,10 @@ lookupFAT:    c=c+1   m
               asl
               asl                   ; A[6:3]= address of secondary function
               abex    x             ; A.X= secondary function identity
-toRTNP2:      golong  RTNP2
+              rtn
+
+notFound:     a=0     m             ; not found
+              rtn
 
 ;;; **********************************************************************
 ;;;
@@ -543,6 +569,9 @@ toRTNP2:      golong  RTNP2
 ;;; Get information needed for how to store a secondary function in a
 ;;; program. This consists of the XROM prefix to be used and the adjusted
 ;;; secondary number (for that prefix).
+;;;
+;;; Note: This routine enters and returns in bank 1, though it does
+;;;       switch to bank 2 internally.
 ;;;
 ;;; In: C[6]= page address
 ;;;     A.X= secondary function identifier
@@ -554,13 +583,16 @@ toRTNP2:      golong  RTNP2
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code1, reorder
               .public secondaryProgram
+              .extern  RTNP2
 secondaryProgram:
+              switchBank 2
               a=0     s
               a=a+1   s
               gosub   secondaryAddress10
-              rtn
+              ?a#0    m
+              gonc    10$
               b=a     x             ; B[1:0]= adjusted secondary function identity
               acex    m             ; C[6:3]= secondary FAT header
               c=c+1   m
@@ -578,7 +610,13 @@ secondaryProgram:
               c=c+c   x
               c=c+c   x
               a=a+c   x
+              enrom1
+10$:          golong  enableBank1
+
+              .section code1
+              .shadow 10$
               golong  RTNP2
+
 
 ;;; **********************************************************************
 ;;;
@@ -591,16 +629,16 @@ secondaryProgram:
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public runSecondary
+              .extern systemBuffer
 runSecondary: s8=0                  ; not Text 1
               s9=0                  ; no text literal consulted
               c=stk                 ; C[6:3]= some page address
               cxisa
               a=c     x             ; A.X= XROM prefix code
               gosub   secondary
-              rtn                   ; (P+1) not found
-              acex    m
+              goto    100$          ; (P+1) not found
 10$:          c=c+1   m
               m=c                   ; M= secondary FAT header pointer + 1
               c=c+1   m
@@ -611,9 +649,11 @@ runSecondary: s8=0                  ; not Text 1
               c=c-1   m
               cxisa
               ?c#0    x             ; are there more tables?
-99$:          golnc   ERRNE         ; no - does not exist
-              gosub   unpack
+99$:          gonc    toERRNE       ; no - does not exist
+              gosub   unpack_B2
               goto    10$
+
+100$:         golong  enableBank1
 
 20$:          c=c+1   m
               ?s13=1                ; running?
@@ -624,7 +664,7 @@ runSecondary: s8=0                  ; not Text 1
               goto    35$
 
 25$:          s9=1                  ; secondary identifier from program memory
-              gosub   NXBYTP
+              gosub   NXBYTP_B2
               b=a
               a=c     x             ; A.X= instruction byte
               pt=     1
@@ -651,24 +691,26 @@ runSecondary: s8=0                  ; not Text 1
               c=m                   ; C[6:3]= secondary FAT header pointer + 1
               cxisa                 ; C.X= number of functions
               ?a<c    x             ; in range?
-toERRNE:      golnc   ERRNE         ; no, flag as error
+toERRNE:      golnc   ERRNE_B2      ; no, flag as error
               gosub   lookupFAT
-              nop                   ; needed as it returns to (P+2)
               b=a     m             ; B[6:3]= XADR
               c=b     m             ; C[6:3]= XADR
+
+;;; Here we switch to bank 1 to call isArgument, systemBuffer and gotoFunction
+              switchBank 1
               gosub   isArgument
               goto    75$           ; not semi-merged
               ?s9=1                 ; semi-merged, fetching from program memory?
-              gonc    78$           ; no
+              gonc    xgotoFunction ; no
               c=b     s             ; C.S= Text literal count - 1
               ?s7=1                 ; dual arguments?
               gonc    72$           ; no
               c=c-1   s
 72$:          c=c-1   s
               ?c#0    s             ; correct text literal length?
-              goc     toERRNE       ; no
+              goc     toErrneInBank1 ; no
               gosub   systemBuffer
-              goto    78$           ; (P+1) no system buffer, this will cause
+              goto    xgotoFunction ; (P+1) no system buffer, this will cause
                                     ;  and error later in argument handling
               c=data                ; tell argument handling that we are
               cstex                 ;  executing a secondary
@@ -676,27 +718,40 @@ toERRNE:      golnc   ERRNE         ; no, flag as error
               cstex
               data=c
 
-              goto    78$           ; yes, we will need the text literal when
+              goto    xgotoFunction ; yes, we will need the text literal when
                                     ;  fetching semi-merged operands, so we do
                                     ;  not skip over it now
 
 75$:          ?s8=1
-              gonc    toERRNE       ; not Text1
+toErrneInBank1:
+              golnc   ERRNE         ; not Text1
               c=n
               a=c                   ; A= address
               gosub   PUTPC         ; step over Text1
-78$:          abex    m             ; A[6:3]= XADR
+xgotoFunction:
+              abex    m             ; A[6:3]= XADR
               golong  gotoFunction
+
+;;; Insert a bank switch (in bank 2) prior to a jump to ERRNE located in bank1
+;;; to make the bank switch and then jump to ERRNE.
+              .section code2
+              .shadow toErrneInBank1 - 1
+ERRNE_B2:     enrom1
 
 ;;; **********************************************************************
 ;;;
 ;;; inProgramSecondary - find secondary as stored in program memory
+;;; inProgramSecondary - same as inProgramSecondary, but callable from
+;;;                      bank 1 and uses +3 sub levels
+;;;
+;;; Note: This routine is in bank 2 and returns without switching bank.
 ;;;
 ;;; In: M[6:3]= points to word before program memory suffix
 ;;;     B.X= secondary function after XROM prefix
-;;; Out: Returns to (P+1) if secondary not found, with:
+;;; Out: If function does not exist:
+;;;        A.M= 0
 ;;;        M[5:3] and M.X= function number after XROM
-;;;      Returns to (P+2) if there are secondary found, with:
+;;;      If function exists:
 ;;;        A[6:3]= address of secondary function
 ;;;        A.X= secondary function identity
 ;;;        M.X= actual function number
@@ -706,7 +761,7 @@ toERRNE:      golnc   ERRNE         ; no, flag as error
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public inProgramSecondary
 inProgramSecondary:
               c=b
@@ -718,8 +773,8 @@ inProgramSecondary:
               cxisa                 ; C.X= read jj suffix
               a=c     x             ; A.X= prefix XROM number (jj of XROM ii,jj)
               gosub   secondary
-              rtn
-              b=a     m             ; B[6:3]= pointer to secondary FAT header
+              goto    99$
+              bcex    m             ; B[6:3]= pointer to secondary FAT header
 
 10$:          c=b     m             ; C[6:3]= pointer to secondary FAT header
               c=c+1   m
@@ -731,14 +786,14 @@ inProgramSecondary:
               cmex
               acex
               c=b     m
-              gosub   unpack1       ; number of entries we skipped
+              gosub   unpack1_B2    ; number of entries we skipped
               c=a+c   x             ; update function index
               cmex
               a=c
               c=b     m
-              gosub   unpack0       ; point to next
+              gosub   unpack0_B2    ; point to next
               ?c#0    x             ; is there a next table?
-              rtnnc                 ; no
+              gonc    99$           ; no
               bcex    m
               goto    10$
 20$:          abex    m             ; A[6:3]= FAT header pointer
@@ -750,5 +805,16 @@ inProgramSecondary:
               c=c+1   m
               cxisa                 ; C.X= number of entries
               ?a<c    x
-              rtnnc                 ; out of range
+              gonc    99$           ; out of range
               golong  lookupFAT
+
+99$:          a=0     m             ; not found
+              rtn
+
+              .public inProgramSecondary_B1
+              .section code1
+inProgramSecondary_B1:
+              switchBank 2
+              gosub   inProgramSecondary
+              switchBank 1
+              rtn

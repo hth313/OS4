@@ -7,6 +7,7 @@
 ;;; **********************************************************************
 
 #include "mainframe.h"
+#include "internals.h"
 
 ;;; **********************************************************************
 ;;;
@@ -394,10 +395,11 @@ assignSecondary10:
 ;;;
 ;;; In: N[1:0] - keycode
 ;;;     B.X= address of buffer header (as after testAssignBit)
-;;; Out: Returns to (P+1) if not found, if S0=1 with:
-;;;        A.X - XROM Id
-;;;        N.X - secondary function identity
-;;;      Returns to (P+2) if found, with
+;;; Out: Returns with A.M=0 if not found, if S0=1 with:
+;;;        A.X= XROM Id
+;;;        A.M= 0
+;;;        N.X= secondary function identity
+;;;      Returns with A.M=non-zero, with
 ;;;        A[6:3]= address of secondary function
 ;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
@@ -406,7 +408,7 @@ assignSecondary10:
 ;;; **********************************************************************
 
               .public secondaryAssignment
-              .extern assignArea10
+              .extern assignArea10, secondaryAddress_B1
               .section code, reorder
 secondaryAssignment:
               s0=0
@@ -414,7 +416,7 @@ secondaryAssignment:
               a=c     x
               dadd=c
               gosub   assignArea10
-              rtn                   ; (P+1) no assignments
+              goto    99$           ; (P+1) no assignments
               c=c+1   x             ; step past bitmap registers
               bcex    x             ; B.X= pointer to assignment registers
               c=data                ; read buffer header
@@ -436,6 +438,7 @@ secondaryAssignment:
               bcex    x
               a=a-1   s
               gonc    10$
+99$:          a=0     m
               rtn                   ; not found
 ;;; * Scan plugged in ROMs, checking Id and that it has the flag set for having
 ;;; * secondaries. If matching, we check if function number is in range.
@@ -455,7 +458,7 @@ secondaryAssignment:
               gonc    60$           ; yes
 57$:          c=c+1   pt
               gonc    55$
-              rtn                   ; not found
+              goto    99$           ; not found
 60$:          a=c     m
               pt=     5
               lc      0xf
@@ -468,7 +471,7 @@ secondaryAssignment:
               goto    57$           ; no
 62$:          c=n
               acex
-              golong   secondaryAddress
+              golong   secondaryAddress_B1
 
 ;;; **********************************************************************
 ;;;

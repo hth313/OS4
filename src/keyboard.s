@@ -34,7 +34,7 @@
               .extern systemBuffer, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell, unpack0, testAssignBit
               .extern secondaryAssignment, secondaryAddress
-              .extern resetBank, secondaryProgram
+              .extern resetBank, secondaryProgram, secondaryAddress_B1
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -274,7 +274,8 @@ secondaryASN: c=n                   ; convert keycode to 1-80 form
               c=c+1   x
               n=c                   ; N[1:0]= keycode to 1-80 form
               gosub   secondaryAssignment
-              goto    noXXROM       ; (P+1) not plugged in
+              ?a#0    m
+              gonc    noXXROM       ; not plugged in
 foundXXROM:   acex                  ; C[6:3]= XADR
                                     ; C.X= secondary function identity
               s9=1                  ; found
@@ -509,10 +510,10 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
 invokeSecondary10:
               a=c     x             ; A.X= secondary index
 invokeSecondary:
-              gosub   secondaryAddress
-              goto    10$           ; (P+1) function not available(?)
-              golong  foundXXROM
-10$:          golong  noXXROM
+              gosub   secondaryAddress_B1
+              ?a#0    m
+              golc    foundXXROM
+              golong  noXXROM
 
 ;;; **********************************************************************
 ;;;

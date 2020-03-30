@@ -648,6 +648,29 @@ versionCheck: a=c     x
               goto    errorExitPop
 
 
+;;; ----------------------------------------------------------------------
+;;;
+;;; Bank switchers allow external code to turn on specific banks.
+;;;
+;;; ----------------------------------------------------------------------
+
+BankSwitchers: .macro
+              rtn                   ; not using bank 3
+              rtn
+              rtn                   ; not using bank 4
+              rtn
+              enrom1
+              rtn
+              enrom2
+              rtn
+              .endm
+
+              .section OS4BankSwitchers1
+             BankSwitchers
+
+              .section OS4BankSwitchers2
+             BankSwitchers
+
 ;;; **********************************************************************
 ;;;
 ;;; Entry points intended for application modules.
@@ -684,6 +707,7 @@ versionCheck: a=c     x
               .extern findBufferHosted, reclaimHostedBuffer, newHostedBuffer
               .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
               .extern dualArgument
+              .public secondaryAddress_B1
 
               golong  activateShell ; 0x4f00
               golong  exitShell     ; 0x4f02
@@ -725,8 +749,13 @@ versionCheck: a=c     x
               nop                   ;        partialKey filler
               golong  noSysBuf      ; 0x4f4a
               golong  shellKeyboard ; 0x4f4c
-              golong  XASRCH        ; 0x4f4e
-              golong  secondaryAddress ; 0x4f50
+              enrom2                ; XASRCH 0x4f4e
+XASRCHB2Location:
+              nop                   ; filler for XASRCH
+secondaryAddress_B1:
+              enrom2                ; secondaryAddress 0x4f50
+secondaryAddressB2Location:
+              nop                   ; filler for secondaryAddress
               golong  clearAssignment ; 0x4f52
               golong  assignSecondary ; 0x4f54
               golong  secondaryAssignment ; 0x4f56
@@ -734,7 +763,9 @@ versionCheck: a=c     x
               golong  invokeSecondary ; 0x4f5a
               golong  XABTSEQ       ; 0x4f5c
               golong  clearSecondaryAssignments ; 0x4f5e
-              golong  runSecondary  ; 0x4f60
+              enrom2                ; runSecondary 0x4f60
+runSecondaryB2Location:
+              nop                   ; filler for runSecondary
               golong  setTimeout    ; 0x4f62
               golong  clearTimeout  ; 0x4f64
               golong  keyDispatch   ; 0x4f66
@@ -746,6 +777,30 @@ versionCheck: a=c     x
               golong  shrinkHostedBuffer ; 0x4f72
               golong  packHostedBuffers ; 0x4f74
               golong  dualArgument  ; 0x4f76
+
+;;; Plain backing wit a jump, the routine handles it.
+backing       .macro  lab
+              .section code2
+              .shadow \labB2Location
+\lab_B2:
+              golong  \lab
+              .endm
+
+;;; Backing with a call
+backingCall   .macro lab
+              .section code2
+              .shadow \labB2Location
+\lab_B2:
+              gosub   \lab
+              golong  enableBank1
+              .endm
+
+;;; Table backing in page 2
+              .section code2
+              backing XASRCH
+              backing runSecondary
+              backingCall secondaryAddress
+
 ;;; Reserved tail identification. We only use a checksum at the moment.
               .section TailOS4
               .con    0             ; to be replaced by checksum

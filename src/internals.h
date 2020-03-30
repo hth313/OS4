@@ -18,3 +18,6 @@ PRT5:         .equlab 0x6fe5
 WKUP20:       .equlab 0x1a6
 WKUP60:       .equlab 0x01d5
 WKUP90:       .equlab 0x020f
+
+enableBank1   .equlab 0x4fc7
+enableBank2   .equlab 0x4fc9

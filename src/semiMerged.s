@@ -25,7 +25,7 @@
               .section code, reorder
               .public doPRGM
               .extern systemBuffer, LocalMEMCHK, noSysBuf, jumpP1
-              .extern inProgramSecondary, resetBank, secondaryProgram
+              .extern inProgramSecondary_B1, resetBank, secondaryProgram
               .extern XABTSEQ
 doPRGM:       ?s12=1                ; PRIVATE ?
               goc     900$          ; yes
@@ -351,8 +351,9 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               rcr     5             ; C[6:3]= ROM page pointer
               m=c                   ; M[6:3]= ROM page pointer
               gosub   ENLCD
-              gosub   inProgramSecondary
-              goto    90000000$     ; (P+1) not available
+              gosub   inProgramSecondary_B1
+              ?a#0    m
+              gonc    90000000$     ; not available
                                     ;   We know the ROM is there as we looked
                                     ;   it, so the problem is really that its
                                     ;   FAT structure has been altered in a way
@@ -437,21 +438,6 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 
 ;;; **********************************************************************
 ;;;
-;;; Increment and get next byte from program memory.
-;;;
-;;; **********************************************************************
-
-              .public NXBYTP, NXBYT
-NXBYTP:       gosub   GETPC
-NXBYT:        gosub   INCAD
-              gosub   GTBYT
-              c=0     xs
-              ?c#0    x
-              rtnc
-              goto    NXBYT         ; skip null
-
-;;; **********************************************************************
-;;;
 ;;; Right justify display
 ;;;
 ;;; Leaves rightmost char in C[2:0] and 32 in A[2:0] (blank)
@@ -469,6 +455,32 @@ RightJustify: gosub   ENLCD
               gonc    1$
               flsabc
               rtn
+
+;;; **********************************************************************
+;;;
+;;; Increment and get next byte from program memory.
+;;;
+;;; **********************************************************************
+
+              .public NXBYTP, NXBYT
+              .section code1, reorder
+NXBYTP:       gosub   GETPC
+NXBYT:        gosub   INCAD
+              gosub   GTBYT
+              c=0     xs
+              ?c#0    x
+              rtnc
+              goto    NXBYT         ; skip null
+
+              .public NXBYTP_B2, NXBYT_B2
+              .section code2, reorder
+NXBYTP_B2:    gosub   GETPC
+NXBYT_B2:     gosub   INCAD
+              gosub   GTBYT
+              c=0     xs
+              ?c#0    x
+              rtnc
+              goto    NXBYT_B2      ; skip null
 
 ;;; ----------------------------------------------------------------------
 ;;;

@@ -801,6 +801,17 @@ backingCall   .macro lab
               backing runSecondary
               backingCall secondaryAddress
 
-;;; Reserved tail identification. We only use a checksum at the moment.
-              .section TailOS4
+;;; Reserved tail identificatios.
+tail:         .macro
+              .con    1             ; A
+              .con    '0'           ; 0
+              .con    0x200 + '4'   ; 4 (banked)
+              .con    0x0f          ; O
               .con    0             ; to be replaced by checksum
+              .endm
+
+              .section TailOS4
+              tail
+
+              .section TailOS4_2
+              tail

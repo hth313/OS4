@@ -629,6 +629,9 @@ shellHandle:  gosub   unpack        ; C[6:3]= pointer to shell
 ;;;          M - shell scan state
 ;;;          ST= system buffer flags, Header[1:0]
 ;;;          B.X= address of system buffer
+;;;          S9= application seen
+;;;          PT= 6
+;;;          DADD= register where shell descriptor is
 ;;; Uses: A, B.X, C, M, DADD, S8, S9, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************

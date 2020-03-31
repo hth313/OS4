@@ -598,8 +598,12 @@ requestArgument:
               c=regn  15
               rcr     3
               pt=     0
-              g=c                   ; G= PTEMP2
               st=c                  ; ST= PTEMP2
+              s6=0                  ; reset indirect bit
+              c=st
+              g=c                   ; G= PTEMP2
+              rcr     -3
+              regn=c  15
               gosub   RightJustify  ; output a space
               acex    x
               slsabc

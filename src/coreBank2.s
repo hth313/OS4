@@ -1,3 +1,21 @@
+;;; ----------------------------------------------------------------------
+;;;
+;;; Main take over entry point at address 0x4000, in case bank 2
+;;; is left enabled by accident.
+;;;
+;;; ----------------------------------------------------------------------
+
+              .section Header4_2
+              .extern patch11_2
+              rst     kb            ; these three instructions
+              chk kb                ; necessary because of
+              sethex                ; problems with CPU wakeup
+              goto    10$           ; 2 instruction corresponding to the LDI
+5$:           enrom1                ; in bank 1, then fall into it
+
+10$:          ldi     0x2fd         ; load constant
+              goto    5$
+
 ;;; **********************************************************************
 ;;;
 ;;; Core routines for bank 2.
@@ -27,4 +45,3 @@ unpack_B2:    csr     m
               c=c+c   x
               rcr     -3
               rtn
-

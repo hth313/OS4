@@ -455,12 +455,42 @@ exitReclaim10:
 exitTransientApp:
               gosub   hasActiveTransientApp
               rtn                   ; (P+1) no
+exitTransientApp10:
               c=data                ; refetch
               c=0     pt            ; deactivate
               data=c
               gosub   clearScratch
               golong  shellChanged
 
+;;; **********************************************************************
+;;;
+;;; exitApp - exit the top level application
+;;;
+;;; Exit the top application.
+;;;
+;;; In: Nothing
+;;; Out: Nothing
+;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +2 sub levels
+;;;
+;;; **********************************************************************
+
+              .public exitApp
+exitApp:      gosub   hasActiveTransientApp
+              goto    10$           ; (P+1) no transient app
+              goto    exitTransientApp10
+10$:          gosub   topShell
+              rtn                   ; (P+1) no buffer
+              rtn                   ; (P+2) no shells
+              ?s9=1                 ; (P+3) application shell found?
+              rtnnc                 ; no
+              c=m                   ; get scan state
+              ?c#0    s             ; shell desriptor in upper half?
+              gonc    20$           ; no, lower
+              pt=     13
+20$:          c=data
+              c=0     pt            ; deactivate shell
+              data=c
+              rtn
 
 ;;; **********************************************************************
 ;;;

@@ -7,6 +7,7 @@
 ;;; **********************************************************************
 
 #include "mainframe.h"
+#include "internals.h"
 
 ;;; **********************************************************************
 ;;;
@@ -469,6 +470,20 @@ growBuffer10: gosub   buffer1
               a=c     x             ; A.X= buffer header address
               golong  RTNP2         ; done, return to (P+2)
 
+;;; variant of growBuffer in bank 2, uses +2 sub levels
+              .section code2, reorder
+              .public growBuffer_B2
+              .extern gotoc_B1
+growBuffer_B2:
+              switchBank 1
+              gosub   growBuffer
+              goto    10$
+              c=stk
+              c=c+1   m
+5$:           golong  gotoc_B1
+10$:          c=stk
+              goto 5$
+
 ;;; **********************************************************************
 ;;;
 ;;; clearScratch - remove transient application scratch area
@@ -589,6 +604,14 @@ buffer2:      c=0     m
               c=data                ; load buffer header
               rtn
 
+;;; * Variant in bank2, uses +2 sub levels
+              .section code2, reorder
+              .public shrinkBuffer_B2
+shrinkBuffer_B2:
+              switchBank 1
+              gosub   shrinkBuffer
+              golong  enableBank2
+
 ;;; **********************************************************************
 ;;;
 ;;; scratchArea - get pointer to transient application scratch area
@@ -627,9 +650,10 @@ scratchArea:  gosub   systemBuffer
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public assignArea, assignArea10
-assignArea:   gosub   systemBuffer
+              .extern systemBuffer_B2, RTNP2_B2
+assignArea:   gosub   systemBuffer_B2
               rtn                   ; (P+1) no system buffer
               b=a     x             ; B.X= buffer header address
 assignArea10: c=data                ; read buffer header
@@ -644,7 +668,7 @@ assignArea10: c=data                ; read buffer header
               c=a+c   x             ;
               c=c+1   x
               abex    x             ; A.X= buffer header address
-              golong  RTNP2
+              golong  RTNP2_B2
 
 ;;; **********************************************************************
 ;;;

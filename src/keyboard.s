@@ -33,7 +33,7 @@
               .public keyKeyboard, invokeSecondary
               .extern systemBuffer, jumpC1, jumpC2, jumpC4, jumpPacked
               .extern disableThisShell, unpack0, testAssignBit
-              .extern secondaryAssignment, secondaryAddress
+              .extern secondaryAssignment_B2, secondaryAddress
               .extern resetBank, secondaryProgram, secondaryAddress_B1
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
@@ -85,15 +85,17 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               bcex                  ; preserve it in B
               asr     x             ; A[1:0]= keycode, 0-79 form
               a=a+1   x             ; to 1-80 form
+              switchBank 2
               gosub   testAssignBit
               goto    24$           ; (P+1) not reassigned
               goto    23$           ; (P+2) normal reassigned
               golong  secondaryASN  ; (P+3) secondary reassigned
 23$:          c=0     x
               dadd=c
-              golong  RAK60
+              golong  RAK60_B2
 
-24$:          bcex                  ; not reassigned
+24$:          switchBank 1
+              bcex                  ; not reassigned
               c=0     x             ; restore scan state to M
               dadd=c
               rcr     4
@@ -268,14 +270,18 @@ noXXROM:      gosub   CLLCDE        ; display it as XXROM nn,func
               s9=0                  ; we did not find it
               golong  nullTest
 
+              .section code2,reorder
 ;;; * Handle secondary reassigned keys.
 secondaryASN: c=n                   ; convert keycode to 1-80 form
               csr     x
               c=c+1   x
               n=c                   ; N[1:0]= keycode to 1-80 form
-              gosub   secondaryAssignment
+secAsn10:     gosub   secondaryAssignment_B2
+
+              .section code1
+              .shadow secAsn10 + 2
               ?a#0    m
-              gonc    noXXROM       ; not plugged in
+              golnc   noXXROM       ; not plugged in
 foundXXROM:   acex                  ; C[6:3]= XADR
                                     ; C.X= secondary function identity
               s9=1                  ; found
@@ -531,7 +537,7 @@ appClearDigitEntry:
               cxisa
               ?c#0    x
               rtnnc                 ; does not define any digit entry
-              gosub   jumpPacked    ; tell app tor clear digit entry
+              gosub   jumpPacked    ; tell app to clear digit entry
                                     ; must preserve: B, N and M!!!
               gosub   systemBuffer
               c=data
@@ -589,3 +595,8 @@ keyDispatch:  c=0     m
               c=0     x             ; yes, set C.X= 0
 20$:          c=c+a   m             ; point to address
               gotoc
+
+;;; * Switch to bank 1 and go to RAK60
+              .section code2
+RAK60_B2:     switchBank 1
+              golong  RAK60

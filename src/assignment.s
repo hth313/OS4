@@ -13,6 +13,10 @@
 ;;;
 ;;; clearAssignment - delete an assignment
 ;;;
+;;; Note: This routine enters and leaves in bank 1, but actually has most
+;;;       of its code in bank 2. This is due to that it is externally
+;;;       called and uses +3 sub levels.
+;;;
 ;;; In: A[1:0] - keycode to be cleared
 ;;; Out: Nothing
 ;;;
@@ -20,17 +24,18 @@
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code1, reorder
               .public clearAssignment
-              .extern shrinkBuffer, secondaryAddress
+              .extern shrinkBuffer
 clearAssignment:
               acex
 clearAssignment10:
+              switchBank 2
               a=c
               n=c                   ; N[1:0]= keycode
               s1=0                  ; assume not system assigned
               gosub   testAssignBit
-              rtn                   ; (P+1) not assigned
+              goto    991$          ; (P+1) not assigned
               s1=1                  ; (P+2) system assigned
                                     ; (P+3) secondary assigned
 ;;; * Reset the bitmap bit in the 'active' one. If the key is assigned
@@ -41,7 +46,12 @@ clearAssignment10:
               c=a-c
               data=c
 
-              gosub   assignArea
+              goto    1$            ; skip over
+991$:         golong  enableBank1   ; return as not assigned, needed as
+                                    ; branch range is too far and there are
+                                    ; no suitable alternative to put it
+
+1$:           gosub   assignArea
               goto    500$          ; (P+1) no secondary assignemnts
               c=c+1   x
               c=c+1   x             ; step past bitmap registers
@@ -103,7 +113,7 @@ clearAssignment10:
               c=b     x             ; C.X= buffer header
               acex    x             ; A.X= buffer header
                                     ; C.X= offset to first register to remove
-              gosub   shrinkBuffer
+              gosub   shrinkBuffer_B2
               ?s0=1                 ; did we remove bitmap registers?
               gonc    30$           ; no, we may need to reset bits there still
 500$:         goto    50$           ; yes, do not reset bits there (as it does
@@ -117,7 +127,7 @@ clearAssignment10:
 ;;; * system assignment on this key, we still need to reset the bitmap
 ;;; * bit in the secondary area.
 30$:          ?s1=1                 ; system assigned
-              rtnnc                 ; no, we are actually done now as we already
+              gonc    99$           ; no, we are actually done now as we already
                                     ;   have reset the bitmap bit in this case
                                     ;   (above)
 ;;; * Now reset the bitmap bit. We make use of testAssignBit again and we
@@ -142,7 +152,7 @@ clearAssignment10:
               gosub   GCPKC         ; clear the key assignment in system
               c=regn  9
               n=c
-              rtn
+99$:          golong  enableBank1
 
 ;;; **********************************************************************
 ;;;
@@ -153,6 +163,7 @@ clearAssignment10:
 ;;; so that if there is already an ordinary assigned key, we do not regard
 ;;; the secondary assignment as valid.
 ;;;
+;;; Note: This routine is in bank 2
 ;;;
 ;;; In: A[1:0] - keycode to be tested (1:80 form)
 ;;; Out: Returns to (P+1) if not assigned at all
@@ -166,10 +177,10 @@ clearAssignment10:
 ;;;
 ;;; **********************************************************************
 
-              .section code, reorder
+              .section code2, reorder
               .public testAssignBit
-              .extern assignArea, RTNP2, RTNP3, noRoom, ensureSystemBuffer
-              .extern growBuffer
+              .extern assignArea, RTNP2_B2, RTNP3_B2, noRoom_B2
+              .extern growBuffer_B2
 testAssignBit:
               s0=0                  ; usual behavior
 testAssignBit10:
@@ -213,7 +224,7 @@ testAssignBit10:
 7$:           m=c                   ; M= bit map
               c=c&a                 ; row,col bit set?
               ?c#0                  ; normally assigned?
-              golc    RTNP2         ; yes, return to (P+2)
+              golc    RTNP2_B2      ; yes, return to (P+2)
               acex
               m=c                   ; M= bit we are testing
               gosub   assignArea
@@ -234,11 +245,13 @@ testAssignBit10:
               goc     20$           ; secondary assigned, return to (P+3)
               ?s0=1                 ; do we still want bitmap result?
               rtnnc                 ; no, return to (P+1)
-20$:          golong  RTNP3
+20$:          golong  RTNP3_B2
 
 ;;; **********************************************************************
 ;;;
 ;;; assignSecondary - assign a secondary function
+;;;
+;;; Note: This routine is in bank 2, but returns to bank 1.
 ;;;
 ;;; In: A[1:0] - keycode
 ;;;     B[4:0] - assignment (XR-FFF)
@@ -248,10 +261,11 @@ testAssignBit10:
 ;;; **********************************************************************
 
 ;;; * Create assignment area.
-              .section code, reorder
+              .section code2, reorder
+              .extern gotoc_B2, ensureSystemBuffer_B2
 createAssignArea:
-              gosub   ensureSystemBuffer
-              goto    toNoRoom      ; (P+1) no room
+              gosub   ensureSystemBuffer_B2
+              goto    toNoRoom_B2   ; (P+1) no room
               b=a     x             ; B.X= buffer header address
               c=data                ; read buffer header
               rcr     4
@@ -265,8 +279,8 @@ createAssignArea:
               g=c
               abex    x             ; A.X= buffer header address
               c=b     x             ; C.X= offset where to add registers
-              gosub   growBuffer
-              goto    toNoRoom      ; (P+1) no space
+              gosub   growBuffer_B2
+              goto    toNoRoom_B2   ; (P+1) no space
 ;;; Set bitmap registers to "1". This means empty bitmaps (as lower nibbles
 ;;; are unused), but also ensures that they are non-zero. Due to the 67/97
 ;;; card reader bug an I/O buffer cannot have empty registers.
@@ -290,7 +304,7 @@ createAssignArea:
               data=c
               goto    assignSecondary10 ; now we can find assign area again
 
-toNoRoom:     golong  noRoom
+toNoRoom_B2:  golong  noRoom_B2
 
 
               .public assignSecondary
@@ -303,7 +317,9 @@ assignSecondary:
               pt=     1
               acex    wpt           ; C[6:0]= assignment
                                     ; C[10:7]= return address
+              switchBank 1
               gosub   clearAssignment10 ; remove any existing assignment
+              switchBank 2
 
 ;;; 1. Ensure there is an assignment area (with one register).
 assignSecondary10:
@@ -339,12 +355,12 @@ assignSecondary10:
               c=data
               pt=     6
               c=c+1   pt
-              goc     toNoRoom      ; no, we have maximum of KARs
+              goc     toNoRoom_B2   ; no, we have maximum of KARs
               a=a-b   x             ; A.X= offset where to add register
               abex    x
               c=b     x
-              gosub   growBuffer
-              goto    toNoRoom      ; (P+1) no space
+              gosub   growBuffer_B2
+              goto    toNoRoom_B2   ; (P+1) no space
               c=data                ; read buffer header
               pt=     6
               c=c+1   pt            ; increment KAR register counter
@@ -378,7 +394,7 @@ assignSecondary10:
               a=c     x             ; A[1:0]= keycode
               s0=1                  ; I want secondary bitmap info
               gosub   testAssignBit10
-              rtn                   ; (P+1) no top row/no assign area
+              goto    99$           ; (P+1) no top row/no assign area
                                     ;        (should not happen)
               nop                   ; (P+2) system assigned
                                     ;        (should not happen as we cleared it)
@@ -387,11 +403,15 @@ assignSecondary10:
               data=c                ; write it back
               c=n                   ; get return address back from N
               rcr     4
-              gotoc
+              golong  gotoc_B2
+99$:          golong  enableBank1
 
 ;;; **********************************************************************
 ;;;
 ;;; secondaryAssignment - look up a secondary assignment
+;;;
+;;; Note: secondaryAssignment_B2 is an entry bank 2 that returns
+;;;       in bank 1.
 ;;;
 ;;; In: N[1:0] - keycode
 ;;;     B.X= address of buffer header (as after testAssignBit)
@@ -407,10 +427,16 @@ assignSecondary10:
 ;;;
 ;;; **********************************************************************
 
-              .public secondaryAssignment
-              .extern assignArea10, secondaryAddress_B1
-              .section code, reorder
+              .public secondaryAssignment, secondaryAssignment_B2
+              .extern assignArea10, secondaryAddress
+
+              .section code1, reorder
+              .shadow secondaryAssignment_B2 - 1
 secondaryAssignment:
+              enrom2
+
+              .section code2, reorder
+secondaryAssignment_B2:
               s0=0
               c=b     x
               a=c     x
@@ -438,8 +464,8 @@ secondaryAssignment:
               bcex    x
               a=a-1   s
               gonc    10$
-99$:          a=0     m
-              rtn                   ; not found
+99$:          a=0     m             ; A.M= 0 to indicate not found
+              goto    991$          ; return via bank switch
 ;;; * Scan plugged in ROMs, checking Id and that it has the flag set for having
 ;;; * secondaries. If matching, we check if function number is in range.
 50$:          s0=1                  ; There is an assignment
@@ -471,23 +497,26 @@ secondaryAssignment:
               goto    57$           ; no
 62$:          c=n
               acex
-              golong   secondaryAddress_B1
+              gosub   secondaryAddress
+991$:         golong  enableBank1
 
 ;;; **********************************************************************
 ;;;
 ;;; clearSecondaryAssignments - clear all secondary assignments
 ;;;
+;;; Note: This routine is in bank 2, but returns in bank 1
 ;;; In: Nothing
 ;;; Out: Nothing
 ;;; Uses: A, C, B, G, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
 
+              .section code2, reorder
               .public clearSecondaryAssignments
-              .section code, reorder
+              .extern shrinkBuffer_B2
 clearSecondaryAssignments:
               gosub   assignArea
-              rtn                   ; (P+1) no secondary assignemnts
+              goto    10$           ; (P+1) no secondary assignemnts
               bcex    x             ; B.X= pointer to assignment area
               c=data                ; read buffer header
               rcr     6
@@ -501,4 +530,5 @@ clearSecondaryAssignments:
               lc      0             ; no secondary assignments
               data=c                ; update buffer header
               bcex    x             ; C.X= offset to first register to remove
-              golong  shrinkBuffer  ; remove the secondary assignment area
+              gosub   shrinkBuffer_B2 ; remove the secondary assignment area
+10$:          golong  enableBank1

@@ -648,6 +648,25 @@ versionCheck: a=c     x
               goto    errorExitPop
 
 
+              .section code2
+              .shadow noRoom - 1
+              .public noRoom_B2
+noRoom_B2:    enrom1
+
+;;; **********************************************************************
+;;;
+;;; gotoc_B2 - jump indirectly into bank 1 from bank 2
+;;;
+;;; In: C[6:3] = address in bank 1
+;;;
+;;; **********************************************************************
+
+              .section code2
+              .shadow jumpP0 - 1
+              .public gotoc_B2
+gotoc_B2:     enrom1
+
+
 ;;; ----------------------------------------------------------------------
 ;;;
 ;;; Bank switchers allow external code to turn on specific banks.
@@ -757,12 +776,18 @@ secondaryAddress_B1:
 secondaryAddressB2Location:
               nop                   ; filler for secondaryAddress
               golong  clearAssignment ; 0x4f52
-              golong  assignSecondary ; 0x4f54
-              golong  secondaryAssignment ; 0x4f56
+              enrom2                ; assignSecondary 0x4f54
+assignSecondaryB2Location:
+              nop                   ; assignSecondary filler
+              enrom2                ; secondaryAssignment 0x4f56
+secondaryAssignmentB2Location:
+              nop
               golong  resetBank     ; 0x4f58
               golong  invokeSecondary ; 0x4f5a
               golong  XABTSEQ       ; 0x4f5c
-              golong  clearSecondaryAssignments ; 0x4f5e
+              enrom2                ; clearSecondaryAssignments 0x4f5e
+clearSecondaryAssignmentsB2Location:
+              nop                   ; filler for runSecondary
               enrom2                ; runSecondary 0x4f60
 runSecondaryB2Location:
               nop                   ; filler for runSecondary
@@ -801,6 +826,9 @@ backingCall   .macro lab
               backing XASRCH
               backing runSecondary
               backingCall secondaryAddress
+              backing assignSecondary
+              backing secondaryAssignment
+              backing clearSecondaryAssignments
 
 ;;; Reserved tail identificatios.
 tail:         .macro

@@ -429,7 +429,7 @@ secondaryAssignment:
 10$:          c=data                ; read assignment register
               ?a#c    wpt           ; keycode match?
               gonc    50$           ; yes
-              rcr     6             ; look at upper part
+              rcr     7             ; look at upper part
               ?a#c    wpt           ; keycode match?
               gonc    50$           ; yes
 20$:          bcex    x             ; step to and select next register

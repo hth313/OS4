@@ -184,7 +184,8 @@ deepWake:     disoff                ; get the display to a known
               lc      4
               data=c
               gosub   releaseHostedBuffers
-10$:          golong  WKUP60
+10$:          gosub   LDSST0
+              golong  WKUP60
 
 ;;; ----------------------------------------------------------------------
 ;;;

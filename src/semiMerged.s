@@ -494,11 +494,13 @@ NXBYT_B2:     gosub   INCAD
 ;;;
 ;;; IN: SS0 UP, CHIP0 selected
 ;;; OUT:  ST - numeric argument
-;;;       C[2:0] - numeric argument
-;;;       A[2:0] - numeric argument
-;;;       B[2:0] - numeric argument
-;;;       B.M - numeric argument
+;;;       C[1:0] - numeric argument
+;;;       C[13:0] - 0
 ;;;       G - numeric argument
+;;;
+;;; For dualArgument:
+;;; OUT:  A[3:2] - first argument
+;;;       A[1:0] - second argument
 ;;;
 ;;; It is assumed here that processing of numbers to registers take
 ;;; place later.
@@ -660,16 +662,14 @@ fetch10:      abex    wpt           ; argument follows in program
               a=c                   ; A[3:2]= argument 1
                                     ; A[1:0]= argument 2
               golong  ENCP00
+
 finalize:     pt=     0
-              g=c                   ; put in G
+              g=c                   ; put argument in G
+              st=c                  ; ST= argument
               c=0
               dadd=c                ; select chip 0
-              c=g
-              a=c                   ; in A.X
-              b=c     x             ; in B.X
-              rcr     -3            ; and finally to
-              bcex    m             ; B.M
-              c=b     x
+              c=g                   ; C[1:0]= argument
+                                    ; C[13:2]= 0
               rtn
 
 ;;; ----------------------------------------------------------------------

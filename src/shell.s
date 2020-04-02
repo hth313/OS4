@@ -508,6 +508,7 @@ exitApp:      gosub   hasActiveTransientApp
 hasActiveTransientApp:
               gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
+              c=data
               rcr     4
               c=0     xs
               ?c#0    x             ; any shells?

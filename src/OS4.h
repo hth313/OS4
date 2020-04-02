@@ -97,6 +97,9 @@ shrinkHostedBuffer: .equlab 0x4f72
 packHostedBuffers: .equlab 0x4f74
 dualArgument: .equlab dualArgumentEntry
 exitApp:      .equlab 0x4f78
+catEmpty      .equlab 0x4f7a
+catalog:      .equlab 0x4f7c
+catalogWithSize: .equlab 0x4f7e
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

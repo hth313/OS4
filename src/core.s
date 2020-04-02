@@ -726,6 +726,7 @@ BankSwitchers: .macro
               .extern findBufferHosted, reclaimHostedBuffer, newHostedBuffer
               .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
               .extern dualArgument, exitApp
+              .extern catEmpty, catalog, catalogWithSize
               .public secondaryAddress_B1
 
               golong  activateShell ; 0x4f00
@@ -803,6 +804,9 @@ runSecondaryB2Location:
               golong  packHostedBuffers ; 0x4f74
               golong  dualArgument  ; 0x4f76
               golong  exitApp       ; 0x4f78
+              golong  catEmpty      ; 0x4f7a
+              golong  catalog       ; 0x4f7c
+              golong  catalogWithSize ; 0x4f7e
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab

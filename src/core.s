@@ -197,7 +197,7 @@ deepWake:     disoff                ; get the display to a known
 ;;;
 ;;; ----------------------------------------------------------------------
 
-              .extern topShell, nextShell, keyHandler
+              .extern topShell, nextShell, keyHandler, clearClock
               .section code
 bufferScan0:  gosub   LDSST0
 fastDigitEntry:
@@ -218,6 +218,8 @@ bufferScan10: pt=     3
               goto    toWKUP20_SS0  ; (P+1) no buffer, ordinary keyboard logic
               goto    30$           ; (P+2) no shell, ordinary keyboard logic
               gosub   resetFlags    ; (P+3)
+              ?s9=1                 ; it is an application?
+              gsubc   clearClock    ; yes, clear any clock mode as key went down
 14$:          gosub   keyHandler    ; invoke key handler
               gosub   nextShell     ; did not want to deal with it, step to
                                     ; next shell

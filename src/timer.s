@@ -1,4 +1,5 @@
 #include "mainframe.h"
+#include "mainframe_cx.h"
 #include "time.h"
 
 #define IN_OS4
@@ -132,3 +133,40 @@ checkTimeout: gosub   systemBuffer
 
 50$:          gosub   LDSST0
               golong  noTimeout
+
+;;; **********************************************************************
+;;;
+;;; clearClock - clear clock display mode
+;;;
+;;; This routines checks for presence of a time module and clear any
+;;; clock mode.
+;;; We need to help the time module as it inspects some flags to sense
+;;; if a key was pressed and this does not work properly in some shell
+;;; modes as the message flag is set during normal display.
+;;; Thus, the time module may not understand a key was pressed and will
+;;; not leave the clock mode.
+;;; To work around this problem, call this routine on key down that is
+;;; processed by a shell.
+;;;
+;;; In: Nothing
+;;; Out: Chip 0 selected, SS0 up
+;;; Uses: C, B.M, A.X, +1 sub levels
+;;;
+;;; **********************************************************************
+
+              .section code, reorder
+              .public clearClock
+clearClock:   ldi     26            ; Time module XROM number
+              a=c     x
+              pt=     6
+              lc      5
+              c=0     wpt           ; 5000
+              cxisa
+              ?a#c    x             ; XROM 26 there?
+              goc     10$           ; no
+              gosub   ENTMR         ; enable timer
+              pt=b
+              rdscr
+              cstex                 ; put up software status
+              gosub   CLRALS
+10$:          golong  LDSST0        ; enable chip 0, put up SS0

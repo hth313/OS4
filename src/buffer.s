@@ -409,7 +409,7 @@ growBuffer10: gosub   buffer1
               gonc    4$
               rtn                   ; return to (P+1), not enough space
 
-10$:          gosub buffer2
+10$:          gosub   buffer2
               c=a+c   m             ; increase size of buffer
               rtnc                  ; return to (P+1) if buffer size overflows
                                     ; We know that buffer is F, so an overflow
@@ -586,7 +586,7 @@ buffer1:      b=a     x             ; B.X= buffer header address
 
               c=regn  13
               acex    x             ; A.X= chain head (pointer to .END.)
-              bcex    x             ; B.X= where to open space
+              bcex    x             ; B.X= where to open/reduce space
               rcr     -3
               bcex    m             ; B[5:3]= buffer header address
               rtn

@@ -540,6 +540,7 @@ appClearDigitEntry:
               gosub   jumpPacked    ; tell app to clear digit entry
                                     ; must preserve: B, N and M!!!
               gosub   systemBuffer
+              nop                   ; (P+1) filler, we know it exists
               c=data
               cstex
               st=0    Flag_Pause

@@ -198,6 +198,7 @@ deepWake:     disoff                ; get the display to a known
 ;;; ----------------------------------------------------------------------
 
               .extern topShell, nextShell, keyHandler
+              .section code
 bufferScan0:  gosub   LDSST0
 fastDigitEntry:
 bufferScan:   c=c+c   xs
@@ -833,6 +834,10 @@ backingCall   .macro lab
               backing assignSecondary
               backing secondaryAssignment
               backing clearSecondaryAssignments
+
+;;; Reserve some words for NoV-64
+              .section NOV64
+              .con    0,0,0,0,0,0
 
 ;;; Reserved tail identificatios.
 tail:         .macro

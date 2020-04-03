@@ -7,10 +7,10 @@ MOD = OS4.mod
 all: $(MOD)
 
 %.o: %.s
-	asnut -g -l $<
+	asnut --cpu=NEWT -g -l $<
 
 $(MOD): $(OBJS) linker.scm OS4.moddesc
-	lnnut -g $(OBJS) --list-file=linker.lst linker.scm OS4.moddesc
+	lnnut -g $(OBJS) --list-file=linker.lst --extra-output-formats=mod2 linker.scm OS4.moddesc
 
 clean:
 	rm $(OBJS) $(MOD)

@@ -536,6 +536,8 @@ dualReady:    c=0     s
                                     ; A[1:0]= second argument
               c=stk
               c=c+1   m
+              c=0     x
+              dadd=c                ; select chip 0
               gotoc
 
 dualArgument: s8=1

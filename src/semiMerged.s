@@ -426,6 +426,15 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               bcex    x             ; C[1:0]= first postfix argument
               s0=0                  ; 2 digit argument
               gosub   0x464         ; display first argument (ROW931+1)
+              bcex    m             ; C[6:3] XADR
+212$:         c=c+1   m             ; step past NOPs
+              cxisa
+              ?c#0    x
+              gonc    212$
+              c=c+1   m             ; step past 'gosub dualArgument'
+              c=c+1   m
+              cxisa                 ; C.X= control word
+              m=c                   ; M.X= control word
               golong  requestArgument
 
 220$:         lc      1             ; second argument entered, reset
@@ -601,10 +610,17 @@ requestArgument:
               gosub   ENCP00
               c=regn  15
               rcr     3
-              pt=     0
               st=c                  ; ST= PTEMP2
+              s1=0                  ; reset allow stack addressing bit
               s6=0                  ; reset indirect bit
-              c=st
+              c=m                   ; C.X= control word
+              c=c+c   xs
+              c=c+c   xs
+              c=c+c   xs
+              gonc    11$
+              s1=1                  ; prevent stack addressing
+11$:          c=st
+              pt=     0
               g=c                   ; G= PTEMP2
               rcr     -3
               regn=c  15
@@ -823,13 +839,12 @@ xeqKeyboard:
 40$:          clrst                 ; run mode
               s5=1
 45$:          s0=1                  ; normal prompt
+              s2=0
               c=n                   ; get modifier bits from default prompt
               c=c+c   xs
               c=c+c   xs
               c=c+c   xs
-              gonc    46$
-              s2=1
-46$:          c=c+c   xs
+              c=c+c   xs
               gonc    47$
               s1=1
 47$:          pt=     0
@@ -1015,8 +1030,9 @@ isArgument:   cxisa
               cxisa
               ?c#0    x
               rtnc                  ; no XROM XKD
-              c=c+1   m             ; inspect next word which should be
-                                    ;  gosub Argument for a semi-merged
+              c=c+1   m             ; inspect next word which should be either
+                                    ;  'gosub argument' or 'gosub dualArgument'
+                                    ;  for a semi-merged
               cxisa
               a=c     x
               ldi     FirstGosub(argumentEntry)

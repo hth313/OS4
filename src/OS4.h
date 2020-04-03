@@ -241,4 +241,14 @@ KeyEntry:     .macro  fun
 #define BuiltinKey(n)                 ((n) + 0x201)
 #define BuiltinKeyKeepDigitEntry(n)   ((n) + 0x300)
 
+;;; **********************************************************************
+;;;
+;;; Semi-merged postfix argument support.
+;;;
+;;; **********************************************************************
+
+#define SEMI_MERGED_NO_STACK         0x100
+#define SEMI_MERGED_SECOND_NO_STACK  0x200
+
+
 #endif // __OS4_H__

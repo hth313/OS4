@@ -1,4 +1,6 @@
 src/*.o
 src/*.lst
 src/*.mod
+src/*.mod2
+src/*.elf
 src/osext

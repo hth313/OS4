@@ -1,5 +1,6 @@
+**************
 System buffer
-==============
+**************
 
 A system buffer is used to keep track of the OS state. As all buffers
 it resides in the memory area between key assignments and user
@@ -21,7 +22,7 @@ Ladybug module which from versio 1 takes advatange of the OS4 module,
 which leaves 15 for the OS4 system buffer.
 
 Buffer layout
--------------
+=============
 
 The buffer makes use of a header register followed by several areas
 that appear in a defined order. The size of each area is kept in the
@@ -59,7 +60,7 @@ to also consult the source code of OS4.
 
 
 Area sizes
-----------
+==========
 
 Most of the areas are defined as being simply the size, 0 means there
 is no such area. For the secondary key assignments it adds two
@@ -71,7 +72,7 @@ calculated from the rest of the sizes).
 
 
 Shell registers
----------------
+===============
 
 Shells will be described in more detail later. For now it is enough to
 know that a shell occupy 7 nibbles and two are stored into each buffer
@@ -83,7 +84,7 @@ key assignments as the shell registers are kept inside the buffer
 structure.
 
 Hosted buffer area
-------------------
+==================
 
 This is an area that keeps track of application buffers. These have
 much of the same properties as ordinary buffers, but are actually
@@ -94,7 +95,7 @@ registers. They also have the advantage of having buffer identities
 that are unrelated to normal buffers, making clashes far less likely.
 
 Secondary assignments
----------------------
+=====================
 
 Instructions defined in secondary function address tables can be bound
 to keys and are stored in the secondary assignment area. Two

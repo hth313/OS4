@@ -53,7 +53,7 @@ tools used to build OS4 and some other modules makes this easy:
 
 .. code-block:: ca65
 
-              .con    .low12 FAT1Start
+                 .con    .low12 FAT1Start
 
 Return status
 -------------
@@ -69,9 +69,9 @@ some kind of error code. At the call site it looks like this:
 
 .. code-block:: ca65
 
-              gosub   secondaryAssignment
-              goto    noXXROM       ; (P+1) not plugged in
-foundXXROM:   acex    m             ; (P+2) C[6:3]= XADR
+                 gosub   secondaryAssignment
+                 goto    noXXROM       ; (P+1) not plugged in
+   foundXXROM:   acex    m             ; (P+2) C[6:3]= XADR
 
 We call this ``(P+n)`` and this works well thanks that almost all
 instructions are single word (including short jumps) and we most often
@@ -82,9 +82,9 @@ The caller will just ``RTN`` to get to ``(P+1)``, and the success case
 
 .. code-block:: ca65
 
-              c=stk
-              c=c+1   m
-              gotoc
+                 c=stk
+                 c=c+1   m
+                 gotoc
 
 The slight disadvantage here is that we clobber the address field
 (``6:3``) of the C register, which means that we cannot pass any return
@@ -226,7 +226,7 @@ module with XROM identifier 7 (as the numbers start from 0).
    4096 secondary functions in a module.
 
 With the Boost module, you can just key the name of the secondary
-function from its ``XEQ'` instruction which is automatically available
+function from its ``XEQ'`` instruction which is automatically available
 as a replacement for the ordinary ``XEQ`` function. Thus, you can just
 access such function in the same way6 as any other named function and
 it follows normal scoping rules based on where it is in the catalog.

@@ -204,14 +204,16 @@ structure. Switching back to the primary bank is done by calling the
 ``FC7`` in the page. As HP only defined two bank switchers and this
 was later expanded to four, the layout is as follows:
 
-    ENBNK3:       enrom3
-                  rtn
-    ENBNK4:       enrom4
-                  rtn
-    ENBNK1:       enrom1
-                  rtn
-    ENBNK2:       enrom2
-                  rtn
+.. code-block:: ca65
+
+   ENBNK3:       enrom3
+                 rtn
+   ENBNK4:       enrom4
+                 rtn
+   ENBNK1:       enrom1
+                 rtn
+   ENBNK2:       enrom2
+                 rtn
 
 This block of code should at page address ``FC3`` to ``FCA``. If you
 are not using all banks, replace the unused switchers with two ``RTN``

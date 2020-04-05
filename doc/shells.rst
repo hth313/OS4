@@ -1,21 +1,25 @@
+******
 Shells
-======
+******
 
-One of the key concepts in OS4 is that of a Shell. A shell is
-essentially an extension mechanism for new basic behavior. A behavior
-is a new keyboard layout coupled with an alternative display routine.
-The keyboard layout replaces the standard keyboard layout and allows
+One of the key features provided by OS4 is the shell. It allows for
+custom keyboards (without using key assignments), optionally coupled
+with its own display routine that replaces the normal display of the X
+register.
+
+The shell keyboard replaces the standard keyboard layout and allows
 for complete redefinition of keys, using standard functions, XROMs and
-even XXROMs. The display routine is what decided to show indstead of
-the default, which shows the X register.
+even XXROMs. The display routine can show the X register in a
+different way.
 
 Both the keyboard replacement and display routines are optional and
 allows for overriding one of them, but keeping the default behavior
 for the other.
 
 In some way you can see coupling a new keyboard together with an
-alternative display routine as an MCODE application, a replacement
-behavior or complete customization.
+alternative display routine as an application written in MCODE that
+consists of multiple functions, a replacement behavior or complete
+customization of the calculator
 
 It is worth pointing out that the keyboard layout is changed much in
 the same way as the built-in standard keyboard is defined. It does not
@@ -23,22 +27,23 @@ use any user key assignments at all. In fact, you can still put user
 key assignments on top of the replaced basic behavior.
 
 Shell stack
------------
+===========
 
-The shells form a stack, so that if you activate a given application
-shell it goes on top of the previous behavior. If you activate another
-application shell, it will shadow the prior shell. If you exit an
-application, the one below (previously active) becomes active again,
-all the way down to the standard behavior at the bottom.
+The shells are stored in a shell stack, so that if you activate an
+application shell it stored on top and shadows the previous
+behavior. If you activate yet another application shell, it will
+shadow the prior shell. If you exit an application, the one below
+becomes active again, all the way down to the standard behavior.
+bottom.
 
 Shells kinds
-------------
+============
 
 There are four kinds of shells and they have different purposes and
 follow somewhat different rules.
 
 Application shells
-^^^^^^^^^^^^^^^^^^
+------------------
 
 The most fundamental shell type is the application shell. They live
 near the top of the shell stack. Only one application is consulted for
@@ -49,7 +54,7 @@ ignored. They reside in the stack in their activation order to make it
 possible to exit a shell and fall back to the previous one.
 
 Transient applications shells
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 A variant of an application is a transient application shell. This is
 a specialized version of an application that always are at the top of
@@ -73,7 +78,7 @@ clock display, but thanks to OS4 being in page 4, we can borrow it
 (when available) from the Time module.
 
 System shells
-^^^^^^^^^^^^^
+-------------
 
 The next shell variant is a /system shell/. System shells are always
 located below all application shells in the stack. All system shells
@@ -89,7 +94,7 @@ redefining keyboard behavior where different handlers do not get into
 the way of each other.
 
 Extension handlers
-^^^^^^^^^^^^^^^^^^
+------------------
 
 The final entity that lives in the shell stack are extension
 handlers. There are not keyboard handlers as the others, but rather a
@@ -137,20 +142,20 @@ A shell is defined using a structure with several elements as follows:
 
 .. code-block:: ca65
 
-            .align 4
-   myShell: .con    kind
-            .con    .low12 displayRoutine
-            .con    .low12 standardKeys
-            .con    .low12 userKeys
-            .con    .low12 alphaKeys
-            .con    .low12 appendName
+                 .align 4
+   myShell:      .con    kind
+                 .con    .low12 displayRoutine
+                 .con    .low12 standardKeys
+                 .con    .low12 userKeys
+                 .con    .low12 alphaKeys
+                 .con    .low12 appendName
 
 The structure must start on an address aligned by 4. Most of the
 elements are also aligned by 4. This is because we are representing a
 12-bit page address using a 10-bit ROM word.
 
 Kind field
-^^^^^^^^^^
+----------
 
 The kind field tells what kind of shell this entry represents. The
 values are defined in `OS4.h` and are either `SysShell`,`AppShell` and
@@ -158,7 +163,7 @@ values are defined in `OS4.h` and are either `SysShell`,`AppShell` and
 following it differs from the application and system shells.
 
 Display routine
-^^^^^^^^^^^^^^^
+---------------
 
 This points to the custom display routine that overrides the default
 display of the stack X register. This is called to replace the
@@ -194,26 +199,26 @@ If not used, set it to 0. In this case nothing happens with the
 display and you will see the normal X display.
 
 Standard keys
-^^^^^^^^^^^^^
+-------------
 
 This field points to another structure that defines the keyboard
 layout. This keyboard definition is the replaced standard keyboard.
 
 User keys
-^^^^^^^^^
+---------
 
 This field points to another structure that defines the keyboard
 layout. This keyboard definition is the replaced user keyboard.
 Normally you will set this to the same value as standard keys.
 
 Alpha keys
-^^^^^^^^^^
+----------
 
 This field points to another structure that defines the alpha keyboard
 layout. If using the default alpha keyboard, set this field to 0.
 
 Name
-^^^^
+----
 
 This fields points to a routine that is the the name of the shell
 to the display. This is intended to be a short name, usually 3-7
@@ -224,7 +229,7 @@ representation of the shell. A typical use can be in a catalog that
 visualizes the shell stack.
 
 Examples
-^^^^^^^^
+--------
 
 A Time-Value-Money style shell mainly provide a keyboard with some
 keys replaced. Its shell definition could look as follows:
@@ -246,7 +251,7 @@ keyboard in both standard and user mode.
 
 
 Internal representation
------------------------
+=======================
 
 To better understand shells stored in the stack it can be good to
 understand how it is represented. A shell consists of seven digits which
@@ -254,7 +259,7 @@ means that two shells are stored into a register. The seven digit sequence
 can be broken up in three parts.
 
 Address
-^^^^^^^
+-------
 
 The first 4 digits are the address of the shell structure. This means
 that a shell in theory can be located at any address in the 64K memory
@@ -270,14 +275,14 @@ mainframe OS firmware) have special meaning in the reconfiguration
 process when the calculator is turned on, see further below.
 
 Kind field
-^^^^^^^^^^
+----------
 
 A single digit kind is stored in the descriptor. This is to make it
 quicker to categorize shells in the stack without digging into the
 actual descriptor structure.
 
 XROM number
-^^^^^^^^^^^
+-----------
 
 The last two digits are the XROM number of the owning module. They
 exist to make the descriptor number (more) unique. As modules may be
@@ -293,7 +298,7 @@ the calculator is turned off, then on.
 
 
 Activation
-----------
+==========
 
 Once you have created a shell structure, activating the shell is done
 by the `activateShell`. This take a packed pointer to the shell
@@ -312,14 +317,14 @@ up ahead of the applications that shadows it, making A the active
 applications.
 
 Deactivation
-------------
+============
 
 You can exit a shell using the `exitShell` routine. This will
 deactivate the shell, bringin any previously shadowed shell in focus
 again.
 
 Reclaim at power on
--------------------
+===================
 
 Shells go through a process similar to buffers in the HP-41. At power
 on they are all marked for removal and it is expected that any plug-in
@@ -328,19 +333,19 @@ it. This is done using the power on poll vector. The `reclaimShell`
 routine is used for this purpose.
 
 Application shells
--------------------
+==================
 
 
 
 
 Temporary application shells
------------------------------
+============================
 
 
 
 
 Scratch area
-------------
+============
 
 Application shells typically need to store some kind of state. The
 typical way of doing this is to allocate a buffer. The typical case is
@@ -382,7 +387,7 @@ transient application) and exiting via `noRoom`.
 
 
 System shells
--------------
+=============
 
 System shells are intended for tuning the default behavior of the
 standard keyboard. Advanced modules from the past like the Zenrom and
@@ -408,7 +413,7 @@ the other applications.
 
 
 Extension points
-----------------
+================
 
 Extension points differ from the other shells in that it does not have
 anything to do with providing functionality to keys or a display
@@ -428,7 +433,7 @@ is just a list of the message numbers it will handle coupled with a
 pointer to the handler itself.
 
 Extension structure
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 The extension structure is fairly simple:
 
@@ -473,18 +478,18 @@ poll vector.
    ;;;
    ;;; **********************************************************************
 
-              .con    0             ; Pause
-              .con    0             ; Running
-              .con    0             ; Wake w/o key
-              .con    0             ; Powoff
-              .con    0             ; I/O
-              goto    deepWake      ; Deep wake-up
-              goto    deepWake      ; Memory lost
-              .con    ...           ; module identifier
-              .con    ...
-              .con    ...
-              .con    ...
-              .con    0             ; checksum position
+                 .con    0             ; Pause
+                 .con    0             ; Running
+                 .con    0             ; Wake w/o key
+                 .con    0             ; Powoff
+                 .con    0             ; I/O
+                 goto    deepWake      ; Deep wake-up
+                 goto    deepWake      ; Memory lost
+                 .con    ...           ; module identifier
+                 .con    ...
+                 .con    ...
+                 .con    ...
+                 .con    0             ; checksum position
 
 
 The routine that sends the message does so using `sendMessage` which
@@ -536,7 +541,3 @@ That one will likely show the catalog and in the end exit via `QUTCAT`
 entry points for function return. The return address will never be
 used and is going to pushed off the top of the 4-level return stack
 at some point.
-
-
-
-

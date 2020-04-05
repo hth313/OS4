@@ -120,6 +120,7 @@ that mark it as non-programmable and possibly also XKD.
 
 
 .. code-block:: ca65
+
                  .con    '\'' + 0x80   ; '
                  .con    0x0e          ; N
                  .con    0x100 + 19    ; S
@@ -214,15 +215,16 @@ possible to check the input to be in a specific range, i.e. 0-511 or
 1-31. Impossible input is detected early which causes a blink.
 
 .. code-block:: ca65
-              gosub   parseNumber
-              .con    .low12 accept_1_31
-              .con    2             ; request 2 digits
+
+                 gosub   parseNumber
+                 .con    .low12 accept_1_31
+                 .con    2             ; request 2 digits
 
 To allow the ``EEX`` key to be used to extend the range you need to
 include its mask value:
 
 .. code-block:: ca65
-              gosub   parseNumber
-              .con    .low12 accept_1_31
-              .con    2 | ParseNumber_AllowEEX ; request 2 digits, allow EEX
 
+                 gosub   parseNumber
+                 .con    .low12 accept_1_31
+                 .con    2 | ParseNumber_AllowEEX ; request 2 digits, allow EEX

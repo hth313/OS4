@@ -2,7 +2,7 @@
 System buffer
 **************
 
-A system buffer is used to keep track of the OS state. As all buffers
+A system buffer is used to keep track of the OS4 state. As all buffers
 it resides in the memory area between key assignments and user
 programs, the so called free area.
 
@@ -11,26 +11,27 @@ not used by any other module as of this writing. 15 is normally used
 for key assignments, so how can this work you may wonder. Well, a
 buffer as defined ny HP is supposed to have the first two nibbles
 (4-bit values) set the same way. This allowes for 14 buffers, numbered
-1-14. The time module uses buffer 10, so it set the first two nibbles
-to `AA` (`A` hex is 10 decimal) for its buffer. However, `FF` would
+1--14. The time module uses buffer 10, so it set the first two nibbles
+to ``AA`` (``A`` hex is 10 decimal) for its buffer. However, ``FF`` would
 not work as it could be mistaken for a key assignment register. The
-answer is that we usually put `1F` there instead. The first nibble can
+answer is that we usually put ``1F`` there instead. The first nibble can
 actually be any non-zero value except 15 and work properly with all
 existing software. Taking advantage of this allowes for having buffer
 0 and 15, for a total of 16 buffers. Buffer 0 is already used by the
-Ladybug module which from versio 1 takes advatange of the OS4 module,
+Ladybug module which from version 1A takes advantage of the OS4 module,
 which leaves 15 for the OS4 system buffer.
 
 Buffer layout
 =============
 
-The buffer makes use of a header register followed by several areas
-that appear in a defined order. The size of each area is kept in the
-buffer header which means that to get to a certain area you need to
-sum the areas before it and then add one for the buffer header. There
-are routines in OS4 to help with this, but normally you will use more
-high level routines that deals with more complete actions on the
-buffer, finding the area inside the buffer is just a small detai;.
+The buffer consists of a header register followed by several areas
+that appear in a well defined order. The size of each area is kept in the
+buffer header, which means that to get to a certain area, sizes of
+areas before need to be summed and added to the buffer header
+address. There are routines in OS4 to help with this, but normally you
+will use more high level routines that deals with more complete
+actions on the buffer, finding the area inside the buffer is just a
+small detail.
 
 The sizes are in the buffer header, but as they is a little shortage
 of room, two of the sizes are single nibble and the reamining two uses
@@ -62,10 +63,10 @@ to also consult the source code of OS4.
 Area sizes
 ==========
 
-Most of the areas are defined as being simply the size, 0 means there
-is no such area. For the secondary key assignments it adds two
+Most of the areas are defined as being simply the size, where 0 means
+that the area is empty. For secondary key assignments it adds two
 additional registers for assignment bitmaps when it is non-zero,
-meaning it will occupy 0, 3, 4 up to 17 registers. The temporary
+meaning it will occupy 0, 3, 4 and up to 17 registers. The temporary
 scratch area could in theory avoid having a nibble for its size, but
 making it explicit simplifies the code. (It could in theory be
 calculated from the rest of the sizes).
@@ -89,7 +90,7 @@ Hosted buffer area
 This is an area that keeps track of application buffers. These have
 much of the same properties as ordinary buffers, but are actually
 stored inside the system buffer. They are somewhat easier to use than
-making your own buffer code and are suitable for smaller buffers as
+making your own buffer code and they are suitable for smaller buffers as
 the overall buffer size (of the system buffer) is limited to 255
 registers. They also have the advantage of having buffer identities
 that are unrelated to normal buffers, making clashes far less likely.
@@ -97,17 +98,15 @@ that are unrelated to normal buffers, making clashes far less likely.
 Secondary assignments
 =====================
 
-Instructions defined in secondary function address tables can be bound
+Functions defined in secondary function address tables can be bound
 to keys and are stored in the secondary assignment area. Two
-assignments are stored into one register and they actually have an
-`F0` marker just like ordinary key assignment registers, though here
-it servers no real practical use. The function code is the XROM
-identity (5 bits) combined with the secondary function number in that
-module. This means that the first 2048 secondary functions can be
-assigned to keys.
+assignments can be stored in one register. This gives seven nibbles
+to describe one assignment. The function code has a two nibble XROM
+number and a three nibble secondary function number. The two remaining
+nibbles are the key-code.
 
-Due to single nibble being used for the size, there is a limit of 30
-secondary functions being assigned to keys.
+Due to single nibble being used for the size of this area, there is a
+limit of 30 secondary functions being assigned to keys.
 
 The secondary assignments have bitmap registers for fast lookup, much
 like what is used by the ordinary assignments. The ordinary bitmaps

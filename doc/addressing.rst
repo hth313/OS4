@@ -5,67 +5,81 @@ Addressing
 Addressing is the way we refer to different memory locations. The
 HP-41 separates ROM from RAM  by using entirely different access
 mechanisms. Normally this is typical for Harvard architectures, though
-on the HP-41, RAM works basically the same as I/O. Addressing both
-ROM and RAM are actually notoriously tricky on the HP-41, though ROM
-is somewhat easier.
+on the HP-41, RAM works basically the same as I/O
+peripherals. Addressing RAM is notoriously tricky on the HP-41, while
+ROM is somewhat easier.
 
 ROM
 ===
 
-ROM normally stores programs, but with the ``CXISA`` instruction that
+ROM normally stores programs. With the ``CXISA`` instruction that
 was introduced with the HP-41 Nut CPU (compared to its predecessors),
 it is possible to read ROM locations for data purposes. This can be
-used to store strings, constants and tables. The address is kept in
-``C[6:3]`` and the fetched word is loaded to ``C[2:0]``. On MLDLs,
-there is often a ``WROM`` instruction which does the opposite, store
-the word to ROM (actually RAM pretending to be ROM to the HP-41).
+used to store strings, constants and tables. The address to read from
+is placed in ``C[6:3]`` (the address field of the CPU ``C`` register)
+and the fetched word is loaded to ``C[2:0]`` (the exponent field of
+the same ``C`` register). On MLDLs, there is often a ``WROM``
+instruction which does the opposite, it stores the word in ``C[2:0]]``
+to ROM at the address in ``C[6:3]`` (actually RAM pretending to be ROM
+to the HP-41).
 
 It can be worth knowing that some instructions are not decoded by the
 CPU, but by peripherals listening on the bus. The ``WROM`` is an
 example of this. The Nut CPU sees it as a no-operation, but the MLDL
 hardware decodes it and acts on it. The bank selection instructions
-are handled by the ROM hardware and typically act only if the bank
-select instruction is fetched from the same memory chip.
-I/O selection, read and write instructions are decoded by peripherals
-in a similar way.
-
+are similar in that they are handled by the ROM hardware and typically
+act only if the bank select instruction is fetched from the same
+memory chip. I/O selection, read and write instructions are decoded by
+peripherals in a similar way.
 
 Stack
 =====
 
 The four level internal stack also interacts with the ``C[6:3]``
 field, making it possible to move between top of stack and
-``C[6:3]``. The low nibble corresponds to the low part of the mantissa
-field, making it possible to use instruction acting on the mantissa
-field to manipulate an address without setting up any field pointers.
+``C[6:3]``. This field is aligned with the mantissa field, but it is
+shorter (four nibbles instead of ten), which makes it possible to use
+instruction acting on the mantissa field to manipulate an address
+without setting up any field pointers.
 This is handy as it allows for manipulation of the return
 address, making it possible to signal different outcomes of a
 subroutine call by returning to slightly different
 positions.
 
-<<example>>
+.. code-block:: ca65
 
-Furthermore, we have the ``GOTOC`` instruction which loads
-``PC`` with the ``C[6:3]`` field. This is useful after calculating a
-destination address in that we immediately can transfer control to it
-without pushing it on the stack and issuing a ``RTN``, a sometimes
-used idiom on other CPUs.
+   RTNP2:        c=stk
+                 c=c+1   m
+                 gotoc
+
+This routine returns one address ahead of what it would normally
+do. Here we get the address from top of the stack into
+``C[6:3]``. Then it is incremented by one, but we operate on
+the mantissa field which is wider. For practical reasons [#FFFF]_ this
+gives identical result as if we had used the more narrow address
+field. Finally the ``GOTOC`` instruction jumps to the address in
+``C[6:3]`` (the stack address plus one in this case).
+
+This style is used in many MCODE programs to handle returns with
+different outcome, i.e. to signal a failure condition by returning to
+the normal return address and the success case returns one step
+ahead. This works as almost every instruction (including short
+branches) are single word on the Nut.
 
 The stack being only four levels deep means that we need to take care
 not nesting subroutines too deep, which is why you find entry points
 in mainframe often state the number of extra subroutine levels
-used. Should you nest to deep, you will end up jumping to address 0
+used. Should you nest too deep, you will end up jumping to address 0
 which is not entirely harmful as that is where we end when starting
-execution, though the code will not do what it is supposed to do.
-
+execution, though the code will not work the way it was supposed to.
 
 RAM
 ===
 
-The RAM registers are as wide as the internal registers, 56 bits or 14
+RAM registers are as wide as the internal registers, 56 bits or 14
 nibbles. This is quite generous, but addressing RAM memory is kind of
-painful. Typically we calculate and address in the ``C[2:0]``, also
-called ``C.X`` field. The good new is that this is one of the more
+painful. Typically we calculate and address in the ``C[2:0]`` field, also
+called ``C.X`` field. The good news is that this is one of the more
 powerful fields of the CPU, as we can load any 10-bit constant using
 the ``LDI`` instruction and perform arithmetics there.
 
@@ -86,12 +100,14 @@ know how an arbitrary address translates to a fixed offset inside the
 current 16-register RAM chip.
 
 The mainframe makes good use of the lowest 16 register as status set 0
-(SS0). By selecting any low address, we can access these registers by
-number.
+(SS0). By selecting any low address, we can access any of these
+registers by its number. For other RAM access, we are essentially
+bound to address a single register at a time, and repeat the selection
+procedure whenever we access any nearby register.
 
 .. note::
    The only exception is location 0 in the chip, which is special
-   in the there is no instruction read it, it has to be read by first
+   in the there is no instruction read it. It has to be read by first
    selecting its address and then using ``C=DATA`` which reads currently
    selected register.
 
@@ -104,3 +120,14 @@ This was done in a tricky way by storing a buffer below the key
 assignment registers (which is the only fixed location outside
 SS0). However, it cannot normally be there, so a lot of measures were
 taken to not leave it there under normal operation.
+
+.. rubric:: Footnotes
+.. [#FFFF]
+   The mantissa field increment may affect all 10 nibbles, not just
+   the four in the address field. This happens when the value in the
+   address field is ``0xffff``, which is unlikely in this case as it
+   would mean the return address would be to the last address, where
+   there normally is a module checksum.
+   Even if we should affect all nibbles in the mantissa field, it is
+   rarely a problem anyway as there seldom is anything kept there of
+   value in cases where we disrupt the lower part of the field.

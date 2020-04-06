@@ -5,38 +5,37 @@ Introduction
 Welcome to the OS4 module for the HP-41 calculator!
 OS4 is a powerful extension module which removes several limitations
 that were originally designed into the HP-41 mainframe (the name used
-by HP for the firmware).
+by HP for the HP-41 firmware).
 
-OS4 is a support module for other extension modules. You will need at
-least one module that makes use of OS4 to unlock the capabilities.
-One such module is Boost which makes good use of OS4. You can also use
-OS4 in your own module projects.
+OS4 is a support module and requires other extension modules to expose
+its capabilities to the user. One such module is Boost which makes
+good use of OS4. You can also use OS4 in your own module projects.
 
-At a very high level, OS4 provides the following:
+At a very high level, OS4 does the following:
 
 #. Removes the 64 function limitation for a single plug-in module
+   page.
 
 #. Support for programmable prompting XROM functions with one or two
-   postfix arguments
+   postfix arguments.
 
 #. A robust way of defining new alternative keyboard layouts,
-   supporting both full and partial layouts without using key
+   supporting both full and partial layouts without relying on key
    assignments.
 
-#. Such new keyboards can be coupled with its own custom default
-   display behavior.
+#. A way to override the default display of the X register with
+   something different.
 
-#. Support for writing temporary modes, such as input modes, clock or
-   catalogs, with interval timer support (if timer chip present) for
-   periodic updates or timeout.
+#. Support for writing temporary modes, such as input modes, clock
+   style modes or catalogs, with interval timer support (if timer chip
+   present) for periodic updates or timeout.
 
 Plug-in module
 ==============
 
-OS4 is a module image that needs to be put in some programmable
+OS4 is a module image file that needs to be put in some programmable
 plug-in module hardware. This can be a Clonix module, an MLDL or some
-kind of ROM emulator. You need to consult the documentation of ROM
-emulation hardware for this.
+kind of ROM emulator.
 
 It is also possible to use OS4 on HP-41 emulators.
 
@@ -47,15 +46,15 @@ This release
 ============
 
 This version, 0A is meant for developers and users of Ladybug 1A. The
-Boost module is currently in development, but can be accessed for
-early adopters.
+Boost module is currently in development, but is available to early
+adopters.
 
 Resource requirements
 =====================
 
 OS4 allocates some space from the free memory pool. How much is taken
-depends on what you actually do with it, but expect at least 3-7
-registers.
+depends on what you actually do with it, but expect around 2-7
+registers for modest use.
 
 Apart from this, it does not impose any restrictions on the
 environment and will run comfortable on any HP-41C, HP-41CV, HP-41CX
@@ -68,11 +67,17 @@ Using this guide
 
 This guide assumes that you have a working knowledge about:
 
-* The HP-41 calculator, especially its RPN system.
-* Have a good understanding of different number bases and working with
-  different word sizes. Basically bits as used in most computers at
-  its lowest level.
+* The HP-41 calculator.
+* Some understanding of, or interest in MCODE programming.
 
+Furthermore, the reader of this guide is assumed to have some
+understanding of programming the HP-41 at the MCODE level. It is after
+all mainly aimed for developers of plug-in modules.
+
+Thus, it is assumed that you understand notations such as ``C[2:0]``
+or ``C.X`` which refers to a field in CPU ``C`` register. In this case
+they both are the same, they refer to the three rightmost nibbles in
+the register (the exponent field).
 
 Further reading
 ===============
@@ -82,15 +87,23 @@ are some suggested reading:
 
 * The *Owner's Manuals* supplied with the HP-41, Hewlett Packard Company.
 * *Extend your HP-41*, W Mier-Jedrzejowicz, 1985.
-* VASM listings
+* A programmer's handbook, Poul Kaarup
+* The VASM listings (annotated mainframe source code)
 * Boost manual
+
+Document conventions
+--------------------
+
+Code examples are typically done in lower case as the author feels it
+somewhat more relaxing to the eyes. If MCODE instructions are
+discussed in the text they are however in upper case to make them
+stand out more.
 
 
 License
 =======
 
-The OS4 software and its manual is copyright by Håkan Thörngren
-2017 under the MIT license.
+The OS4 software and its manual is copyright by Håkan Thörngren.
 
 MIT License
 

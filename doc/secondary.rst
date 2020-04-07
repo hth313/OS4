@@ -110,7 +110,7 @@ are needed to decode the real function number.When bound to a key, the
 actual full secondary index number is stored in the assignment, so it
 will be displayed as ``XXROM`` if the module is removed.
 
-.. note:: 
+.. note::
    A secondary function bound to a key that belongs to a module that is
    not plugged in cannot be entered in a program. This is because the
    use of a XROM prefix function requires the secondary FAT tables
@@ -123,7 +123,7 @@ Defining
 A secondary function is defined as any normal XROM function, with a
 name and an entry point. The name can have upper bits set to tell
 that it is a prompting function. The first words at the entry point
-may be 000 to indicate a non-programmable and optionally execute
+may be ``000`` to indicate a non-programmable and optionally execute
 direct (XKD).
 
 The only minor thing that differs here is that the secondary
@@ -160,11 +160,10 @@ consists of several parts:
    pointer to the actual secondary FAT table and a bank switch routine.
 
 #. The actual secondary FAT is pointed to from the secondary FAT
-   header. This FAT is defined in the same way as the ordinary XROM FAT,
-   except that is does not need any ``0x000`` end marker. It can also be
-   located in any bank, but all functions in it must be (or at least
-   start) in the same bank. This bank is enabled by the bank switch
-   routine in its secondary FAT header.
+   header. This FAT is defined in the same way as the ordinary XROM
+   FAT. It may be located in any bank, but all functions in it must be
+   (or at least start) in the same bank. This bank is enabled by the
+   bank switch routine in its secondary FAT header.
 
 The bank switch routine should either be ``RTN`` for a primary bank,
 or one of the ``ENROM`` instructions followed by a ``RTN`` and that

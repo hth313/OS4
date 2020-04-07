@@ -1,7 +1,10 @@
+#ifndef __OS4_INTERNALS_H__
+#define __OS4_INTERNALS_H__
+
 Text1:        .equ    0xf1
 Text2:        .equ    0xf2
 
-;;; Macro to switch to given bank on the fly.
+// Macro to switch to given bank on the fly.
 switchBank:   .macro  n
               enrom\n
 10$:
@@ -22,3 +25,5 @@ WKUP90:       .equlab 0x020f
 
 enableBank1   .equlab 0x4fc7
 enableBank2   .equlab 0x4fc9
+
+#endif // __OS4_INTERNALS_H__

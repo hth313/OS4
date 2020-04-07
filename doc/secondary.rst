@@ -153,7 +153,7 @@ consists of several parts:
    ``0xFC2`` is assumed to be a packed pointer to the start of the
    secondary FAT header structure.
 
-#. The secondary FAT headers are small records that need to be located
+#. The secondary FAT headers are small records that must be located
    in the primary bank. This is a linked list of records. Each record
    has a packed pointer to the next record, the number of
    secondary functions it owns, the XROM prefix function number, a packed
@@ -167,8 +167,9 @@ consists of several parts:
    routine in its secondary FAT header.
 
 The bank switch routine should either be ``RTN`` for a primary bank,
-or one of the ``ENROM`` instructions followed by a ``RTN``. No
-registers should be affected by this code snippet.
+or one of the ``ENROM`` instructions followed by a ``RTN`` and that
+``RTN`` instruction must be located at the following address in the
+bank it enables. No registers should be affected by this code snippet.
 
 Design constraints
 ==================

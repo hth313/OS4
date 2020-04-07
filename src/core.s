@@ -844,7 +844,7 @@ backingCall   .macro lab
 ;;; Reserved tail identificatios.
 tail:         .macro
               .con    1             ; A
-              .con    '0'           ; 0
+              .con    '1'           ; 1
               .con    0x200 + '4'   ; 4 (banked)
               .con    0x0f          ; O
               .con    0             ; to be replaced by checksum

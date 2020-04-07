@@ -45,7 +45,7 @@ page and must be loaded to address page 4.
 This release
 ============
 
-This version, 0A is meant for developers and users of Ladybug 1A. The
+This version, 1A is meant for developers and users of Ladybug 1A. The
 Boost module is currently in development, but is available to early
 adopters.
 

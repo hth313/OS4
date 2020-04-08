@@ -619,7 +619,9 @@ requestArgument:
               c=c+c   xs
               gonc    11$
               s1=1                  ; prevent stack addressing
-11$:          c=st
+11$:          c=regn  15
+              rcr     3
+              c=st
               pt=     0
               g=c                   ; G= PTEMP2
               rcr     -3

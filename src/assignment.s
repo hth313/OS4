@@ -247,19 +247,6 @@ testAssignBit10:
               rtnnc                 ; no, return to (P+1)
 20$:          golong  RTNP3_B2
 
-;;; **********************************************************************
-;;;
-;;; assignSecondary - assign a secondary function
-;;;
-;;; Note: This routine is in bank 2, but returns to bank 1.
-;;;
-;;; In: A[1:0] - keycode
-;;;     B[4:0] - assignment (XR-FFF)
-;;;
-;;; Uses: A, C, B.X, N, M, DADD, +3 sub levels
-;;;
-;;; **********************************************************************
-
 ;;; * Create assignment area.
               .section code2, reorder
               .extern gotoc_B2, ensureSystemBuffer_B2
@@ -306,6 +293,18 @@ createAssignArea:
 
 toNoRoom_B2:  golong  noRoom_B2
 
+;;; **********************************************************************
+;;;
+;;; assignSecondary - assign a secondary function
+;;;
+;;; Note: This routine is in bank 2, but returns to bank 1.
+;;;
+;;; In: A[1:0] - keycode
+;;;     B[4:0] - assignment (XR-FFF)
+;;;
+;;; Uses: A, C, B.X, N, M, DADD, +3 sub levels
+;;;
+;;; **********************************************************************
 
               .public assignSecondary
 assignSecondary:

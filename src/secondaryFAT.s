@@ -274,8 +274,8 @@ XSARO22:      cxisa
               cxisa
               ?b#0    x             ; end of table?
               goc     SARO25        ; no
-              ?c#0    x             ; yes
-              gonc    SEC00
+              ?c#0    x
+              gonc    SEC00         ; yes
 SARO25:       bcex    x
               a=c
               rcr     5
@@ -354,6 +354,8 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               c=b
               rcr     4             ; C[6:3]= secondary FAT header
               n=c                   ; N[6:3]= secondary FAT header
+              gosub   resetBank_B2
+              c=n
               gosub   unpack4_B2
               rcr     3             ; C[3:0]= secondary FAT start
               c=a-c                 ; C[3:0]= offset to instruction in table
@@ -362,8 +364,6 @@ SARO55:       c=n                   ; C[3:0]_ADDR & F.C.
               c=c+c
               csr                   ; C[2:0]= secondary instruction offset
               a=c     x             ; A[2:0]= secondary instruction offset
-              c=n
-              gosub   resetBank_B2
               c=n
               c=c+1   m
               c=c+1   m
@@ -490,10 +490,11 @@ secondary:    pt=     5
 ;;;        A.M= 0
 ;;;      If function exists:
 ;;;        A[6:3]= address of secondary function
+;;;        A[10:7]= address of bank switch routine
 ;;;        A.M= non-zero ([6:3] is the address which is non-zero if valid)
 ;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
-;;; Uses: A, B.X, C, active PT
+;;; Uses: A, B[12:0], C, active PT
 ;;;       +1 sub levels, or +2 sub levels called from outside OS4
 ;;;
 ;;; **********************************************************************
@@ -501,20 +502,27 @@ secondary:    pt=     5
               .section code2, reorder
               .public secondaryAddress
 secondaryAddress:
-              b=a     x             ; B.X= secondary function identity
               a=0     s
 secondaryAddress10:
+              b=a     x             ; B.X= secondary function identity
               gosub   secondary
-              goto    notFound      ; (P+1) no secondaries
-10$:          c=c+1   m
+              goto    18$           ; (P+1) no secondaries
+10$:          a=b     x
+              c=c+1   m
+              c=c+1   m
+              c=c+1   m
+              cxisa                 ; get index offset used here
+              c=c-1   m             ; step back to FAT+1
+              c=c-1   m
+              a=a-c   x             ; adjust index for this table
+              goc     15$           ; outside, skip this one
               cxisa                 ; C.X= number of entries on this secondary table
               ?a<c    x             ; in range?
               goc     20$           ; yes
-              a=a-c   x             ; subtract entries in this secondary table
-              c=c-1   m
+15$:          c=c-1   m
               cxisa
               ?c#0    x             ; do we have a next secondary table?
-              gonc    notFound      ; no, does not exist
+18$:          gonc    notFound      ; no, does not exist (also relay)
               gosub   unpack_B2     ; read next pointer
               goto    10$
 
@@ -534,6 +542,9 @@ lookupFAT:    c=c+1   m
               acex    m             ; A[5:3]= page address of secondary FAT
                                     ; C[6:3]= address in secondary FAT header
               gosub   jumpP1_B2     ; switch bank
+              rcr     -4
+              b=c     m             ; B[10:7]= bank switcher routine
+              rcr     4
               pt=     5
               acex    wpt           ; C[6:3]= start of secondary FAT
                                     ; C.X= index
@@ -557,6 +568,14 @@ lookupFAT:    c=c+1   m
               asl
               asl                   ; A[6:3]= address of secondary function
               abex    x             ; A.X= secondary function identity
+              pt=     6
+              b=a     wpt           ; B[10:7]= bank switcher
+                                    ; B[6:3]= XADR
+                                    ; B.X= secondary function identity
+              abex    m             ; A[10:7]= bank switcher
+                                    ; A[6:3]= XADR
+              abex    x             ; A.X= secondary function id entity
+                                    ; (preserve B.S)
               rtn
 
 notFound:     a=0     m             ; not found
@@ -764,11 +783,7 @@ ERRNE_B2:     enrom1
               .section code2, reorder
               .public inProgramSecondary
 inProgramSecondary:
-              c=b
-              rcr     -3
-              c=b     x
-              cmex                  ; M[5:3]= function number after XROM
-                                    ; M.X= also function number after XROM
+              c=m
               c=c+1   m
               cxisa                 ; C.X= read jj suffix
               a=c     x             ; A.X= prefix XROM number (jj of XROM ii,jj)
@@ -782,32 +797,19 @@ inProgramSecondary:
               cxisa
               ?a#c    x             ; this secondary
               gonc    20$           ; yes
-              acex                  ; no, swap A and M
-              cmex
-              acex
               c=b     m
-              gosub   unpack1_B2    ; number of entries we skipped
-              c=a+c   x             ; update function index
-              cmex
-              a=c
-              c=b     m
-              gosub   unpack0_B2    ; point to next
+              cxisa
               ?c#0    x             ; is there a next table?
               gonc    99$           ; no
+              gosub   unpack_B2     ; point to next
               bcex    m
               goto    10$
-20$:          abex    m             ; A[6:3]= FAT header pointer
-              c=m
-              bcex    x             ; B.X= actual function number
-              rcr     3
-              acex                  ; A.X= function number in this table
-                                    ; C[6:3]= secondary FAT header
+20$:          c=b     m
               c=c+1   m
-              cxisa                 ; C.X= number of entries
-              ?a<c    x
-              gonc    99$           ; out of range
-              golong  lookupFAT
-
+              cxisa                 ; C.X= number of functions here
+              abex    x             ; A.X= actual function number
+              ?a<c    x             ; in range?
+              golc    lookupFAT     ; yes
 99$:          a=0     m             ; not found
               rtn
 

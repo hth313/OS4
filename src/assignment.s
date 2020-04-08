@@ -419,10 +419,11 @@ assignSecondary10:
 ;;;        A.M= 0
 ;;;        N.X= secondary function identity
 ;;;      Returns with A.M=non-zero, with
+;;;        A[10:7]= FAT bank switcher routine for secondary function
 ;;;        A[6:3]= address of secondary function
 ;;;        A.X= secondary function identity
 ;;;        active bank set for secondary
-;;; Uses: A, C, B.X, N, PT, DADD, +2 sub levels
+;;; Uses: A, C, B[12:10], N, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
 

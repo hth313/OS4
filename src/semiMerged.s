@@ -24,7 +24,7 @@
 
               .section code, reorder
               .public doPRGM
-              .extern systemBuffer, LocalMEMCHK, noSysBuf, jumpP1
+              .extern systemBuffer, LocalMEMCHK, noSysBuf, jumpP0, jumpP1
               .extern inProgramSecondary_B1, resetBank, secondaryProgram
               .extern XABTSEQ
 doPRGM:       ?s12=1                ; PRIVATE ?
@@ -422,11 +422,16 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   CLLCDE
               gosub   DSPLN+8       ; display line number
               c=b     m             ; C[6:3]= XADR
+              gosub   resetBank     ; ensure bank 1
+              c=b     m
+              rcr     4             ; C[6:3]= bank switcher
+              gosub   jumpP0        ; switch bank
+              c=b     m
               gosub   PROMF2        ; prompt string
               bcex    x             ; C[1:0]= first postfix argument
               s0=0                  ; 2 digit argument
               gosub   0x464         ; display first argument (ROW931+1)
-              bcex    m             ; C[6:3] XADR
+              c=b     m             ; C[6:3] XADR
 212$:         c=c+1   m             ; step past NOPs
               cxisa
               ?c#0    x
@@ -435,6 +440,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               c=c+1   m
               cxisa                 ; C.X= control word
               m=c                   ; M.X= control word
+              c=b                   ; C[6:3]= XADR
+              gosub   resetBank     ; restore to bank 1
               golong  requestArgument
 
 220$:         lc      1             ; second argument entered, reset
@@ -574,7 +581,8 @@ argument10:   gosub   systemBuffer  ; ensure we have the system buffer
                                     ;  it is already in place and second time we
                                     ;  come here M is most likely clobbered!
               c=m                   ; save potential secondary function in REG9/Q
-              regn=c  9             ; needed when doing direct execution
+              regn=c  9             ; needed when doing direct execution and
+                                    ; displaying the function name in doPRGM
 2$:           c=regn  14
               cstex
               ?s4=1                 ; single step?
@@ -769,7 +777,9 @@ xeqKeyboard:
               c=n
               acex    m
               n=c                   ; N[6:3]= secondary XADR
+                                    ; N[10:7]= bank switch routine
                                     ; N[2:0]= modifier bits and default argument
+              gosub   resetBank     ; set bank 1 for the caller
               ?s3=1                 ; program mode?
               golnc   40$           ; no
               gosub   secondaryProgram
@@ -898,7 +908,14 @@ xeqKeyboard:
               rcr     11
               regn=c  9             ; REGN9[6:3]= XADR (ordinary XROM)
               gosub   ENLCD
-52$:          gosub   PROMF2        ; prompt string
+52$:          a=c     m             ; A[6:3]= XADR
+              c=n
+              ?c#0    m             ; secondary XADR?
+              gonc    54$           ; no
+              rcr     4
+              gosub   jumpP0        ; yes, switch bank
+54$:          acex
+              gosub   PROMF2        ; prompt string
               c=n
               ?c#0    m             ; secondary XADR?
               gsubc   resetBank     ; yes, reset to primary bank

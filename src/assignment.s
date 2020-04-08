@@ -75,15 +75,15 @@ clearAssignment10:
               goc     12$           ; no
               c=0     wpt           ; yes, clear it
               goto    14$
-12$:          rcr     6             ; inspect upper part
+12$:          rcr     7             ; inspect upper part
               ?a#c    wpt           ; this is the one we should clear?
               goc     20$           ; no
               c=0     wpt           ; yes, clear it
-              rcr     -6
+              rcr     -7
 14$:          data=c                ; write back
               ?c#0    wpt           ; any part still in use?
               goc     30$           ; yes, no need to prune
-              rcr     6
+              rcr     7
               ?c#0    wpt
               goc     30$           ; yes, no need to prune
 ;;; * We do not actually this assignment register anymore, remove it

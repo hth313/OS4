@@ -744,6 +744,8 @@ xeqKeyboard:
               rcr     -4
               n=c                   ; N[2:0]= modifier bits and default argument
                                     ; N[6:3]= 0 (no secondary XADR, for a start)
+                                    ; N[12:7]= garbage, holds bank switcher when
+                                    ;          N[6:3] is non-zero
                                     ; N[13:11]= buffer address
               pt=     0
               g=c
@@ -763,7 +765,7 @@ xeqKeyboard:
               goc     16$           ; no
 
               c=n                   ; yes, set the Flag_SEC_Argument flag
-              rcr     -3
+              rcr     -3            ; C.X= buffer header address
               dadd=c
               c=data                ; read buffer header
               cstex
@@ -775,9 +777,12 @@ xeqKeyboard:
                                     ; C[6:3]= XADR for secondary
               a=c
               c=n
-              acex    m
+              pt=     10
+              a=c     x
+              acex    wpt
               n=c                   ; N[6:3]= secondary XADR
                                     ; N[10:7]= bank switch routine
+                                    ; N[13:11]= buffer header address
                                     ; N[2:0]= modifier bits and default argument
               gosub   resetBank     ; set bank 1 for the caller
               ?s3=1                 ; program mode?
@@ -910,9 +915,12 @@ xeqKeyboard:
               gosub   ENLCD
 52$:          a=c     m             ; A[6:3]= XADR
               c=n
-              ?c#0    m             ; secondary XADR?
+              rcr     4             ; C[6:3]= bank switcher (if secondary)
+                                    ; C[2:0]= upper 3 nibbles of XADR, will
+                                    ;         be non-zero if this is a secondary
+                                    ;         as the page address cannot be zero
+              ?c#0    x             ; secondary XADR?
               gonc    54$           ; no
-              rcr     4
               gosub   jumpP0        ; yes, switch bank
 54$:          acex
               gosub   PROMF2        ; prompt string

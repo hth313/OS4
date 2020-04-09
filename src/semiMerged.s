@@ -425,7 +425,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   resetBank     ; ensure bank 1
               c=b     m
               rcr     4             ; C[6:3]= bank switcher
-              gosub   jumpP0        ; switch bank
+              ?st=1   Flag_SEC_Argument
+              gsubc   jumpP0        ; switch bank
               c=b     m
               gosub   PROMF2        ; prompt string
               bcex    x             ; C[1:0]= first postfix argument

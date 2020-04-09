@@ -282,12 +282,13 @@ secAsn10:     gosub   secondaryAssignment_B2
               .shadow secAsn10 + 2
               ?a#0    m
               golnc   noXXROM       ; not plugged in
-foundXXROM:   acex                  ; C[10:7]= FAT bank switcher
+foundXXROM:   acex                  ; C[10:7]= bank switcher
                                     ; C[6:3]= XADR
                                     ; C.X= secondary function identity
               s9=1                  ; found
               m=c                   ; M[6:3]= XADR
                                     ; M.X= secondary function identity
+                                    ; M[10:7]= bank switcher
               c=0
               dadd=c
               c=regn  10            ; set XROM 0,1 as function code

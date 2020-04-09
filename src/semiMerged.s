@@ -779,12 +779,13 @@ xeqKeyboard:
               a=c
               c=n
               pt=     10
-              a=c     x
+              acex    x
               acex    wpt
               n=c                   ; N[6:3]= secondary XADR
                                     ; N[10:7]= bank switch routine
                                     ; N[13:11]= buffer header address
                                     ; N[2:0]= modifier bits and default argument
+                                    ; A.X= secondary function number
               gosub   resetBank     ; set bank 1 for the caller
               ?s3=1                 ; program mode?
               golnc   40$           ; no

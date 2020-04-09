@@ -115,8 +115,8 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   BSTEP
               goto    10$
 
-6$:           ?st=1   Flag_SEC_Argument ; are we dealing with a secondary?
-              gsubc   mergeTextLiterals ; yes, merge text literals
+6$:           gosub   mergeTextLiteralsOrShow ; yes, merge text literals if
+                                              ; needed, otherwise just show it
 
 ;;; ***********************************************
 ;;; See if current line is an MCODE prompt function
@@ -1108,6 +1108,9 @@ isArgument:   cxisa
 ;;;
 ;;; **********************************************************************
 
+mergeTextLiteralsOrShow:
+              ?st=1   Flag_SEC_Argument ; are we dealing with a secondary?
+              gonc    mergeTextLiterals10
 mergeTextLiterals:
               gosub   GETPC
               gosub   NXBYTA        ; read Text1 (postfix operand)
@@ -1147,4 +1150,5 @@ mergeTextLiterals:
               gsubc   INCADA        ; yes, step one further
               c=n
               gosub   PTBYTA        ; write postfix byte
+mergeTextLiterals10:
               golong  DFRST8        ; bring instruction line up

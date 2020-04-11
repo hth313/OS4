@@ -151,4 +151,3 @@ toRTNP2_B2:   golong  RTNP2_B2
 ;;; Reserve some words for NoV-64
               .section NOV64_B2
               .con    0,0,0,0,0,0
-

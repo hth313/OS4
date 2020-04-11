@@ -113,6 +113,14 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   PTBYTA        ; clear it too
               gosub   PUTPC         ; go to previous line
               gosub   BSTEP
+              ?st=1   Flag_SEC_Argument
+              gsubc   DFRST8        ; If secondary we need to replace the
+                                    ; sigma-reg with the text line that
+                                    ; describes the secondary, which is what
+                                    ; we are now standing at.
+                                    ; For primary functions, it will be an
+                                    ; XROM so coming code will display it
+                                    ; properly decorated.
               goto    10$
 
 6$:           gosub   mergeTextLiteralsOrShow ; yes, merge text literals if

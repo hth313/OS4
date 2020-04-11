@@ -383,7 +383,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
 
 
 320$:         gosub   DF150         ; normal secondary, finalize line
-              c=b     m
+              c=n
               gosub   resetBank     ; restore to primary bank
 90000000$:    golong  9000000$
 

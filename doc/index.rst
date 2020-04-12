@@ -19,6 +19,7 @@ Welcome to OS4's documentation!
    buffer
    shells
    secondary
+   semimerged
    partialKeys
 
    gettingStarted

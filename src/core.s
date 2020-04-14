@@ -713,7 +713,7 @@ BankSwitchers: .macro
               .section entry
               .extern activateShell, exitShell, reclaimShell
               .extern findBuffer, ensureBuffer, growBuffer
-              .extern findKAR2
+              .extern findSecondaryAssignments
               .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
               .extern clearSystemDigitEntry, reclaimSystemBuffer
@@ -738,7 +738,7 @@ BankSwitchers: .macro
               golong  findBuffer    ; 0x4f06
               golong  ensureBuffer  ; 0x4f08
               golong  growBuffer    ; 0x4f0a
-              golong  findKAR2      ; 0x4f0c
+              golong  findSecondaryAssignments ; 0x4f0c
               golong  setMessl      ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
               golong  getXAdr       ; 0x4f12

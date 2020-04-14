@@ -42,7 +42,7 @@ reclaimShell: .equlab 0x4f04
 findBuffer:   .equlab 0x4f06
 ensureBuffer: .equlab 0x4f08
 growBuffer:   .equlab 0x4f0a
-findKAR2:     .equlab 0x4f0c
+findSecondaryAssignments: .equlab 0x4f0c
 setMessl:     .equlab 0x4f0e
 shellDisplay: .equlab 0x4f10
 getXAdr:      .equlab 0x4f12

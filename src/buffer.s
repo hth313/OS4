@@ -191,13 +191,13 @@ ensureBuffer: gosub   findBuffer
               data=c
               goto    relayRTNP2
 
+;;; findSecondaryAssignments docstart
 ;;; **********************************************************************
 ;;;
-;;; findKAR2 - locate the first secondary KAR
+;;; findSecondaryAssignments - locate the first secondary KAR
 ;;;
-;;; findKAR2 can typically be used by routines that want to access all
-;;;   key assignment registers. After doing the normaly ones, this
-;;;   routine can be used to find the start of secondary ones.
+;;; This routine is typically be used by routines that want to access all
+;;; secondary key assignment registers.
 ;;;
 ;;; In: Nothing
 ;;; Out: Returns to P+1 if no secondary KARs

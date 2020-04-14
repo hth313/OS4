@@ -507,7 +507,8 @@ NXBYT_B2:     gosub   INCAD
               rtnc
               goto    NXBYT_B2      ; skip null
 
-;;; ----------------------------------------------------------------------
+;;; argument docstart
+;;; **********************************************************************
 ;;;
 ;;; argument - handle numerical arguments for functions in XROMs
 ;;;
@@ -523,20 +524,37 @@ NXBYT_B2:     gosub   INCAD
 ;;;       C[13:0] - 0
 ;;;       G - numeric argument
 ;;;
-;;; For dualArgument:
+;;; Possible modifiers are:
+;;; SEMI_MERGED_NO_STACK - do not allow direct stack addressing
+;;;
+;;; **********************************************************************
+;;; argument docend
+
+;;; dualArgument docstart
+;;; **********************************************************************
+;;;
+;;; dualArgument - request two arguments
+;;;
+;;; Start MCODE function as follows:
+;;; XADR  nop
+;;;       nop
+;;;       gosub   dualArgument
+;;;       .con    modifiers
+;;;
+;;; IN: SS0 UP, CHIP0 selected
 ;;; OUT:  A[3:2] - first argument
 ;;;       A[1:0] - second argument
 ;;;
-;;; It is assumed here that processing of numbers to registers take
-;;; place later.
-;;;
 ;;; Possible modifiers are:
-;;; 0x100 (sets S1), allow IND, but disallow ST
-;;;       (bit 9 of second char in a prompting name label)
-;;; 0x200 (sets S2), disallow IND and ST
-;;;       (bit 8 of first char in a prompting name label)
+;;; SEMI_MERGED_NO_STACK - do not allow direct stack addressing, first
+;;;                        operand
+;;; SEMI_MERGED_SECOND_NO_STACK - do not allow direct stack addressing,
+;;;                               second operand
+;;; SEMI_MERGED_QMARK - append a question mark after this function
+;;;                     when shown in program mode
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
+;;; dualArgument docend
 
               .section code, reorder
               .public argument, dualArgument

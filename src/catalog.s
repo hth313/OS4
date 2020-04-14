@@ -4,6 +4,7 @@
 #include "OS4.h"
 #include "internals.h"
 
+;;; catalog docstart
 ;;; **********************************************************************
 ;;;
 ;;; catalog - generic catalog support
@@ -27,6 +28,7 @@
 ;;; Out: Nothing (returns to mainframe when done)
 ;;;
 ;;; **********************************************************************
+;;; catalog docend
 
               .section code
               .public catalog, catalogWithSize, catEmpty

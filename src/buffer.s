@@ -92,6 +92,7 @@
 
 
 
+;;; findBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; systemBuffer - locate the system buffer, number 15
@@ -120,6 +121,7 @@
 ;;; or 16ms on a standard HP-41.
 ;;;
 ;;; **********************************************************************
+;;; findBuffer docend
 
               .section code, reorder
               .public systemBuffer, findBuffer
@@ -155,6 +157,7 @@ findBuffer:   dadd=c                ; select chip 0
               a=a+c   x
               goto    2$
 
+;;; ensureBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; ensureBuffer - find or create an empty buffer
@@ -174,6 +177,7 @@ findBuffer:   dadd=c                ; select chip 0
 ;;; Uses: A, C, B.X, PT, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; ensureBuffer docend
 
               .public ensureBuffer, ensureSystemBuffer
 ensureSystemBuffer:
@@ -207,10 +211,12 @@ ensureBuffer: gosub   findBuffer
 ;;; Uses: A, C, B.X, active PT=12, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; findSecondaryAssignments docend
 
-              .public findKAR2
+              .public findSecondaryAssignments
               .extern RTNP2
-findKAR2:     gosub   systemBuffer
+findSecondaryAssignments:
+              gosub   systemBuffer
               rtn                   ; no system buffer, return to P+1
               c=data
               rcr     7
@@ -227,6 +233,7 @@ findKAR2:     gosub   systemBuffer
               a=a+1   x             ; and buffer header
 relayRTNP2:   golong  RTNP2         ; return to (P+2)
 
+;;; reclaimSystemBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; reclaimSystemBuffer - ensure the system buffers stays at power on
@@ -237,7 +244,9 @@ relayRTNP2:   golong  RTNP2         ; return to (P+2)
 ;;; point to reclaim the system buffer.
 ;;;
 ;;; Uses: C, +1 sub level, DADD
+;;;
 ;;; **********************************************************************
+;;; reclaimSystemBuffer docend
 
               .public reclaimSystemBuffer
 reclaimSystemBuffer:
@@ -327,6 +336,7 @@ scratchOffset:
               abex    x             ; A.X= buffer header address
               rtn
 
+;;; allocScratch docstart
 ;;; **********************************************************************
 ;;;
 ;;; allocScratch - allocate (ensure) a given scratch size
@@ -345,6 +355,7 @@ scratchOffset:
 ;;; Uses: A, B, C, G, S7, DADD, active PT set to 10, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; allocScratch docend
 
               .public allocScratch
               .section code, reorder
@@ -370,6 +381,7 @@ allocScratch: rcr     -7
               s7=1                  ; tell growBuffer we are adding to scratch
               goto    growBuffer10
 
+;;; growBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; growBuffer - add space to buffer
@@ -392,6 +404,7 @@ allocScratch: rcr     -7
 ;;; Uses: A, B, C, G, DADD, S7, active PT, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; growBuffer docend
 
               .public growBuffer
 growBuffer:   s7=0
@@ -484,10 +497,10 @@ growBuffer_B2:
 10$:          c=stk
               goto 5$
 
+;;; clearScratch docstart
 ;;; **********************************************************************
 ;;;
 ;;; clearScratch - remove transient application scratch area
-;;; requestTransientAppScratch - allocate a transient scratch area
 ;;;
 ;;; A transient application can set up a transient scratch area typically
 ;;; to store its state. This works because there can only be one active
@@ -499,6 +512,7 @@ growBuffer_B2:
 ;;; Uses: A, B[12:0], C, M, G, DADD, active PT set to 0, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; clearScratch docend
 
               .public clearScratch
               .section code, reorder
@@ -522,6 +536,7 @@ clearScratch1:
 
 ;;; !!! Fall into shrinkBuffer !!!
 
+;;; shrinkBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; shrinkBuffer - remove registers from a buffer
@@ -539,6 +554,7 @@ clearScratch1:
 ;;; Uses: A, B[12:0], C, M, G, DADD, active PT set to 0, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; shrinkBuffer docend
 
               .public shrinkBuffer
 shrinkBuffer: gosub   buffer1
@@ -612,6 +628,7 @@ shrinkBuffer_B2:
               gosub   shrinkBuffer
               golong  enableBank2
 
+;;; scratchArea docstart
 ;;; **********************************************************************
 ;;;
 ;;; scratchArea - get pointer to transient application scratch area
@@ -626,6 +643,7 @@ shrinkBuffer_B2:
 ;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub level
 ;;;
 ;;; **********************************************************************
+;;; scratchArea docend
 
               .section code, reorder
               .public scratchArea
@@ -702,6 +720,7 @@ hostedBufferSetup:
               rtnc                  ; no hosted buffers
               golong  RTNP2
 
+;;; newHostedBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; newHostedBuffer - reserve space for a hosted buffer.
@@ -720,6 +739,7 @@ hostedBufferSetup:
 ;;; Uses: A, B, C, N, G, DADD, S7, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; newHostedBuffer docend
 
               .section code, reorder
               .public newHostedBuffer
@@ -752,6 +772,7 @@ newHostedBuffer:
               abex    x             ; A.X= address of buffer header
               golong  RTNP2
 
+;;; findBufferHosted docstart
 ;;; **********************************************************************
 ;;;
 ;;; findBufferHosted - find a hosted buffer
@@ -766,6 +787,7 @@ newHostedBuffer:
 ;;; Uses: A, B, C, G, active PT, +1 sub level
 ;;;
 ;;; **********************************************************************
+;;; findBufferHosted docend
 
               .section code, reorder
               .public findBufferHosted
@@ -803,6 +825,7 @@ findBufferHosted:
 20$:          abex    x             ; A.X= hosted buffer header address
               golong  RTNP2         ; done, return to (P+2)
 
+;;; reclaimHostedBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; reclaimHostedBuffer
@@ -815,6 +838,7 @@ findBufferHosted:
 ;;; Uses: A, C, B.X, N, active PT=12, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; reclaimHostedBuffer docend
 
               .section code, reorder
               .public reclaimHostedBuffer
@@ -863,6 +887,7 @@ releaseHostedBuffers:
               gonc    10$
               rtn
 
+;;; packHostedBuffers docstart
 ;;; **********************************************************************
 ;;;
 ;;; packHostedBuffers - pack the hosted buffer area
@@ -875,6 +900,7 @@ releaseHostedBuffers:
 ;;; Uses: A, B[12:0], C, M, G, DADD, PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; packHostedBuffers docend
 
               .section code, reorder
               .public  packHostedBuffers
@@ -916,6 +942,7 @@ packHostedBuffers:
               gonc    10$
               rtn
 
+;;; growHostedBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; growHostedBuffer - add space to a hosted buffer
@@ -942,6 +969,7 @@ packHostedBuffers:
 ;;; Uses: A, B, C, G, N, DADD, S7, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; growHostedBuffer docend
 
               .section code, reorder
               .public growHostedBuffer
@@ -969,6 +997,7 @@ growHostedBuffer:
               data=c
               golong  RTNP2
 
+;;; shrinkHostedBuffer docstart
 ;;; **********************************************************************
 ;;;
 ;;; shrinkHostedBuffer - remove space from a hosted buffer
@@ -985,6 +1014,7 @@ growHostedBuffer:
 ;;; Uses: A, B, C, G, M, N, DADD, S7, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; shrinkHostedBuffer docend
 
               .section code, reorder
               .public shrinkHostedBuffer

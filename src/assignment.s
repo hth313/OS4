@@ -9,6 +9,7 @@
 #include "mainframe.h"
 #include "internals.h"
 
+;;; clearAssignment docstart
 ;;; **********************************************************************
 ;;;
 ;;; clearAssignment - delete an assignment
@@ -17,12 +18,12 @@
 ;;;       of its code in bank 2. This is due to that it is externally
 ;;;       called and uses +3 sub levels.
 ;;;
-;;; In: A[1:0] - keycode to be cleared
+;;; In: A[1:0] - keycode to be cleared, in 1-80 form
 ;;; Out: Nothing
-;;;
 ;;; Uses: A, C, B.X, N, M, DADD, +3 sub levels
 ;;;
 ;;; **********************************************************************
+;;; clearAssignment docend
 
               .section code1, reorder
               .public clearAssignment
@@ -293,18 +294,21 @@ createAssignArea:
 
 toNoRoom_B2:  golong  noRoom_B2
 
+;;; assignSecondary docstart
 ;;; **********************************************************************
 ;;;
 ;;; assignSecondary - assign a secondary function
 ;;;
 ;;; Note: This routine is in bank 2, but returns to bank 1.
 ;;;
-;;; In: A[1:0] - keycode
-;;;     B[4:0] - assignment (XR-FFF)
+;;; In: A[1:0] - keycode, in 1-80 form
+;;;     B[4:3] - XROM identity
+;;;     B[2:0] - secondary function number
 ;;;
 ;;; Uses: A, C, B.X, N, M, DADD, +3 sub levels
 ;;;
 ;;; **********************************************************************
+;;; assignSecondary docend
 
               .public assignSecondary
 assignSecondary:
@@ -500,6 +504,7 @@ secondaryAssignment_B2:
               gosub   secondaryAddress
 991$:         golong  enableBank1
 
+;;; clearSecondaryAssignments docstart
 ;;; **********************************************************************
 ;;;
 ;;; clearSecondaryAssignments - clear all secondary assignments
@@ -510,6 +515,7 @@ secondaryAssignment_B2:
 ;;; Uses: A, C, B, G, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; clearSecondaryAssignments docend
 
               .section code2, reorder
               .public clearSecondaryAssignments

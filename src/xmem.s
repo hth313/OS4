@@ -4,6 +4,7 @@
 #include "mainframe_cx.h"
 
 
+;;; getXAdr docstart
 ;;; **********************************************************************
 ;;;
 ;;; getXAdr - get the X memory address of given logical register
@@ -23,6 +24,7 @@
 ;;; Uses: A, B, C, M, N, Q, PT, S0-7, DADD, +3 sub levels
 ;;;
 ;;; **********************************************************************
+;;; getXAdr docend
 
               .public getXAdr
               .extern ensure41CX

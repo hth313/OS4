@@ -61,6 +61,7 @@
 ;;; **********************************************************************
 
 
+;;; activateShell docstart
 ;;; **********************************************************************
 ;;;
 ;;; activateShell - activate a given Shell
@@ -71,6 +72,7 @@
 ;;; Uses: A, B, C, M, G, ST, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; activateShell docend
 
               .section code, reorder
               .public activateShell
@@ -342,6 +344,7 @@ unusedSlot:   pt=     6
               golong  RTNP2
 
 
+;;; exitShell docstart
 ;;; **********************************************************************
 ;;;
 ;;; exitShell - dectivate a given Shell
@@ -362,6 +365,7 @@ unusedSlot:   pt=     6
 ;;;       +3 sub levels if exitShell (due to exit via shellChanged)
 ;;;
 ;;; **********************************************************************
+;;; exitShell docend
 
               .section code, reorder
               .public exitShell, reclaimShell
@@ -437,7 +441,7 @@ exitReclaim10:
               bcex    x
               goto    10$
 
-
+;;; exitTransientApp docstart
 ;;; **********************************************************************
 ;;;
 ;;; exitTransientApp - exit the top level transient application
@@ -449,6 +453,7 @@ exitReclaim10:
 ;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; exitTransientApp docend
 
               .section code, reorder
               .public exitTransientApp
@@ -462,6 +467,7 @@ exitTransientApp10:
               gosub   clearScratch
               golong  shellChanged
 
+;;; exitApp docstart
 ;;; **********************************************************************
 ;;;
 ;;; exitApp - exit the top level application
@@ -473,6 +479,7 @@ exitTransientApp10:
 ;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; exitApp docend
 
               .public exitApp
 exitApp:      gosub   hasActiveTransientApp
@@ -492,6 +499,7 @@ exitApp:      gosub   hasActiveTransientApp
               data=c
               rtn
 
+;;; hasActiveTransientApp docstart
 ;;; **********************************************************************
 ;;;
 ;;; hasActiveTransientApp - is there an active top level transient application?
@@ -502,6 +510,7 @@ exitApp:      gosub   hasActiveTransientApp
 ;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; hasActiveTransientApp docend
 
               .section code, reorder
               .public hasActiveTransientApp
@@ -527,6 +536,7 @@ hasActiveTransientApp:
               golong  RTNP2         ; yes, return to (P+2)
 
 
+;;; activeApp docstart
 ;;; **********************************************************************
 ;;;
 ;;; activeApp - return pointer to active application
@@ -539,6 +549,7 @@ hasActiveTransientApp:
 ;;; Uses: A, B.X, C, active PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; activeApp docend
 
               .section code, reorder
               .public activeApp
@@ -640,7 +651,7 @@ shellHandle:  gosub   unpack        ; C[6:3]= pointer to shell
               st=c
               rtn
 
-
+;;; topShell docstart
 ;;; **********************************************************************
 ;;;
 ;;; topExtension - find first extension point
@@ -666,6 +677,7 @@ shellHandle:  gosub   unpack        ; C[6:3]= pointer to shell
 ;;; Uses: A, B.X, C, M, DADD, S8, S9, active PT, +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; topShell docend
 
               .section code, reorder
               .public topExtension, topShell, nextShell
@@ -860,7 +872,7 @@ gotoPacked:   c=c+c   x
               rcr     -3
               gotoc
 
-
+;;; shellDisplay docstart
 ;;; **********************************************************************
 ;;;
 ;;; shellDisplay - show active shell display and set message flags
@@ -878,6 +890,7 @@ gotoPacked:   c=c+c   x
 ;;; Uses: Worst case everything, +3 sub levels
 ;;;
 ;;; **********************************************************************
+;;; shellDisplay docend
 
               .public shellDisplay, doDisplay
 shellDisplay: ?s13=1                ; running?
@@ -902,7 +915,7 @@ doDisplay:    gosub   topShell
               acex                  ; C[6,2:0]= display routine
               goto    gotoPacked    ; update display
 
-
+;;; displayDone docstart
 ;;; **********************************************************************
 ;;;
 ;;; displayDone - set flags indicating display is done
@@ -919,6 +932,7 @@ doDisplay:    gosub   topShell
 ;;; Uses: C, DADD
 ;;;
 ;;; **********************************************************************
+;;; displayDone docend
 
               .section code, reorder
               .public displayDone
@@ -936,6 +950,7 @@ setDisplayFlags:
               regn=c  14
               rtn
 
+;;; sendMessage docstart
 ;;; **********************************************************************
 ;;;
 ;;; sendMessage - invoke an extension
@@ -976,6 +991,7 @@ setDisplayFlags:
 ;;; Uses: A, B.X, C, M, ST, DADD, active PT, +3 sub levels
 ;;;
 ;;; **********************************************************************
+;;; sendMessage docend
 
               .section code, reorder
               .public sendMessage
@@ -1016,7 +1032,7 @@ sendMessage:  pt=     0
               rtn                   ; (P+2) no more shells
               goto    10$           ; (P+3) try the next one
 
-
+;;; shellName docstart
 ;;; **********************************************************************
 ;;;
 ;;; shellName - append the name of the current shell to LCD
@@ -1030,6 +1046,7 @@ sendMessage:  pt=     0
 ;;; Uses: A.M, C, +1 sub level
 ;;;
 ;;; **********************************************************************
+;;; shellName docend
 
               .section code, reorder
               .public shellName
@@ -1162,6 +1179,7 @@ disableOrphanShells:
                                     ;  in order
               goto    55$           ; done
 
+;;; shellKeyboard docstart
 ;;; **********************************************************************
 ;;;
 ;;; shellKeyboard - get active keyboard
@@ -1173,6 +1191,7 @@ disableOrphanShells:
 ;;; Uses: A[13:3], C, ST, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; shellKeyboard docend
 
               .section code, reorder
               .public shellKeyboard

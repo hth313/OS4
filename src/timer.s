@@ -5,6 +5,7 @@
 #define IN_OS4
 #include "OS4.h"
 
+;;; setTimeout docstart
 ;;; **********************************************************************
 ;;;
 ;;; setTimeout - set a time out
@@ -27,6 +28,7 @@
 ;;; Uses: A, C, B, ST, DADD, PFAD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; setTimeout docend
 
               .section code, reorder
               .public setTimeout
@@ -66,6 +68,7 @@ setTimeout:   bcex                  ; B= timeout
               data=c
               golong  RTNP2         ; success
 
+;;; clearTimeout docstart
 ;;; **********************************************************************
 ;;;
 ;;; clearTimeout - disable the time out
@@ -73,6 +76,7 @@ setTimeout:   bcex                  ; B= timeout
 ;;; Uses: C.X, DADD, PFAD, +1 sub levels
 ;;;
 ;;; **********************************************************************
+;;; clearTimeout docend
 
               .public clearTimeout
 clearTimeout: gosub   ENTMR

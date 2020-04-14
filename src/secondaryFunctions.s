@@ -69,6 +69,7 @@
 ;;; **********************************************************************
 
 
+;;; XASRCH docstart
 ;;; **********************************************************************
 ;;;
 ;;;  XASRCH - alpha search
@@ -105,6 +106,7 @@
 ;;;       +2 sub levels
 ;;;
 ;;; **********************************************************************
+;;; XASRCH docend
 
               .section code2, reorder
               .public XASRCH
@@ -402,6 +404,7 @@ toBank1:      golong  enableBank1
 to_0x263a:    switchBank 1
               golong  0x263a
 
+;;; resetBank docstart
 ;;; **********************************************************************
 ;;;
 ;;; resetBank    - reset to primary bank (routine in bank 1)
@@ -420,6 +423,7 @@ to_0x263a:    switchBank 1
 ;;; Uses: C[6:3], active PT
 ;;;
 ;;; **********************************************************************
+;;; resetBank docend
 
 resetBankM:   .macro
               pt=     5
@@ -478,6 +482,7 @@ secondary:    pt=     5
               lc      2
               golong  unpack0_B2    ; fetch and unpack
 
+;;; secondaryAddress docstart
 ;;; **********************************************************************
 ;;;
 ;;; secondaryAddress - look up a secondary function
@@ -498,6 +503,7 @@ secondary:    pt=     5
 ;;;       +1 sub levels, or +2 sub levels called from outside OS4
 ;;;
 ;;; **********************************************************************
+;;; secondaryAddress docend
 
               .section code2, reorder
               .public secondaryAddress
@@ -636,7 +642,7 @@ secondaryProgram:
               .shadow 10$
               golong  RTNP2
 
-
+;;; runSecondary docstart
 ;;; **********************************************************************
 ;;;
 ;;; runSecondary - run-time handling of secondary invocation
@@ -647,6 +653,7 @@ secondaryProgram:
 ;;; Uses: N/A
 ;;;
 ;;; **********************************************************************
+;;; runSecondary docend
 
               .section code2, reorder
               .public runSecondary
@@ -760,8 +767,8 @@ ERRNE_B2:     enrom1
 ;;; **********************************************************************
 ;;;
 ;;; inProgramSecondary - find secondary as stored in program memory
-;;; inProgramSecondary - same as inProgramSecondary, but callable from
-;;;                      bank 1 and uses +3 sub levels
+;;; inProgramSecondary_B1 - same as inProgramSecondary, but callable from
+;;;                         bank 1 and uses +3 sub levels
 ;;;
 ;;; Note: This routine is in bank 2 and returns without switching bank.
 ;;;

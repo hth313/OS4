@@ -4,6 +4,7 @@
 #include "OS4.h"
 
 
+;;; XABTSEQ docstart
 ;;; **********************************************************************
 ;;;
 ;;; XABTSEQ - abort partial key sequence
@@ -17,6 +18,7 @@
 ;;; handling).
 ;;;
 ;;; **********************************************************************
+;;; XABTSEQ docend
 
               .section code, reorder
               .public XABTSEQ

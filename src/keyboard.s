@@ -4,6 +4,7 @@
 #define IN_OS4
 #include "OS4.h"
 
+;;; keyKeyboard docstart
 ;;; **********************************************************************
 ;;;
 ;;; keyKeyboard - act on a key using the given keyboard definition
@@ -28,6 +29,7 @@
 ;;;     A.S - 0 if user mode (set in keyHandler)
 ;;;
 ;;; **********************************************************************
+;;; keyKeyboard docend
 
               .section code, reorder
               .public keyKeyboard, invokeSecondary
@@ -499,6 +501,7 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
               rcr     -2            ; C[3:0]= complete 2-byte instruction
               golong  RAK70
 
+;;; invokeSecondary docstart
 ;;; **********************************************************************
 ;;;
 ;;; invokeSecondary - call a secondary function
@@ -514,6 +517,7 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
 ;;;     A.X - secondary function identity
 ;;;
 ;;; **********************************************************************
+;;; invokeSecondary docend
 
 invokeSecondary10:
               a=c     x             ; A.X= secondary index
@@ -561,6 +565,7 @@ clearSystemDigitEntry:
               regn=c  14
               rtn
 
+;;; keyDispatch docstart
 ;;; ************************************************************
 ;;;
 ;;; keyDispatch - table dispatch on key (from TIME module)
@@ -579,6 +584,7 @@ clearSystemDigitEntry:
 ;;;       and debounce handing is the reposibility of the caller.
 ;;;
 ;;; ************************************************************
+;;; keyDispatch docend
 
               .section code, reorder
               .public keyDispatch

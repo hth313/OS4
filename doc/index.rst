@@ -23,3 +23,4 @@ Welcome to OS4's documentation!
    partialKeys
 
    gettingStarted
+   reference

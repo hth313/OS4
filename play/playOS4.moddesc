@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ModFile FileFormat="MOD1" Title="PlayOS4" Version="1A" PartNumber="" Author="Håkan Thörngren" Copyright="Håkan Thörngren" License="MIT" Comments="" Category="2" Hardware="0" MemoryModules="0" XMemoryModules="0">
+  <Page Name="Play1" Identity="PL1A" Page="Any" PageGroup="1" Bank="1" BankGroup="1" RAM="0" WriteProtect="0" FAT="1"/>
+  <Page Name="Play2" Identity="PL1A" Page="Any" PageGroup="1" Bank="2" BankGroup="1" RAM="0" WriteProtect="0" FAT="0"/>
+</ModFile>

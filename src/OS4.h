@@ -41,7 +41,7 @@ exitShell:    .equlab 0x4f02
 reclaimShell: .equlab 0x4f04
 findBuffer:   .equlab 0x4f06
 ensureBuffer: .equlab 0x4f08
-openSpace:    .equlab 0x4f0a
+growBuffer:   .equlab 0x4f0a
 findKAR2:     .equlab 0x4f0c
 setMessl:     .equlab 0x4f0e
 shellDisplay: .equlab 0x4f10

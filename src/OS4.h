@@ -229,6 +229,22 @@ KeyEntry:     .macro  fun
               .con   FATOFF(fun)
               .endm
 
+FAT:       .macro  entry
+              .public LFE(entry)
+LFE(entry):   .fat    `\entry`
+              .endm
+
+FATRPN:       .macro  entry
+              .public LFE(entry)
+LFE(entry):   .fatrpn `\entry`
+              .endm
+
+;;; RPN function when compiled with a prefix
+prefixFATRPN  .macro  prefix, entry
+              .public LFE(entry)
+LFE(entry):   .fatrpn `\prefix\entry`
+              .endm
+
 ;;; Builtin function in a key table.
 ;;;
 ;;; BuiltinKey - builtin function that ends digit entry.

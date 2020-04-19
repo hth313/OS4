@@ -321,15 +321,16 @@ scratchOffset:
               c=data                ; read buffer header
               rcr     5
               c=0     xs
-              csr     x             ; C.X= key assignment size
+              rcr     1
+              c=0     xs            ; C.X= key assignment size
               a=c     x             ; A.X= key assignment size
               rcr     2             ; C[1:0]= hosted buffer size
-              ?a#c    x             ; do we have any key assignments?
+              ?a#0    x             ; do we have any key assignments?
               gonc    5$            ; no
-              c=c+1   x             ; yes, add two for bitmap registers
-              c=c+1   x
+              a=a+1   x             ; yes, add two for bitmap registers
+              a=a+1   x
 5$:           a=a+c   x             ; A[1:0]= key assignment + buffer sizes
-              rcr     11            ; C[1:0]= shell registers
+              rcr     -4            ; C[1:0]= shell registers
               c=c+1   x             ; add one for buffer header
               c=a+c   x             ; C[1:0]= offset to scratch area
               c=0     xs            ; C.X= offset to scratch area

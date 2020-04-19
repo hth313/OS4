@@ -370,8 +370,12 @@ allocScratch: rcr     -7
               ?c#0    pt
               gonc    10$           ; no previous allocation
               ?a#c    pt            ; same allocation?
-              gonc    10$           ; yes
-              gosub   clearScratch1 ; no, clear old one
+              goc     5$            ; no
+              gosub   scratchOffset ; yes
+              c=a+c   x
+              bcex    x
+              golong  RTNP2
+5$:           gosub   clearScratch1 ; clear old one
 10$:          c=b                   ; C[13] = size to allocate
               c=0     x
               rcr     -1

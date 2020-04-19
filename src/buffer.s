@@ -174,7 +174,7 @@ findBuffer:   dadd=c                ; select chip 0
 ;;;   C[13] part of buffer header incremented
 ;;;   C[12:7] = part of buffer header
 ;;;   C[2:0] = part of buffer header
-;;; Uses: A, C, B.X, PT, DADD, +1 sub levels
+;;; Uses: A[12], A.X, C, B.X, PT, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
 ;;; ensureBuffer docend

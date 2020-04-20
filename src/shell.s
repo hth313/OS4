@@ -950,6 +950,42 @@ setDisplayFlags:
               regn=c  14
               rtn
 
+;;; displayingMessage docstart
+;;; **********************************************************************
+;;;
+;;; displayingMessage - test if showing a message
+;;;
+;;; This routine tests if the display is currently showing a message.
+;;; Normally you would test the message flag in the flag register for this,
+;;; but it may also be set by a shell to tell that the display is done
+;;; and the system default of showing X should not be done.
+;;; This poses a problem if you really want to know if a message is being
+;;; shown, typically when implementing an alternative backarrow logic,
+;;; where you want to distinguish between clearing the display or clearing
+;;; the X register. In this case this routine is handy.
+;;;
+;;; Out: Returns to (P+1) if showing message
+;;;      Returns to (P+2) if normal display
+;;; Uses: A[12], A.X, C, B.X, ST, active PT=12, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+;;; displayingMessage docend
+
+              .section code, reorder
+              .public displayingMessage
+displayingMessage:
+              gosub   LDSST0
+              ?s5=1                 ; message flag?
+              gonc    10$           ; no
+              gosub   systemBuffer  ; yes
+              rtn                   ; (P+1) no system buffer, message
+                                    ;       flag means we show a message
+              c=data                ; C= buffer header
+              c=st
+              ?st=1   Flag_DisplayOverride
+              rtnnc                 ; message flag not used for display override
+10$:          golong  RTNP2         ; not showing message
+
 ;;; sendMessage docstart
 ;;; **********************************************************************
 ;;;

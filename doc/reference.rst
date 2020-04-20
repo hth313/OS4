@@ -51,7 +51,7 @@ if it is a primary or secondary assignment (or both).
    :lines: 1-4, 6-
 
 **findSecondaryAssignments**
-------------
+----------------------------
 
 **Entry point:** ``4F0C``
 
@@ -338,6 +338,16 @@ the shell stack instead.
    :language: none
    :start-after: ;;; displayDone docstart
    :end-before:  ;;; displayDone docend
+
+**displayingMessage**
+---------------------
+
+**Entry point:** ``4F80``
+
+.. literalinclude:: ../src/shell.s
+   :language: none
+   :start-after: ;;; displayingMessage docstart
+   :end-before:  ;;; displayingMessage docend
 
 **sendMessage**
 ---------------

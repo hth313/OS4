@@ -944,9 +944,12 @@ setDisplayFlags:
               st=1    Flag_DisplayOverride
               cstex
               data=c
-              gosub   LDSST0        ; load SS0
+              c=0
+              dadd=c
+              c=regn  14
+              cstex
               s5=1                  ; set message flag
-              c=st
+              cstex
               regn=c  14
               rtn
 

@@ -709,6 +709,7 @@ fetch10:      abex    wpt           ; argument follows in program
               gonc    finalize      ; no
               pt=     0             ; yes
               g=c                   ; G= first argument
+              pt=     3
               gosub   INCAD         ; step ahead
               gosub   PUTPC
               gosub   GTBYT

@@ -15,11 +15,8 @@
 ;;; XROM i,sub#
 ;;;    where sub# is the sub function number.
 ;;; The lowest 1023 (0-1022) can be bound to a key on a shell keyboard.
-;;; Sub functions 0-2047 can be assigned to keys.
-;;; (From programs and by name, up to 4K are possible, but for practical
-;;; reasons it is probably best to keep within 2K secondary instructions,
-;;; you are probably going to run out of memory before using them up
-;;; anyway).
+;;; For key assignments and in program memory the full range is in theory
+;;; possible, but that is a lot of functions!
 ;;;
 ;;; The following structure is a secondary FAT header:
 ;;;   .con  .low12 next       ; points to next secondary FAT header,
@@ -580,7 +577,7 @@ lookupFAT:    c=c+1   m
                                     ; B.X= secondary function identity
               abex    m             ; A[10:7]= bank switcher
                                     ; A[6:3]= XADR
-              abex    x             ; A.X= secondary function id entity
+              abex    x             ; A.X= secondary function identity
                                     ; (preserve B.S)
               rtn
 

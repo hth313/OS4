@@ -967,6 +967,13 @@ setDisplayFlags:
 ;;; where you want to distinguish between clearing the display or clearing
 ;;; the X register. In this case this routine is handy.
 ;;;
+;;; Note: This will not report if a message is shown while running a
+;;;       program! The reason is that this routine is intended for backspace
+;;;       logic. In a running program you normally know if you are
+;;;       displaying a message or not.
+;;;       In a running program it suffices to inspect the ordinary message
+;;;       flag.
+;;;
 ;;; Out: Returns to (P+1) if showing message
 ;;;      Returns to (P+2) if normal display
 ;;; Uses: A[12], A.X, C, B.X, ST, active PT=12, DADD, +1 sub levels
@@ -977,6 +984,10 @@ setDisplayFlags:
               .section code, reorder
               .public displayingMessage
 displayingMessage:
+              ?s13=1                ; running?
+              goc     10$           ; yes, say not showing message
+              ?s4=1                 ; single stepping?
+              goc     10$           ; yes, say not showing message
               gosub   LDSST0
               ?s5=1                 ; message flag?
               gonc    10$           ; no

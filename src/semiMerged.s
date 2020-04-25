@@ -229,7 +229,7 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               ?s2=1                 ; secondary?
               gonc    472$          ; no
               c=c+1   x             ; yes, make it a Text 3
-472$:         ?a#c    x             ; is it a text 2?
+472$:         ?a#c    x             ; is it the expected Text N?
               goc     480$          ; no, we do not have default for duals
               abex
               ?s2=1
@@ -362,10 +362,11 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   inProgramSecondary_B1
               ?a#0    m
               gonc    90000000$     ; not available
-                                    ;   We know the ROM is there as we looked
-                                    ;   it, so the problem is really that its
-                                    ;   FAT structure has been altered in a way
-                                    ;   that makes it impossible to find it.
+                                    ;   We know the ROM is there as we found
+                                    ;   it earlier, so the problem is really
+                                    ;   that its FAT structure has been altered
+                                    ;   in a way that makes it impossible to
+                                    ;   find it.
                                     ;   Just use the default display, we cannot
                                     ;   make anything meaningful out of it
                                     ;   anyway.

@@ -265,9 +265,10 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   ROW930
               gosub   RightJustify
               c=n
-              c=0     xs
-              ?c#0    x             ; postfix character?
-              gonc    3200$         ; no (also relay)
+              c=c+c   wpt           ; PT=1 after RightJustify,
+                                    ;  SEMI_MERGED_QMARK set?
+              gonc    3200$         ; no
+              ldi     '?'
               slsabc                ; yes
               goto    3200$
 

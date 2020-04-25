@@ -268,6 +268,6 @@ LFE(entry):   .fatrpn `\prefix\entry`
 
 #define SEMI_MERGED_NO_STACK         0x100
 #define SEMI_MERGED_SECOND_NO_STACK  0x200
-
+#define SEMI_MERGED_QMARK            0x080
 
 #endif // __OS4_H__

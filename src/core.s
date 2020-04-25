@@ -544,6 +544,33 @@ unpack:       csr     m
 
 ;;; **********************************************************************
 ;;;
+;;; XNFRC - do alternative shell display and return to mainframe
+;;;
+;;; Use this routine to exit back to mainframe, showing the default X
+;;; for the active application.
+;;; This exits to NFRC, which means the stack lift flag is not affected.
+;;;
+;;; **********************************************************************
+
+              .public XNFRC
+XNFRC:        gosub   shellDisplay
+              golong  NFRC
+
+;;; **********************************************************************
+;;;
+;;; XNFRPU - do alternative shell display and return to mainframe
+;;;
+;;; Use this routine to exit back to mainframe, showing the default X
+;;; for the active application.
+;;; This exits to NFRPU, which enables stack lift.
+;;;
+;;; **********************************************************************
+
+XNFRPU:       gosub   shellDisplay
+              golong  NFRPU
+
+;;; **********************************************************************
+;;;
 ;;; noRoom - show NO ROOM error
 ;;; displayError, errMessl, errExit - error support routines
 ;;;

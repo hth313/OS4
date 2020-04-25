@@ -124,6 +124,8 @@ unpack2:      .equlab 0x4d22
 unpack1:      .equlab 0x4d23
 unpack0:      .equlab 0x4d24
 unpack:       .equlab 0x4d25
+XNFRC:        .equlab 0x4d2c
+XNFRPU:       .equlab 0x4d30
 #endif
 
 ;;; **********************************************************************

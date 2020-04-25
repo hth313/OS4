@@ -427,6 +427,8 @@ gotoFunction: c=0
               pt=     4
               lc      15            ; put NFRPU (0x00f0)
               stk=c                 ;  on the subroutine stack
+              c=regn  14
+              st=c                  ; put up SS0
               acex    m
               gotoc
 

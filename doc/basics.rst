@@ -74,9 +74,9 @@ some kind of error code. At the call site it looks like this:
 
 .. code-block:: ca65
 
-                 gosub   secondaryAssignment
-                 goto    noXXROM       ; (P+1) not plugged in
-   foundXXROM:   acex    m             ; (P+2) C[6:3]= XADR
+                 gosub   findBuffer
+                 goto    noBuffer      ; (P+1) not found
+   foundBuffer:  ...
 
 We call this ``(P+n)`` and this works well thanks that almost all
 instructions are single word (including short jumps) and we most often

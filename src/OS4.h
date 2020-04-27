@@ -79,7 +79,7 @@ XASRCH:       .equlab 0x4f4e
 secondaryAddress: .equlab 0x4f50
 clearAssignment: .equlab 0x4f52
 assignSecondary: .equlab 0x4f54
-secondaryAssignment: .equlab 0x4f56
+displayingMessage: .equlab 0x4f56
 resetBank:    .equlab 0x4f58
 invokeSecondary: .equlab 0x4f5a
 XABTSEQ:      .equlab 0x4f5c
@@ -100,7 +100,6 @@ exitApp:      .equlab 0x4f78
 catEmpty      .equlab 0x4f7a
 catalog:      .equlab 0x4f7c
 catalogWithSize: .equlab 0x4f7e
-displayingMessage: .equlab 0x4f80
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

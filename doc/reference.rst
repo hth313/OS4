@@ -342,7 +342,7 @@ the shell stack instead.
 **displayingMessage**
 ---------------------
 
-**Entry point:** ``4F80``
+**Entry point:** ``4F56``
 
 .. literalinclude:: ../src/shell.s
    :language: none

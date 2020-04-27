@@ -749,7 +749,7 @@ BankSwitchers: .macro
               .extern exitTransientApp, hasActiveTransientApp
               .extern parseNumber, parseNumberInput
               .extern shellKeyboard, XASRCH, secondaryAddress
-              .extern clearAssignment, assignSecondary, secondaryAssignment
+              .extern clearAssignment, assignSecondary
               .extern resetBank, invokeSecondary, XABTSEQ
               .extern clearSecondaryAssignments, runSecondary
               .extern setTimeout, clearTimeout, activeApp
@@ -810,9 +810,7 @@ secondaryAddressB2Location:
               enrom2                ; assignSecondary 0x4f54
 assignSecondaryB2Location:
               nop                   ; assignSecondary filler
-              enrom2                ; secondaryAssignment 0x4f56
-secondaryAssignmentB2Location:
-              nop
+              golong  displayingMessage ; 0x4f56
               golong  resetBank     ; 0x4f58
               golong  invokeSecondary ; 0x4f5a
               golong  XABTSEQ       ; 0x4f5c
@@ -837,7 +835,6 @@ runSecondaryB2Location:
               golong  catEmpty      ; 0x4f7a
               golong  catalog       ; 0x4f7c
               golong  catalogWithSize ; 0x4f7e
-              golong  displayingMessage ; 0x4f80
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab
@@ -862,7 +859,6 @@ backingCall   .macro lab
               backing runSecondary
               backingCall secondaryAddress
               backing assignSecondary
-              backing secondaryAssignment
               backing clearSecondaryAssignments
 
 ;;; Reserve some words for NoV-64

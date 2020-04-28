@@ -2,7 +2,7 @@
 SRCS = core.s coreBank2.s buffer.s shell.s keyboard.s catalog.s \
        secondaryFunctions.s semiMerged.s xmem.s partial.s assignment.s timer.s
 OBJS = $(SRCS:%.s=%.o)
-MOD = OS4.mod
+MOD = OS4.mod OS4.mod2
 
 all: $(MOD)
 

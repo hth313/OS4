@@ -974,6 +974,7 @@ setDisplayFlags:
 ;;;       In a running program it suffices to inspect the ordinary message
 ;;;       flag.
 ;;;
+;;; In: Nothing
 ;;; Out: Returns to (P+1) if showing message
 ;;;      Returns to (P+2) if normal display
 ;;; Uses: A[12], A.X, C, B.X, ST, active PT=12, DADD, +1 sub levels
@@ -986,9 +987,9 @@ setDisplayFlags:
 displayingMessage:
               ?s13=1                ; running?
               goc     10$           ; yes, say not showing message
+              gosub   LDSST0
               ?s4=1                 ; single stepping?
               goc     10$           ; yes, say not showing message
-              gosub   LDSST0
               ?s5=1                 ; message flag?
               gonc    10$           ; no
               gosub   systemBuffer  ; yes

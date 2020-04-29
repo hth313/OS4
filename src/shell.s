@@ -927,9 +927,9 @@ doDisplay:    gosub   topShell
 ;;; to show an alternative display, like showing the 'X' value in an
 ;;; alternative way to default.
 ;;;
+;;; In: Nothing
 ;;; Out: chip 0 selected
-;;;      C= flag register of SS0
-;;; Uses: C, DADD
+;;; Uses: A[12], A.X, C, B.X, active PT=12, DADD, +1 sub levels
 ;;;
 ;;; **********************************************************************
 ;;; displayDone docend

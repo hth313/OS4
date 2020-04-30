@@ -1,4 +1,4 @@
-;;; -*- mode: gas;-*-
+;;; Emacs use  -*- mode: gas;-*-
 #ifndef __OS4_H__
 #define __OS4_H__
 
@@ -7,16 +7,19 @@
 ;;; The current version of OS4. This can be used as input to versionCheck
 ;;; to make sure that the installed OS4 is at least the expected version.
 ;;;
-;;; The version number is 3 nibbled (12 bits), the first nibble is the
+;;; The version number is 3 nibbles (12 bits), the first nibble is the
 ;;; major version, which tells whether the overall structure is the same.
 ;;; Changing it means that nothing may be the same, all entry points may
 ;;; be gone, moved or whatever.
 ;;; The lower 2 nibbles is the minor version which is incremented anytime
 ;;; new features are added, but otherwise it shall be backward compatible.
 ;;;
+;;; Simply load this value (using LDI will suffice) into C.X and call
+;;; versionCheck.
+;;;
 ;;; **********************************************************************
 
-#define OS4Version  0
+#define OS4Version  0x000
 
 
 ;;; **********************************************************************
@@ -100,6 +103,7 @@ exitApp:      .equlab 0x4f78
 catEmpty      .equlab 0x4f7a
 catalog:      .equlab 0x4f7c
 catalogWithSize: .equlab 0x4f7e
+versionCheck: .equlab 0x4f80
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

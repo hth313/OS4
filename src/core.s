@@ -651,7 +651,6 @@ ensure41CX:   ldi     25
               .messl  "NO 41CX OS"
               goto    errorExitPop
 
-
 ;;; **********************************************************************
 ;;;
 ;;; versionCheck - check the version expected by OS4
@@ -659,7 +658,6 @@ ensure41CX:   ldi     25
 ;;; In: C.X = Version number, where the first nibble is the main version
 ;;;           number that must match. The lower 8 bits are the minor
 ;;;           number that be at least the same
-
 ;;; Out: Only returns if the current version is at least the expected
 ;;;      one. Exits showing error "OLD OS4" if expected version is
 ;;;      higher than the current one.
@@ -676,7 +674,6 @@ versionCheck: a=c     x
 10$:          gosub   errorMessage
               .messl  "OLD OS4"
               goto    errorExitPop
-
 
               .section code2
               .shadow noRoom - 1
@@ -695,7 +692,6 @@ noRoom_B2:    enrom1
               .shadow jumpP0 - 1
               .public gotoc_B2
 gotoc_B2:     enrom1
-
 
 ;;; ----------------------------------------------------------------------
 ;;;
@@ -835,6 +831,7 @@ runSecondaryB2Location:
               golong  catEmpty      ; 0x4f7a
               golong  catalog       ; 0x4f7c
               golong  catalogWithSize ; 0x4f7e
+              golong  versionCheck  ; 0x4f80
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab

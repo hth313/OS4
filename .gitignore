@@ -3,3 +3,5 @@
 *.mod
 *.mod2
 *.elf
+doc/_static/lcd*.svg
+doc/_static/lcd*.pdf

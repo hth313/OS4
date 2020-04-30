@@ -123,19 +123,19 @@ it will optionally skip the next program line.
 When entered the instruction is shown first followed by the prompt
 underscores:
 
-.. image:: _static/less-than-program-1.png
+.. image:: _static/lcd-less-than-program-1.*
 
 Then if we start entering a stack operand:
 
-.. image:: _static/less-than-program-2.png
+.. image:: _static/lcd-less-than-program-2.*
 
 When complete the first operand is followed by the second prompt:
 
-.. image:: _static/less-than-program-3.png
+.. image:: _static/lcd-less-than-program-3.*
 
 Here the second operand is partially entered:
 
-.. image:: _static/less-than-program-4.png
+.. image:: _static/lcd-less-than-program-4.*
 
 When the instruction is complete it will show the text literal to
 accept further program steps. (Here shown with some weird
@@ -143,13 +143,13 @@ characters due to limitations in the simulator used for screen
 capture. On a real calculator they will various characters, often with
 all segments on).
 
-.. image:: _static/less-than-program-5.png
+.. image:: _static/lcd-less-than-program-5.*
 
 If we now back stop to the previous line we can see the decorated
 instruction. In this case it is somewhat too long for the display
 making the line number scroll off the display:
 
-.. image:: _static/less-than-program-6.png
+.. image:: _static/lcd-less-than-program-6.*
 
 .. note::
    During input the function name is shown first and the operands
@@ -160,7 +160,7 @@ The prompt mechanism is the same as the built-in one, synthetic status
 register operands cannot be keyed in. Using synthetic techniques, or
 hex editing the program makes it possible to have them in a program:
 
-.. image:: _static/less-than-program-7.png
+.. image:: _static/lcd-less-than-program-7.*
 
 .. note::
    If you are observant you may have noticed that the program line

@@ -1,0 +1,3 @@
+[submodule "module/lcd41"]
+	path = module/lcd41
+	url = git@github.com:hth313/lcd41.git

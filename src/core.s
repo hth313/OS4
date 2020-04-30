@@ -653,11 +653,11 @@ ensure41CX:   ldi     25
 
 ;;; **********************************************************************
 ;;;
-;;; versionCheck - check the version expected by OS4
+;;; checkApiVersionOS4 - check the version expected by OS4
 ;;;
-;;; In: C.X = Version number, where the first nibble is the main version
-;;;           number that must match. The lower 8 bits are the minor
-;;;           number that be at least the same
+;;; In: C.X = API version number, where the first nibble is the main
+;;;           version number that must match. The lower 8 bits are the
+;;;           minor number that be at least the same
 ;;; Out: Only returns if the current version is at least the expected
 ;;;      one. Exits showing error "OLD OS4" if expected version is
 ;;;      higher than the current one.
@@ -665,8 +665,9 @@ ensure41CX:   ldi     25
 ;;;
 ;;; **********************************************************************
 
-versionCheck: a=c     x
-              ldi     OS4Version + 1
+checkApiVersionOS4:
+              a=c     x
+              ldi     ApiVersionOS4 + 1
               ?a#c    xs            ; main version good?
               goc     10$           ; no
               a=a-c   x             ; check minor version
@@ -831,7 +832,7 @@ runSecondaryB2Location:
               golong  catEmpty      ; 0x4f7a
               golong  catalog       ; 0x4f7c
               golong  catalogWithSize ; 0x4f7e
-              golong  versionCheck  ; 0x4f80
+              golong  checkApiVersionOS4 ; 0x4f80
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab

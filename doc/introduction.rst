@@ -19,16 +19,16 @@ At a very high level, OS4 does the following:
 #. Support for programmable prompting XROM functions with one or two
    postfix arguments.
 
-#. A robust way of defining new alternative keyboard layouts,
+#. Provides a robust way of defining new alternative keyboard layouts,
    supporting both full and partial layouts without relying on key
    assignments.
 
 #. A way to override the default display of the X register with
-   something different.
+   something else.
 
-#. Support for writing temporary modes, such as input modes, clock
-   style modes or catalogs, with interval timer support (if timer chip
-   present) for periodic updates or timeout.
+#. Support for writing temporary modes, such as input modes, updating
+   clock style modes or catalogs, with interval timer support (if
+   timer chip present) for periodic updates or timeout.
 
 Plug-in module
 ==============
@@ -65,10 +65,10 @@ There is no XROM number used by this module as it is in page 4.
 Using this guide
 ================
 
-This guide assumes that you have a working knowledge about:
+This guide assumes that you have a working knowledge of:
 
 * The HP-41 calculator.
-* Some understanding of, or interest in MCODE programming.
+* Understanding of low level programming.
 
 Furthermore, the reader of this guide is assumed to have some
 understanding of programming the HP-41 at the MCODE level. It is after
@@ -85,8 +85,9 @@ Further reading
 If you feel that you need to brush up your background knowledge, here
 are some suggested reading:
 
-* The *Owner's Manuals* supplied with the HP-41, Hewlett Packard Company.
-* *Extend your HP-41*, W Mier-Jedrzejowicz, 1985.
+* The *Owner's Manuals* supplied with the HP-41, Hewlett Packard Company
+* *MCODE Programming for Beginners*, Ken Emery, 1985
+* *Extend your HP-41*, W Mier-Jedrzejowicz, 1985
 * A programmer's handbook, Poul Kaarup
 * The VASM listings (annotated mainframe source code)
 * Boost manual
@@ -103,7 +104,8 @@ stand out more.
 License
 =======
 
-The OS4 software and its manual is copyright by Håkan Thörngren.
+The OS4 software and its manual are under copyright using a permissive
+open source license.
 
 MIT License
 

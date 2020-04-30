@@ -167,9 +167,9 @@ hex editing the program makes it possible to have them in a program:
    number is the same for the semi-merged step being entered as the
    text literal being shown when done. This is because two program
    steps are inserted up front in program memory which advances the
-   program line counter twice. The user is shown the decorated
-   semi-merged instruction with the current line number which is where
-   the text literal will be.
+   program line counter twice. The display shows the decorated
+   semi-merged instruction with the current line number, which
+   corresponds to the text literal will be.
 
 Secondary functions as semi-merged
 ==================================

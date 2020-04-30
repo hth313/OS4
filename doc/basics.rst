@@ -1,12 +1,13 @@
+******
 Basics
-======
+******
 
 In this chapter we go through some concepts that are used internally
 in OS4. This is not a primer on MCODE programming or the Nut CPU, you
 are expected to have some basic understanding of MCODE programming.
 
 Addressing
-----------
+==========
 
 ROM addressing is done using 16-bit addresses. This gives a total of
 64K of addressable memory space. The HP-41 mainframe divides this up
@@ -26,7 +27,7 @@ way to read data from the ROM space is using the ``CXISA`` instruction
 which expects an address in the ``6:3`` field of the C register.
 
 Packed pointer
-^^^^^^^^^^^^^^
+--------------
 
 As we often work inside a single (often relocatable) 4K page it is
 convenient to have a compact notation to describe a location inside
@@ -61,7 +62,7 @@ operator makes it possible to obtain a packed pointer:
    table:        .con    .low12 FAT1Start   ; single word pointer
 
 Return status
--------------
+=============
 
 A routine may need to deal with possible error conditions.  For
 flexibility it may be better to return some error condition rather
@@ -96,7 +97,7 @@ The disadvantage here is that we clobber the address field
 value there, as we often use the incremented return when successful.
 
 Buffer advice
--------------
+=============
 
 I/O buffers, or just buffers for short, were defined from the beginning
 in the HP-41 mainframe. However, they were first used by the Time
@@ -124,7 +125,7 @@ system will scan from the other direction to find free registers and
 the first non-zero register found is considered occupied.
 
 Non-null registers
-^^^^^^^^^^^^^^^^^^
+------------------
 
 The Time module buffer code take precautions to never store a zero
 value inside a buffer too. This is due to some 67/97 card reader bug
@@ -136,7 +137,7 @@ As a result, you should probably avoid storing empty registers inside
 the buffer to avoid potential memory corruption.
 
 System buffer
--------------
+=============
 
 The OS4 module needs to store its own information somewhere.
 The mainframe code typically uses the 0--15 RAM address
@@ -152,7 +153,7 @@ time to locate it and we may run out of space if there are no free
 registers that can be occupied when the buffer needs to grow.
 
 Keyboard
---------
+========
 
 HP calculators before the arrival of the HP-41 used fixed keyboard
 layouts and an increasing number of shift keys culminating with the HP-67 that
@@ -169,116 +170,15 @@ not be obvious until you look closer at it.
 
 
 Reassigned keys
-^^^^^^^^^^^^^^^
+---------------
 
 Keys can be reassigned and change behavior in user mode. If in doubt,
 you can press and hold the key to see its current behavior. On top of
 this, the top two rows are dynamically bound to single letter labels
 in the current RPN program.
 
-Non-programmable functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Some functions cannot be entered in a program. The are marked with a
-``NOP`` as its first instruction.
-
-Execute direction functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Some functions execute immediately on key down, they are called
-*execute direct* (or XKD internally). They have two ``NOP``
-instructions and can as a result not be entered in a program either.
-Functions such as ``SST``, ``R/S``, ``USER`` and ``SHIFT`` are execute
-direct.
-
-
-Semi-merged functions
----------------------
-
-Many operations in the HP-41 consists of a function and a postfix
-argument, i.e. ``FIX 4`` or ``RCL IND Z``. When pressed, the operand will
-output one or more underscores to be filled in with the argument. The
-base operating system allows XROM instructions to be defined as
-prompting too, but it cannot represent them in program memory. It is
-mainly a side-effect of the flexibility of how the base operating
-system was written and the main use of it was to provide an easy way
-of doing alpha input to functions such as ``PRP`` in the printer
-ROM. Later, the Extended Functions module provided means of reading
-such arguments from the alpha register.
-
-The OS4 module provides a way for XROM to prompt for arguments and
-represent them as program steps. It is not possible to fully
-merge such program steps, but OS4 allows you to get partly there.
-In program memory the XROM is followed by an alpha literal that
-wraps the postfix operand. When shown in program memory, the postfix
-operand is automatically taken from the alpha literal, allowing you to
-see the instruction in its full glory. However, if you step ahead you
-will see the alpha literal as a separate step.
-
-@@ Take stuff from the ladybug manual
-
-
-Secondary functions
--------------------
-
-The function address table, or FAT for short is the inventory of
-functions that a plug-in module provides. It is located first in the
-module. This table provides up to 64 functions, which may have seemed
-a lot from the beginning, but with the arrival of banked modules you
-may find that you wish you had more entries.
-
-The OS4 module provides a mechanism for providing secondary
-functions. Up to 4096 such functions are possible. These are
-internally called eXtended XROM functions (XXROM).
-
-You can see such XXROM functions as having a numeric identity in the
-same way as an XROM, though the function number has a wider range
-0--4095, i.e. ``XXROM 7,689`` would be the 690th secondary function in a
-module with XROM identifier 7 (as the numbers start from 0).
-
-.. note::
-   The numeric series are separate, so you have up to 64 primary and
-   4096 secondary functions in a module.
-
-With the Boost module, you can key the name of the secondary
-function from its ``XEQ'`` instruction which is automatically available
-as a replacement for the ordinary ``XEQ`` function. This means you can
-access a secondary function in the same way as any other named
-function. The normal search order rules used, following the catalog
-order. Primary XROM functions are searched before looking at secondary
-XXROM functions in the same page.
-
-A secondary function can also be assigned to a key. If you press
-such key in user mode it will go through the normal behavior showing
-its name and NULL if you keep the key pressed. If it is a prompting
-function it will put up its prompt, just like any primary XROM or
-built-in function would do.
-
-The actual assignment information is kept inside the system buffer. If
-you assign a secondary function to a key and remove the module, the
-key will display as an XXROM, i.e. ``XXROM 7,45`` to show the function
-that is not present, in the same way as is done for an XROM.
-
-Secondary functions can also be stored into programs and they will be
-correctly displayed in program memory. However, in order to represent
-them in program memory they are actually stored as an XROM (acting as
-a prefix) followed by a semi-merged alpha literal.
-
-In summary, secondary functions provide a way of having essentially as
-many functions as you can fit into the memory constraints rather than
-being limited by as fixed maximum of 64. Using the Boost companion
-module, you can access them the same way as ordinary functions and
-they can also be assigned to keys and stored into program memory. In
-addition, they are just as powerful when it comes to prompting as any
-normal function.
-
-.. note::
-   You need the Boost module to obtain the ``XEQ'`` and ``ASN'``
-   replacement functions that will search also for secondary
-   functions.
-
 Key-codes
----------
+=========
 
 There are several ways key codes are represented in the HP-41.
 The key codes returned from the keyboard as read by a machine
@@ -310,3 +210,20 @@ if few keys are defined, while still being reasonable fast.
 As also secondary functions can be bound to keyboard definitions,
 there are some further schemes and details on how more advanced
 keyboards are defined. This is further described in XXXX.
+
+Return to mainframe
+===================
+
+The normal behavior for an MCODE function is to exit using a ``RTN``
+instruction. As the invocation mechanism push the address of ``NFRPU``
+on the stack before giving control, this is where we will normally
+return. This exit point enables stack lift (sets the internal push
+flag, CPU flag 11) and falls into ``NFRC``.
+
+If you used up all four levels of CPU stack, you must exit back using
+a ``GOLONG`` instruction instead. By design, XKD functions (seldom
+used functions that execute immediately on key down) does not have
+``NFRPU`` pushed on the stack, so they also must ``GOLONG`` back. Such
+functions may want to return back to ``NFRKB`` instead as it waits for
+key release and resets the keyboard (useful as it acted immediately on
+key down).

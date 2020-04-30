@@ -39,3 +39,50 @@ points and definitions suitable for the developer. Simply:
    #include "OS4.h"
 
 and you are good to go.
+
+Version check
+=============
+
+To allow future changes to OS4 there is a mechanism for checking if
+the plugged in OS4 module is compatible with your own module. The
+``checkApiVersionOS4`` routine can be called from the deep wake up
+poll vector entry:
+
+.. code-block:: ca65
+
+   deepWake:     n=c
+                 ldi     0x000         ; I need major version 0 at least
+                 gosub   checkApiVersionOS4
+
+The number passed to ``checkApiVersionOS4`` is the required version of
+OS4. You can find the current version number used in such context
+early in the ``OS4.h`` header file.
+
+This version number is API related and is not the same as the version
+of the OS4 release.
+
+You can either load the version number defined in ``OS4.h``, or
+better, the API version your software requires.
+
+.. note::
+
+   If you use the ``ApiVersionOS4`` constant defined in ``OS4.h``,
+   then your software will automatically demand a later version of OS4
+   if you upgrade OS4, even if you do not actually use any of the
+   additional features provided with that version.
+
+This API version number consists of two parts. The lower 8 bits are an
+increasing number that is bumped whenever new entry points are added,
+or additional things are provided by existing entry points. The upper
+4 bits are a major version number that must match precisely. Changing
+the major number means that anything may have been moved or altered
+(except the version check).
+
+.. note::
+
+   If the version is old, "OLD OS4" is displayed as an error
+   message. This may have the consequence that poll entries are
+   skipped, but the calculator may still work (to some
+   degree). However, anything may be broken and the user should
+   hopefully understand that the current configuration should not be
+   used.

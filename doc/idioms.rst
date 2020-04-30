@@ -299,8 +299,8 @@ matter of taste, and having 0 as empty value is easier for the user
 and is perhaps somewhat more natural.
 
 
-Combining call backs
---------------------
+Combined call backs
+-------------------
 
 While the call back routine is not large, it is not trivial either. We
 want to avoid code duplication so it may be a good idea to arrange

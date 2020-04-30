@@ -211,8 +211,26 @@ may make it easier for the user to understand it. The take-away is
 that both ways have been in used for long and are accepted, there are
 no right or wrong.
 
-OS4 support
+Limitations
 -----------
+
+If you decide to use the prompt mechanism offered by mainframe with
+your XROM function, it is possible to do so, but normal limitations
+apply. The bug with stack operands exists (unless you use a corrected
+mainframe ROM), the function must be non-programmable and you function
+cannot be a secondary functions. The ``CAT'`` catalog replacement
+function in the Boost module is currently implemented this way.
+
+If you take over prompt handling but in the end make use of existing
+functionality in mainframe, it will not work properly with secondary
+functions. One example of this is the ``ASN'`` assign replacement
+function in the Boost module, it uses the mainframe code to ask for
+the key-code as its final step. This forces it to be an ordinary XROM
+function.
+
+
+Support functions
+-----------------
 
 Some prompt support functionality can be found in the Boost
 module. The ``parseNumber`` routine can be used for requesting decimal

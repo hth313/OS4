@@ -355,10 +355,6 @@ module that wants its shell to survive a power cycle will reclaim
 it. This is done using the power on poll vector. The ``reclaimShell``
 routine is used.
 
-Application shells
-==================
-
-
 
 
 Temporary application shells

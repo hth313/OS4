@@ -15,9 +15,11 @@ Welcome to OS4's documentation!
    overview
    addressing
    basics
+   functions
    idioms
    buffer
    shells
+   applications
    secondary
    semimerged
    partialKeys

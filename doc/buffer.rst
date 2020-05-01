@@ -40,24 +40,42 @@ less likely to need a lot of registers.
 
 The header register is defined as follows:
 
-ID SZ BF 'SC:KA' SH DF ST
+``ID SZ BF SC:KA SH DF ST``
 
-The ID is the identifier which normally set to `1F`. The SZ field is
-the size of the buffer. These two fields are defined by the HP-41
-operating system and all buffers are like this.
+The ``ID`` is the identifier which normally set to ``1F``. The ``SZ``
+field is the size of the buffer. These two fields are defined by the
+HP-41 operating system and all buffers are like this.
 
-The ST field is a set of flags that keeps track of the internal
+The ``ST`` field is a set of flags that keeps track of the internal
 state. You normally do not need to take these in account as they are
 handled internally by OS4.
 
-The DF field is a default postfix used by the semi-merged mechanism
-and is also handled internally by OS4.
+The ``DF`` field is used by the semi-merged mechanism to store a
+postfix arguments during function entry. When entering a single
+postfix argument, the default argument is stored here. For dual
+postfix functions, this field is used to hold the first entered
+argument.
 
-The remaning for fields BF, SC, KA and SH are the sizes of the
-different areas that follows the header.
+The remaning for fields ``BF``, ``SC``, ``KA`` and ``SH`` are the
+sizes of the different areas that follows the header. The sizes are
+naturally used to tell the size of a field, so we know where it ends,
+but it is also used when calculating the start address of a given
+field. This is done by adding the sizes of all fields preceding the
+field we are interested in, plus one for the buffer header and finally
+the address of the buffer header.
 
-For the latest information and every detail it is probably a good idea
-to also consult the source code of OS4.
+.. note::
+
+   You do not normally need to bother about the fields in the buffer
+   header as they are internal to OS4. It should be sufficient to use
+   the provided routines in the API, especially when making changes to
+   field sizes as there are certain invariants that need to be
+   maintained to keep OS4 in a consistent state. The built in routines
+   takes care of this.
+
+.. figure:: _static/memory.*
+
+   Key assignments and buffer area.
 
 
 Area sizes

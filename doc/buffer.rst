@@ -66,12 +66,12 @@ the address of the buffer header.
 
 .. note::
 
-   You do not normally need to bother about the fields in the buffer
+   You do not normally need to worry about the fields in the buffer
    header as they are internal to OS4. It should be sufficient to use
    the provided routines in the API, especially when making changes to
-   field sizes as there are certain invariants that need to be
-   maintained to keep OS4 in a consistent state. The built in routines
-   takes care of this.
+   field sizes, as there are certain invariants that need to be
+   maintained to keep a consistent state. The built in routines
+   take care of this.
 
 .. figure:: _static/memory.*
 

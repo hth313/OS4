@@ -20,6 +20,7 @@ Welcome to OS4's documentation!
    buffer
    shells
    applications
+   transientApplications
    secondary
    semimerged
    partialKeys

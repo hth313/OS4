@@ -48,12 +48,27 @@ usual way, to customize the calculator further.
 Shell stack
 ===========
 
-The shells are stored in a shell stack, so that if you activate an
-application shell it stored on top and shadows the previous
-behavior. If you activate yet another application shell, it will
-shadow all prior shells. When you exit an application, the one
+The shells are stored in a shell stack. If you activate an
+application shell it pushed on top of the stack, shadowing all
+applications below it. When you exit an application, the one
 immediately below becomes active again, all the way down to the
 standard behavior.
+
+There are four kind of entities stored in the shell stack, described
+below. Even though they are pushed on the stack, they are kept
+together based on its kind. Pushing a shell means it is stored on top
+of other shells of the same kind.
+
+You can think of a shell as defining a keyboard layout. Such keyboard
+layout does not need to have a meaning for every key. If a key that is
+not handled is pressed, the next shell on the stack is inspected.
+However, only the top application is given the chance to handle a key,
+any shadowed application is not consulted.
+
+.. figure:: _static/shells.*
+
+   The shell stack
+
 
 Shell kinds
 ===========
@@ -84,20 +99,14 @@ pressed. This is similar to how the original catalog 1--3 works. If
 you press a key that is not used by the catalog when it is stopped,
 the catalog exits and the key performs its usual behavior.
 
-In the HP-41, the original catalogs and the clock display would
-roughly correspond to transient applications. In fact, if the shell
-mechanism would have been available at the time, a transient
-application would most likely have been used to implement them. As the
-shell mechanism did not exist, various other tricks were used instead.
+This means that if you press a key that is not handled by the
+transient application, it is removed from the shell stack and the top
+most ordinary application will get a chance to handle the key.
 
-A transient application can thanks to its single and short-lived
-existence use various additional resources. There is a
-scratch area that can be easily obtained from the system buffer for
-temporary state storage. There is also support for borrowing the
-interval timer from the Time module (if present). This timer is
-normally used for the clock display, but thanks to OS4 being in page
-4, you can borrow it (when available) from the Time module and use it
-for periodic updates or for implementing a timeout.
+.. figure:: _static/transient-shell.*
+
+   The shell stack with transient application
+
 
 System shells
 -------------

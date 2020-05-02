@@ -27,9 +27,8 @@ for (file, body) in lcdImages:
     command_line = ["inkscape", "--export-filename=" + pdffile, "--export-dpi=96", svgfile]
     subprocess.call(command_line, cwd="_static")
 
-for file in [ "memory" ]:
+for file in [ "memory", "shells", "transient-shell" ]:
     svgfile = file + ".svg"
     pdffile = file + ".pdf"
     command_line = ["inkscape", "--export-filename=" + pdffile, "--export-dpi=96", svgfile]
     subprocess.call(command_line, cwd="_static")
-

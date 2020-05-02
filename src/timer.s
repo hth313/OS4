@@ -32,16 +32,10 @@
 
               .section code, reorder
               .public setTimeout
-              .extern systemBuffer, RTNP2
+              .extern hasTimer, systemBuffer, RTNP2
 setTimeout:   bcex                  ; B= timeout
-              ldi     26            ; Time module XROM number
-              a=c     x
-              pt=     6
-              lc      5
-              c=0     wpt           ; 5000
-              cxisa
-              ?a#c    x             ; XROM 26 there?
-              rtnc                  ; no
+              gosub   hasTimer      ; do we have a timer chip?
+              rtn                   ; no
               gosub   ENTMR         ; yes, enable timer chip
               a=0
               setdec

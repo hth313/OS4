@@ -2,6 +2,218 @@
 Entry points reference
 **********************
 
+Fundamentals
+============
+
+Basic building blocks for dealing with packed pointers and other small
+routines.
+
+**jump via packed pointer**
+---------------------------
+
+These are a set of routines that fetched a packed pointer by offset
+from a given address. By using the ``GOSUB`` instruction to one of
+these entries, you perform a subroutine call to it. You can also use
+the ``GOLONG`` instruction to transfer control to it.
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; jumpPacked docstart
+   :end-before:  ;;; jumpPacked docend
+
+**call aligned subroutine**
+---------------------------
+
+These are alternatives to the three word page relative jump and call
+routines provided by mainframe. They require 4 alignment on the
+destination address, but avoids the problem of temporary using a
+subroutine level and can access the full 4K page.
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; gosubAligned docstart
+   :end-before:  ;;; gosubAligned docend
+
+**return skipping ahead**
+-------------------------
+
+These routines allow for returning to (P+2) and (P+3), that is,
+skipping one or two instructions ahead in the return location.
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; RTNP2 docstart
+   :end-before:  ;;; RTNP2 docend
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; RTNP3 docstart
+   :end-before:  ;;; RTNP3 docend
+
+**unpack a packed pointer**
+---------------------------
+
+These routines reads a packed pointer with a displacement, but does
+not do any other actions based on the result.
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; unpack docstart
+   :end-before:  ;;; unpack docend
+
+Return to mainframe
+===================
+
+**XFNRC**
+---------
+
+**Entry point:** ``4D2C``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; XNFRC docstart
+   :end-before:  ;;; XNFRC docend
+
+**XFNRPU**
+----------
+
+**Entry point:** ``4D30``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; XNFRPU docstart
+   :end-before:  ;;; XNFRPU docend
+
+Error handling
+==============
+
+These error routines are the same as found in the Extended functions
+module and later 41CX. They are provided in OS4 as they do not exist
+in 41C and 41CV. Thus, if you rely on OS4 they are now available to
+all HP-41 variants.
+
+**displayError**
+----------------
+
+**Entry point:** ``4F82``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; displayError docstart
+   :end-before:  ;;; displayError docend
+
+**errorMessage**
+----------------
+
+**Entry point:** ``4F2A``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; errorMessage docstart
+   :end-before:  ;;; errorMessage docend
+
+**errorExit**
+-------------
+
+**Entry point:** ``4F2C``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; errorExit docstart
+   :end-before:  ;;; errorExit docend
+
+**noRoom**
+----------
+
+**Entry point:** ``4F28``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; noRoom docstart
+   :end-before:  ;;; noRoom docend
+
+**noSysBuf**
+------------
+
+**Entry point:** ``4F4A``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; noSysBuf docstart
+   :end-before:  ;;; noSysBuf docend
+
+Ensure environment
+==================
+
+Some code may require certain optional hardware to be available to
+work properly. These routines allow for testing such requirements and
+give a sensible error if the resource is not present.
+
+**ensureDrive**
+---------------
+
+Check for the mass storage HP-IL drive. This tests both that we have
+an HP-IL module as some mass storage device connected to the loop.
+
+**Entry point:** ``4F68``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ensureDrive docstart
+   :end-before:  ;;; ensureDrive docend
+   :lines: 1-3, 5-
+
+**ensureHPIL**
+--------------
+
+**Entry point:** ``4F44``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ensureDrive docstart
+   :end-before:  ;;; ensureDrive docend
+   :lines: 1-2, 4-
+
+**ensure41CX**
+--------------
+
+Testing for 41CX is intended mainly to ensure that the entry points
+for accessing extended memory is available.
+
+**Entry point:** ``4F46``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ensure41CX docstart
+   :end-before:  ;;; ensure41CX docend
+
+**ensureTimer**
+---------------
+
+The timeout related routines will politely tell you if there is no
+timer available. This routine is intended if you want to really bail
+out and prevent further actions when the timer is missing.
+
+**Entry point:** ``4F82``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ensureTimer docstart
+   :end-before:  ;;; ensureTimer docend
+
+API version check
+=================
+
+**checkApiVersionOS4**
+----------------------
+
+**Entry point:** ``4F80``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; checkApiVersionOS4 docstart
+   :end-before:  ;;; checkApiVersionOS4 docend
+
 
 Assignments
 ===========

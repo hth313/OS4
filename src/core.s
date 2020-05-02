@@ -13,11 +13,11 @@
 
 CHKCST:       .equlab 0x7cdd
 
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 ;;;
 ;;; Main take over entry point at address 0x4000.
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 
               .extern systemBuffer, doDisplay, doPRGM, disableOrphanShells
 
@@ -43,7 +43,7 @@ lightWake:    c=0     x
               c=regn  14            ; C= flags
               st=c                  ; put up SS0
 
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 ;;;
 ;;; Light sleep wake up actually comes here both at wake up and when
 ;;; going back to light sleep after processing is done.
@@ -59,7 +59,7 @@ lightWake:    c=0     x
 ;;; something is wrong. As this is an unusual case (yes really, despite all
 ;;; the MEMORY LOSTs you think may have seen) we can shave some cycles.
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 
               chk kb
               golc    bufferScan    ; key is down, find active handler
@@ -110,14 +110,14 @@ noTimeout:    ldi     8             ; I/O service
 
               golong  0x18c         ; go to light sleep
 
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 ;;;
 ;;; deepWake - deep sleep wake up
 ;;;
 ;;; Release all Shells, application ROMs need to reclaim them using their
 ;;; deep wake poll vectors.
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 
               .extern releaseShells, releaseHostedBuffers
               .newt_timing_start    ; to synchronize NEWT Time clone at start up
@@ -187,7 +187,7 @@ deepWake:     disoff                ; get the display to a known
 10$:          gosub   LDSST0
               golong  WKUP60
 
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 ;;;
 ;;; fastDigitEntry  - fast additional digit entry handling
 ;;;
@@ -195,7 +195,7 @@ deepWake:     disoff                ; get the display to a known
 ;;; that there is another key down. The idea here is to bypass the I/O poll
 ;;; vector to speed things up.
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 
               .extern topShell, nextShell, keyHandler, clearClock
               .section code
@@ -383,9 +383,14 @@ pause:        cstex                 ; restore flags
 
               .section fixedEntries
 
+;;; jumpPacked docstart
 ;;; **********************************************************************
 ;;;
-;;; jumpCN - jump via a packed pointer
+;;; jumpC0 - jump via a packed pointer
+;;; jumpC1 - jump via a packed pointer, increment by 1
+;;;   ...
+;;; jumpC5 - jump via a packed pointer, increment by 5
+;;; jumpPacked - C[6] has page and C.X holds packed pointer
 ;;;
 ;;; Assume that C[6:3] points somewhere in a table of code pointers, well
 ;;; there should at least be one. Provide different entry points to advance
@@ -411,6 +416,7 @@ pause:        cstex                 ; restore flags
 ;;;       fixedEntries accordingly.
 ;;;
 ;;; **********************************************************************
+;;; jumpPacked docend
 
               .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5
               .public jumpPacked
@@ -430,6 +436,7 @@ jumpPacked:   c=c+c   x
               rcr     -3
               gotoc
 
+;;; gosubAligned docstart
 ;;; **********************************************************************
 ;;;
 ;;; gosubAlign4 - call a 4 aligned subroutine in a plug-in ROM
@@ -457,7 +464,9 @@ jumpPacked:   c=c+c   x
 ;;; Assumes: hex enabled
 ;;;
 ;;; **********************************************************************
+;;; gosubAligned docend
 
+              .public golAlign4, gosubAlign4
 golAlign4:    c=stk
               cxisa
               goto    jumpPacked
@@ -467,6 +476,7 @@ gosubAlign4:  c=stk
               stk=c
               goto    jumpPacked
 
+;;; RTNP2 docstart
 ;;; **********************************************************************
 ;;;
 ;;; RTNP2 - return to P+2
@@ -484,6 +494,7 @@ gosubAlign4:  c=stk
 ;;; Uses: C[6:3]
 ;;;
 ;;; **********************************************************************
+;;; RTNP2 docend
 
               .public dropRTNP2, RTNP2, jumpP0, jumpP1
 dropRTNP2:    spopnd
@@ -491,10 +502,11 @@ RTNP2:        c=stk
 jumpP1:       c=c+1   m
 jumpP0:       gotoc
 
+;;; RTNP3 docstart
 ;;; **********************************************************************
 ;;;
 ;;; RTNP3 - return to P+3
-;;; dropRTNP2 - drop stack and return to P+3
+;;; dropRTNP3 - drop stack and return to P+3
 ;;;
 ;;; These routines are useful for returning skipping past the instruction
 ;;; just after the gosub.
@@ -508,6 +520,7 @@ jumpP0:       gotoc
 ;;; Uses: C[6:3]
 ;;;
 ;;; **********************************************************************
+;;; RTNP3 docend
 
               .public dropRTNP3, RTNP3, jumpP2
 dropRTNP3:    spopnd
@@ -515,9 +528,13 @@ RTNP3:        c=stk
 jumpP2:       c=c+1   m
               goto    jumpP1
 
+;;; unpack docstart
 ;;; **********************************************************************
 ;;;
-;;; unpackN - unpack a packed pointer relative to C[6:3]
+;;; unpack - unpack a packed pointer in C[6:3]
+;;; unpack1 - unpack a packed pointer in C[6:3] + 1
+;;;  ...
+;;; unpack5 - unpack a packed pointer in C[6:3] + 5
 ;;;
 ;;; Change a base pointer to what a packed field pointer points to.
 ;;; Basically base.member in C.
@@ -526,6 +543,7 @@ jumpP2:       c=c+1   m
 ;;; Out: C[6:3] - the member at given offset, unpacked
 ;;;
 ;;; **********************************************************************
+;;; unpack docend
 
               .public unpack, unpack0, unpack1, unpack2, unpack3, unpack4, unpack5
 unpack5:      c=c+1   m
@@ -542,6 +560,7 @@ unpack:       csr     m
               rcr     -3
               rtn
 
+;;; XNFRC docstart
 ;;; **********************************************************************
 ;;;
 ;;; XNFRC - do alternative shell display and return to mainframe
@@ -551,11 +570,13 @@ unpack:       csr     m
 ;;; This exits to NFRC, which means the stack lift flag is not affected.
 ;;;
 ;;; **********************************************************************
+;;; XNFRC docend
 
               .public XNFRC
 XNFRC:        gosub   shellDisplay
               golong  NFRC
 
+;;; XNFRPU docstart
 ;;; **********************************************************************
 ;;;
 ;;; XNFRPU - do alternative shell display and return to mainframe
@@ -565,16 +586,19 @@ XNFRC:        gosub   shellDisplay
 ;;; This exits to NFRPU, which enables stack lift.
 ;;;
 ;;; **********************************************************************
+;;; XNFRPU docend
 
+              .public XNFRPU
 XNFRPU:       gosub   shellDisplay
               golong  NFRPU
 
+;;; noRoom docstart
 ;;; **********************************************************************
 ;;;
 ;;; noRoom - show NO ROOM error
-;;; displayError, errMessl, errExit - error support routines
 ;;;
 ;;; **********************************************************************
+;;; noRoom docend
 
               .section code, reorder
               .public noRoom, noSysBuf, ensureHPIL, ensure41CX
@@ -582,17 +606,50 @@ noRoom:       gosub   errorMessage
               .messl  "NO ROOM"
               goto    errorExit
 
+;;; noSysBuf docstart
+;;; **********************************************************************
+;;;
+;;; noSysBuf - show NO SYSBUF error
+;;;
+;;; **********************************************************************
+;;; noSysBuf docend
+
 noSysBuf:     gosub   errorMessage
               .messl  "NO SYSBUF"
               goto    errorExit
 
+;;; displayError docstart
+;;; **********************************************************************
+;;;
+;;; displayError - display error message followed by ERR
+;;;
+;;; A call to this routine should be followed by the error message
+;;; formatted in the same way as with the MESSL call.
+;;;
+;;; **********************************************************************
+;;; displayError docend
+
               .public displayError, errorMessage, errorExit
 displayError: gosub   MESSL
               .messl  " ERR"
+              goto    errorExit
+
+;;; errorMessage docstart
+;;; **********************************************************************
+;;;
+;;; errorMessage - display an error message
+;;;
+;;; A call to this routine should be followed by the error message
+;;; formatted in the same way as with the MESSL call.
+;;;
+;;; **********************************************************************
+;;; errorMessage docend
+
 errorMessage: gosub   ERRSUB
-setMessl:     gosub   CLLCDE
+              gosub   CLLCDE
               golong  MESSL
 
+;;; ensureDrive docstart
 ;;; **********************************************************************
 ;;;
 ;;; ensureDrive - ensure that an HP-IL moduld and mass storage exists
@@ -604,7 +661,9 @@ setMessl:     gosub   CLLCDE
 ;;; Uses: C, A.X
 ;;;
 ;;; **********************************************************************
+;;; ensureDrive docend
 
+              .public ensureDrive, ensureHPIL
 ensureDrive:  c=0
               gosub   CHKCST
               ?c#0
@@ -613,6 +672,14 @@ ensureDrive:  c=0
               .messl  "NO DRIVE"
 errorExitPop: spopnd                ; defensive measure
                                     ; not strictly needed, but probably a good
+;;; errorExit docstart
+;;; **********************************************************************
+;;;
+;;; errorExit - left justify LCD and handle error
+;;;
+;;; **********************************************************************
+;;; errorExit docend
+
 errorExit:    gosub   LEFTJ
               gosub   MSG105
               golong  ERR110
@@ -628,6 +695,7 @@ ensureHPIL:   ldi     28            ; HP-IL XROM Id
               .messl "NO HP-IL"
               goto    errorExitPop
 
+;;; ensure41CX docstart
 ;;; **********************************************************************
 ;;;
 ;;; ensure41CX - ensure we are running on a 41CX style OS
@@ -638,6 +706,7 @@ ensureHPIL:   ldi     28            ; HP-IL XROM Id
 ;;; Uses: C, A.X
 ;;;
 ;;; **********************************************************************
+;;; ensure41CX docend
 
 ensure41CX:   ldi     25
               a=c     x
@@ -651,6 +720,37 @@ ensure41CX:   ldi     25
               .messl  "NO 41CX OS"
               goto    errorExitPop
 
+;;; ensureTimer docstart
+;;; **********************************************************************
+;;;
+;;; ensureTimer - ensure there is a timer chip
+;;;
+;;; Display NO TIMER if there is no timer chip present.
+;;;
+;;; Uses: C, A.X
+;;;
+;;; **********************************************************************
+;;; ensureTimer docend
+
+              .public ensureTimer, hasTimer
+ensureTimer:  gosub   hasTimer
+              rtn
+              gosub   errorMessage
+              .messl  "NO TIMER"
+errorExitPop10:
+              goto    errorExitPop
+
+hasTimer:     ldi     26            ; Time module XROM number
+              a=c     x
+              pt=     6
+              lc      5
+              c=0     wpt           ; 5000
+              cxisa
+              ?a#c    x             ; XROM 26 there?
+              rtnnc                 ; yes
+              golong  RTNP2         ; no
+
+;;; checkApiVersionOS4 docstart
 ;;; **********************************************************************
 ;;;
 ;;; checkApiVersionOS4 - check the version expected by OS4
@@ -664,6 +764,7 @@ ensure41CX:   ldi     25
 ;;; Uses: A.X, C[6:3]
 ;;;
 ;;; **********************************************************************
+;;; checkApiVersionOS4 docend
 
 checkApiVersionOS4:
               a=c     x
@@ -674,7 +775,7 @@ checkApiVersionOS4:
               rtnc                  ; OK
 10$:          gosub   errorMessage
               .messl  "OLD OS4"
-              goto    errorExitPop
+              goto    errorExitPop10
 
               .section code2
               .shadow noRoom - 1
@@ -694,11 +795,11 @@ noRoom_B2:    enrom1
               .public gotoc_B2
 gotoc_B2:     enrom1
 
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 ;;;
 ;;; Bank switchers allow external code to turn on specific banks.
 ;;;
-;;; ----------------------------------------------------------------------
+;;; **********************************************************************
 
 BankSwitchers: .macro
               rtn                   ; not using bank 3
@@ -763,7 +864,7 @@ BankSwitchers: .macro
               golong  ensureBuffer  ; 0x4f08
               golong  growBuffer    ; 0x4f0a
               golong  findSecondaryAssignments ; 0x4f0c
-              golong  setMessl      ; 0x4f0e
+              golong  displayError  ; 0x4f0e
               golong  shellDisplay  ; 0x4f10
               golong  getXAdr       ; 0x4f12
               golong  topShell      ; 0x4f14
@@ -833,7 +934,7 @@ runSecondaryB2Location:
               golong  catalog       ; 0x4f7c
               golong  catalogWithSize ; 0x4f7e
               golong  checkApiVersionOS4 ; 0x4f80
-
+              golong  ensureTimer   ; 0x4f82
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab
               .section code2

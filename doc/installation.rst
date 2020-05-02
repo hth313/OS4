@@ -2,6 +2,8 @@
 Installation
 ************
 
+.. index:: installation
+
 The OS4 image consists of two banks that occupy a single 4K
 page and it must be loaded to address page 4.
 
@@ -11,6 +13,8 @@ The module emulator you use must support a banked page 4 and also
 allow for independent bank switching of page groups. The HP-41CL and
 MLDL-2000 supports this. MLDLs and module emulation hardware from long
 ago will probably not be able to support OS4.
+
+.. index:: Clonix
 
 .. note::
    Clonix and NoV modules will require an update of its firmware to a
@@ -42,6 +46,8 @@ and you are good to go.
 
 Version check
 =============
+
+.. index:: API version check, version check
 
 To allow future changes to OS4 there is a mechanism for checking if
 the plugged in OS4 module is compatible with your own module. The

@@ -11,6 +11,8 @@ routines.
 **jump via packed pointer**
 ---------------------------
 
+.. index:: jump via packed pointer
+
 These are a set of routines that fetched a packed pointer by offset
 from a given address. By using the ``GOSUB`` instruction to one of
 these entries, you perform a subroutine call to it. You can also use
@@ -24,6 +26,8 @@ the ``GOLONG`` instruction to transfer control to it.
 **call aligned subroutine**
 ---------------------------
 
+.. index:: call aligned subroutine, aligned subroutine
+
 These are alternatives to the three word page relative jump and call
 routines provided by mainframe. They require 4 alignment on the
 destination address, but avoids the problem of temporary using a
@@ -36,6 +40,8 @@ subroutine level and can access the full 4K page.
 
 **return skipping ahead**
 -------------------------
+
+.. index:: return skipping ahead
 
 These routines allow for returning to (P+2) and (P+3), that is,
 skipping one or two instructions ahead in the return location.
@@ -53,6 +59,8 @@ skipping one or two instructions ahead in the return location.
 **unpack a packed pointer**
 ---------------------------
 
+.. index:: unpack a packed pointer
+
 These routines reads a packed pointer with a displacement, but does
 not do any other actions based on the result.
 
@@ -63,6 +71,8 @@ not do any other actions based on the result.
 
 Return to mainframe
 ===================
+
+.. index:: return to mainframe, mainframe; return to
 
 **XFNRC**
 ---------
@@ -86,6 +96,8 @@ Return to mainframe
 
 Error handling
 ==============
+
+.. index:: error handling
 
 These error routines are the same as found in the Extended functions
 module and later 41CX. They are provided in OS4 as they do not exist
@@ -152,6 +164,8 @@ give a sensible error if the resource is not present.
 **ensureDrive**
 ---------------
 
+.. index:: HP-IL mass storage; testing for
+
 Check for the mass storage HP-IL drive. This tests both that we have
 an HP-IL module as some mass storage device connected to the loop.
 
@@ -166,6 +180,8 @@ an HP-IL module as some mass storage device connected to the loop.
 **ensureHPIL**
 --------------
 
+.. index:: HP-IL; testing for
+
 **Entry point:** ``4F44``
 
 .. literalinclude:: ../src/core.s
@@ -176,6 +192,8 @@ an HP-IL module as some mass storage device connected to the loop.
 
 **ensure41CX**
 --------------
+
+.. index:: 41CX; testing for
 
 Testing for 41CX is intended mainly to ensure that the entry points
 for accessing extended memory is available.
@@ -189,6 +207,8 @@ for accessing extended memory is available.
 
 **ensureTimer**
 ---------------
+
+.. index:: timer; testing for
 
 The timeout related routines will politely tell you if there is no
 timer available. This routine is intended if you want to really bail
@@ -207,6 +227,8 @@ API version check
 **checkApiVersionOS4**
 ----------------------
 
+.. index:: API version check, version check
+
 **Entry point:** ``4F80``
 
 .. literalinclude:: ../src/core.s
@@ -218,11 +240,15 @@ API version check
 Assignments
 ===========
 
+.. index:: assignments
+
 Functions related to assignments are mainly for handling assignments
 of secondary functions which reside in the system buffer.
 
 **assignSecondary**
 -------------------
+
+.. index:: assignments; secondary
 
 **Entry point:** ``4F54``
 
@@ -275,6 +301,8 @@ if it is a primary or secondary assignment (or both).
 
 Buffers
 =======
+
+.. index:: buffers
 
 Buffer routines cover both ordinary I/O buffers, as well as hosted
 buffers which are stored inside the system buffer.
@@ -342,6 +370,8 @@ one that takes the buffer number (0--15) from ``C.X``.
 **allocScratch**
 ----------------
 
+.. index:: scratch area
+
 **Entry point:** ``4F3A``
 
 .. literalinclude:: ../src/buffer.s
@@ -371,6 +401,8 @@ one that takes the buffer number (0--15) from ``C.X``.
 
 **newHostedBuffer**
 -------------------
+
+.. index:: buffers; hosted, hosted buffers
 
 **Entry point:** ``4F6E``
 
@@ -432,8 +464,12 @@ one that takes the buffer number (0--15) from ``C.X``.
 Shells
 ======
 
+.. index:: shells
+
 **activateShell**
 -----------------
+
+.. index:: shells; activation, activation; of shells
 
 **Entry point:** ``4F00``
 
@@ -444,6 +480,8 @@ Shells
 
 **exitShell**
 -------------
+
+.. index:: shells; exiting
 
 **Entry point:** ``4F02``
 
@@ -456,6 +494,8 @@ Shells
 **reclaimShell**
 ----------------
 
+.. index:: shells; reclaim, reclaim; shells
+
 **Entry point:** ``4F04``
 
 .. literalinclude:: ../src/shell.s
@@ -467,6 +507,8 @@ Shells
 **exitTransientApp**
 --------------------
 
+.. index:: shells; transient application, transient applications
+
 **Entry point:** ``4F40``
 
 .. literalinclude:: ../src/shell.s
@@ -476,6 +518,8 @@ Shells
 
 **exitApp**
 -----------
+
+.. index:: shells; exiting
 
 **Entry point:** ``4F78``
 
@@ -534,6 +578,8 @@ the shell stack instead.
 **shellDisplay**
 ----------------
 
+.. index:: shells; default display, display; default
+
 **Entry point:** ``4F10``
 
 .. literalinclude:: ../src/shell.s
@@ -543,6 +589,8 @@ the shell stack instead.
 
 **displayDone**
 ----------------
+
+.. index:: shells; default display, display; default
 
 **Entry point:** ``4F32``
 
@@ -554,6 +602,8 @@ the shell stack instead.
 **displayingMessage**
 ---------------------
 
+.. index:: message flag
+
 **Entry point:** ``4F56``
 
 .. literalinclude:: ../src/shell.s
@@ -563,6 +613,8 @@ the shell stack instead.
 
 **sendMessage**
 ---------------
+
+.. index:: extension handlers
 
 **Entry point:** ``4F34``
 
@@ -594,6 +646,8 @@ the shell stack instead.
 Semi-merged
 ===========
 
+.. index:: functions; semi-merged, semi-merged functions
+
 These functions define semi-merged prompting functions.
 
 .. note::
@@ -624,6 +678,8 @@ These functions define semi-merged prompting functions.
 Partial key sequences
 =====================
 
+.. index:: partial key sequences
+
 **XABTSEQ**
 -----------
 
@@ -636,6 +692,8 @@ Partial key sequences
 
 Secondary functions
 ===================
+
+.. index:: secondary functions, functions; secondary
 
 **XASRCH**
 -----------
@@ -653,6 +711,8 @@ works the same, but will also locate secondary functions.
 **resetBank**
 --------------
 
+.. index:: bank switching
+
 **Entry point:** ``4F58``
 
 .. literalinclude:: ../src/secondaryFunctions.s
@@ -663,6 +723,8 @@ works the same, but will also locate secondary functions.
 
 **secondaryAddress**
 --------------------
+
+.. index:: functions, secondary, secondary functions
 
 **Entry point:** ``4F50``
 
@@ -695,6 +757,8 @@ works the same, but will also locate secondary functions.
 Keyboard
 ========
 
+.. index:: keyboard
+
 **keyKeyboard**
 ---------------
 
@@ -724,6 +788,8 @@ timeouts or periodic updates of the display.
 **setTimeout**
 ---------------
 
+.. index:: timer
+
 **Entry point:** ``4F62``
 
 .. literalinclude:: ../src/timer.s
@@ -744,6 +810,8 @@ timeouts or periodic updates of the display.
 Catalog
 ========
 
+.. index:: catalogs
+
 **catalog**
 -----------
 
@@ -756,6 +824,8 @@ Catalog
 
 Extended memory
 ===============
+
+..index:: extended memory, memory; extended
 
 **getXAdr**
 -----------

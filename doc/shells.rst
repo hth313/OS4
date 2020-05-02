@@ -2,6 +2,8 @@
 Shells
 ******
 
+.. index:: shells
+
 A new concept provided is a shell which provides a way of installing
 new keyboard and display behaviors.
 
@@ -48,6 +50,8 @@ usual way, to customize the calculator further.
 Shell stack
 ===========
 
+.. index:: shells; stack
+
 The shells are stored in a shell stack. If you activate an
 application shell it pushed on top of the stack, shadowing all
 applications below it. When you exit an application, the one
@@ -73,11 +77,15 @@ any shadowed application is not consulted.
 Shell kinds
 ===========
 
+.. index:: shells; kind
+
 There are four kinds of shells and they have different purposes and
 follow somewhat different rules.
 
 Application shells
 ------------------
+
+.. index:: shells; applications, applications
 
 The most fundamental shell type is the *application shell*. They live
 near the top of the shell stack. Only the topmost application shell on
@@ -89,6 +97,8 @@ previous application, by leaving the currently active one.
 
 Transient applications shells
 -----------------------------
+
+.. index:: shells; transient application, transient applications
 
 A variant of an application is a *transient application shell*. This is
 a specialized version of an application that always are at the top of
@@ -111,6 +121,8 @@ most ordinary application will get a chance to handle the key.
 System shells
 -------------
 
+.. index:: shells; system, system shells
+
 The next shell variant is a *system shell*. System shells are always
 located below all application shells in the shell stack. All system shells
 are always active in their stacking order. They are typically used for
@@ -121,6 +133,8 @@ function that could be implemented using a system shell.
 Extension handlers
 ------------------
 
+.. index:: extension handlers
+
 The final thing that lives in the shell stack are *extension
 handlers*. They are very different from the shells as they
 implement a generic message system. There are no keyboard or display
@@ -129,6 +143,8 @@ which act on a given message.
 
 Shell structure
 ===============
+
+..index shells; structure
 
 A shell is defined using a structure with several elements as follows:
 
@@ -150,16 +166,20 @@ the use of the ``.low12`` relocation operator).
 Kind field
 ----------
 
+..index shells; kind
+
 The kind field tells what kind of shell this entry represents. The
 values are defined in ``OS4.h`` and are either
 ``SysShell``, ``AppShell`` and ``TransAppShell``. The
 ``GenericExtension`` also exists, but the structure following it
 differs radically from the application and system shells.
 
-Display routine
+Display handler
 ---------------
 
-This points to the custom display routine that overrides the default
+.. index:: display handler
+
+This points to the custom display handler that overrides the default
 display of the stack X register. This is called to replace the
 built-in provided display of X when appropriate. To get a steadier
 display it is recommended that functions you implement in your
@@ -289,6 +309,8 @@ happen to use the same page address for different shells.
 Activation
 ==========
 
+.. index:: shells; activation, activation; of shells
+
 Once you have created a shell structure, activating the shell is done
 by calling ``activateShell``. This routine takes a packed pointer to
 the shell structure (which is why it needs to be aligned on an even
@@ -309,12 +331,16 @@ application.
 Deactivation
 ============
 
+.. index:: shells; deactivation, deactivation; of shells
+
 You can exit a shell using the ``exitShell`` routine. This will
 deactivate the shell, bringing any previously shadowed shell in focus
 again.
 
 Reclaim at power on
 ===================
+
+.. index:: shells; reclaim, reclaim; shells
 
 Shells go through a process similar to buffers in the HP-41. At power
 on they are all marked for removal and it is expected that any plug-in

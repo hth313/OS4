@@ -2,6 +2,8 @@
 Semi-merged functions
 *********************
 
+.. index:: functions; semi-merged, semi-merged functions
+
 Semi-merged function are prompting XROM functions that take postfix
 arguments. This is much like many built-in functions, i.e. ``RCL``.
 
@@ -15,6 +17,8 @@ possible.
 
 Postfix operands
 ================
+
+.. index:: functions; postfix operands, postfix operands
 
 As we cannot alter the mainframe, there is no way to store a fully
 merged XROm function in a program step. What we can do is storing it
@@ -68,6 +72,8 @@ on the alpha register.
 Default operand
 ---------------
 
+.. index:: functions; postfix operands, postfix operands; default
+
 If the postfix operand is missing, the instruction reverts to a
 default behavior. For a shift instruction, it means shift one step:
 
@@ -109,6 +115,8 @@ bare instruction without any postfix operand.
 
 Dual operand functions
 ======================
+
+.. index:: functions; dual operands, dual operand functions
 
 With OS4 you are not limited to a single postfix operand, a function
 may use two. This is useful things like comparisons or exchange
@@ -173,6 +181,8 @@ hex editing the program makes it possible to have them in a program:
 
 Secondary functions as semi-merged
 ==================================
+
+.. index:: functions; secondary and semi-merged
 
 Secondary functions can also have semi-merged arguments. This works
 for both single and dual operands. It also works to have the function

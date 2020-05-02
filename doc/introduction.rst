@@ -49,6 +49,8 @@ This version, 1A is meant for developers and users of Ladybug 1A. The
 Boost module is currently in development, but is available to early
 adopters.
 
+.. index:: memory; requirements
+
 Resource requirements
 =====================
 

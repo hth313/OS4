@@ -48,6 +48,8 @@ normal plug-in modules.
 Shells
 ======
 
+.. index:: shells
+
 A new concept provided is a *shell* which provides
 a way of installing new keyboard and display behaviors.
 Such behaviors can be activated by the user to turn the
@@ -66,6 +68,8 @@ capabilities you are used to have.
 
 Message system
 ==============
+
+.. index:: message system
 
 A new internal message handler system is now available. In some way it
 can be seen as somewhat related to poll vectors, but it is more
@@ -92,6 +96,8 @@ can be added to as needed.
 Secondary FAT
 =============
 
+.. index:: secondary functions, functions; secondary
+
 A 4K module page is limited to 64 functions. This may have been an
 ample amount in the early days when the HP-41 was designed. However, later
 we got banked modules allowing up to 4 banks to be stacked into a single 4K
@@ -115,6 +121,8 @@ The limitations are mainly what is imposed by semi-merged operands, see below.
 
 Semi-merged operands
 ====================
+
+.. index:: functions; semi-merged
 
 Functions in plug-in modules can display a prompt like any built in
 function, but the original mainframe does not allow such functions
@@ -144,6 +152,8 @@ makes the life easier for the MCODE developer.
 
 Banking
 =======
+
+.. index:: banking
 
 The HP-41 banking mechanism is implemented by the memory systems and
 the CPU is completely unaware of this. This may seem a bit
@@ -222,6 +232,8 @@ using the same catalog key.
 
 Reserving identities
 ====================
+
+.. index:: reserving identities, identities; reserving
 
 The original HP-41 never reserved buffer identities in a central
 place. This has resulted in that different modules may use the same

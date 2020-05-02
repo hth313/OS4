@@ -2,6 +2,8 @@
 Extension handlers
 ******************
 
+.. index:: extension handlers
+
 Extension handlers implement a generic message system and can be seen
 as a more flexible variant of poll vectors. They are descriptors like
 shells and are stored in the shell stack. Their structure is however
@@ -42,6 +44,8 @@ such notification by using the extension handler mechanism.
 
 Extension structure
 ===================
+
+.. index:: extension handlers; structure
 
 The data structure used by extension points is very different from the
 various shells. Only the first identifier word is "shared" with

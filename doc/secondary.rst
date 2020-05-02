@@ -2,6 +2,8 @@
 Secondary functions
 *******************
 
+.. index:: functions, secondary, secondary functions
+
 Secondary functions are additional XROM functions allows for up to
 4096 additional functions that can be used if the provided 64
 primary functions are not enough.
@@ -23,6 +25,8 @@ specific code apart from bank switching if you use that.
 Secondary FAT
 =============
 
+.. index:: functions; secondary FAT, secondary FAT
+
 The secondary FAT is split in two parts. The main structure is a
 linked list of secondary FAT headers that are located in the primary
 bank. This structure is rather small, typically 6-7 words. The actual
@@ -39,6 +43,8 @@ hold up to 256 functions.
 Execution by name
 =================
 
+.. index:: functions, execution by name
+
 To find a secondary function by name, a similar routine to ``ASRCH`` in
 mainframe is needed. As it is not possible to ``alter`` ASRCH, which is in
 mainframe ROM, OS4 provides a similar function that is aware of
@@ -50,6 +56,8 @@ the ordinary ``XEQ`` key when Boost module is inserted.
 
 Assignments
 ===========
+
+.. index:: assignment; of secondary functions, secondary functions; assignment
 
 Assignments of secondary function are stored in the OS4 system buffer.
 It stores the XROM of the module identity together with the secondary
@@ -95,6 +103,8 @@ and held.
 In RPN programs
 ===============
 
+.. index:: secondary functions; in programs
+
 In program mode a normal XROM works as a prefix for running
 secondary functions coupled with the semi-merged ability provided by
 OS4.
@@ -120,6 +130,8 @@ will be displayed as ``XXROM`` if the module is removed.
 Defining
 ========
 
+.. index:: secondary functions; defining
+
 A secondary function is defined as any normal XROM function, with a
 name and an entry point. The name can have upper bits set to tell
 that it is a prompting function. The first words at the entry point
@@ -133,6 +145,8 @@ bank.
 
 Secondary FAT
 =============
+
+.. index:: functions; secondary FAT, secondary FAT
 
 The secondary FAT structure is different to the ordinary FAT and
 consists of several parts:
@@ -183,6 +197,8 @@ secondary functions in each FAT.
 
 Bank switching
 ==============
+
+.. index:: bank switching
 
 Enabling the appropriate bank for secondary functions is done
 automatically once you have set up the secondary FAT

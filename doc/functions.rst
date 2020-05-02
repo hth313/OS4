@@ -27,6 +27,8 @@ or not.
 Prompting functions
 -------------------
 
+.. index:: functions; prompting, prompting functions
+
 A prompting function has some upper bits set in its name header. This
 indicates the class of prompting function it is. A prompting function
 does not go through any NULL check, instead its name is immediately
@@ -42,6 +44,10 @@ token is two bytes and the XROM uses up those two bytes.
 Execute direct functions
 ------------------------
 
+.. index:: functions; XKD, functions; execute direct
+.. index:: XKD functions, execute direct functions
+
+
 Execute direct functions (XKD) are use for functions that act
 immediately on key down, i.e. ``SHIFT``, ``SST`` and ``R/S``. A
 function is marked as being XKD by starting with two ``NOP``
@@ -55,6 +61,9 @@ is done.
 
 Finding a function
 ==================
+
+.. index:: functions; finding, functions; by name, functions; by identity
+.. index:: finding functions, lookup functions
 
 There are two ways a function can be found, by name and by its
 execution token.
@@ -107,6 +116,8 @@ probably best avoided.
 Search order
 ------------
 
+.. index:: functions; search order, search order
+
 Searching a function by name is done in catalog order. User programs
 in catalog are searched first, followed by plug-in modules (XROMs) in
 address order [#page3]_ and finally the built-in functions in
@@ -129,6 +140,8 @@ name.
 Semi-merged functions
 =====================
 
+.. index:: functions; semi-merged, semi-merged functions
+
 Many operations in the HP-41 consists of a function and a postfix
 argument, i.e. ``FIX 4`` or ``RCL IND Z``. When pressed, the operand will
 output one or more underscores to be filled in with the argument. The
@@ -149,11 +162,12 @@ operand is automatically taken from the alpha literal, allowing you to
 see the instruction in its full glory. However, if you step ahead you
 will see the alpha literal as a separate step.
 
-@@ Take stuff from the ladybug manual
-
 
 Secondary functions
 ===================
+
+.. index:: functions; secondary, secondary functions
+.. index:: XXROM functions, functions; XXROM
 
 The function address table, or FAT for short is the inventory of
 functions that a plug-in module provides. It is located first in the
@@ -214,6 +228,8 @@ normal function.
 What is up
 ==========
 
+.. index:: functions; what is up
+
 In the book "HP-41 MCODE Programming for Beginners" appendix B
 (page 132) lists what is up on function entry. Secondary functions
 diverge a bit from what is listed there and the list is probably a bit
@@ -226,6 +242,8 @@ too detailed anyway. The following list is what you can rely on:
 
 Internal representation
 =======================
+
+.. index:: functions; internal representation
 
 Finally we will take a look at the ways that are used to represent the
 function internally. This is probably not anything you normally need

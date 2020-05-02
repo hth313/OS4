@@ -12,6 +12,8 @@ ROM is somewhat easier.
 ROM
 ===
 
+.. index:: memory; ROM
+
 ROM normally stores programs. With the ``CXISA`` instruction that
 was introduced with the HP-41 Nut CPU (compared to its predecessors),
 it is possible to read ROM locations for data purposes. This can be
@@ -34,6 +36,8 @@ peripherals in a similar way.
 
 Stack
 =====
+
+.. index:: stack; CPU, CPU stack
 
 The four level internal stack also interacts with the ``C[6:3]``
 field, making it possible to move between top of stack and
@@ -75,6 +79,8 @@ execution, though the code will not work the way it was supposed to.
 
 RAM
 ===
+
+.. index:: memory; RAM
 
 RAM registers are as wide as the internal registers, 56 bits or 14
 nibbles. This is quite generous, but addressing RAM memory is kind of

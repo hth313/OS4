@@ -2,6 +2,8 @@
 System buffer
 **************
 
+.. index:: buffers; system, system buffer
+
 A system buffer is used to keep track of the OS4 state. As all buffers
 it resides in the memory area between key assignments and user
 programs, the so called free area.
@@ -115,6 +117,8 @@ that are unrelated to normal buffers, making clashes far less likely.
 
 Secondary assignments
 =====================
+
+.. index:: assignments; secondary, secondary assignments
 
 Functions defined in secondary function address tables can be bound
 to keys and are stored in the secondary assignment area. Two

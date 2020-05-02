@@ -2,6 +2,8 @@
 System shells
 *************
 
+.. index:: shells, system, system shells
+
 System shells are intended for tuning the default behavior of the
 standard keyboard. Advanced modules from the past like the Zenrom and
 CCD used various tricks with the partial key sequence mechanism to
@@ -24,6 +26,8 @@ the all other applications.
 
 Display handler
 ===============
+
+.. index:: display handler; system shell
 
 A system shell may also have a display routine, but only the top-most
 one is ever consulted and that is only if there is no active

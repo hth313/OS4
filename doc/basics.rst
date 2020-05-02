@@ -9,6 +9,8 @@ are expected to have some basic understanding of MCODE programming.
 Addressing
 ==========
 
+.. index:: memory; ROM
+
 ROM addressing is done using 16-bit addresses. This gives a total of
 64K of addressable memory space. The HP-41 mainframe divides this up
 in 4K blocks and treats each such block as a page. There is really
@@ -28,6 +30,8 @@ which expects an address in the ``6:3`` field of the C register.
 
 Packed pointer
 --------------
+
+.. index:: packed pointers, pointers; packed
 
 As we often work inside a single (often relocatable) 4K page it is
 convenient to have a compact notation to describe a location inside
@@ -64,6 +68,8 @@ operator makes it possible to obtain a packed pointer:
 Return status
 =============
 
+.. index:: return; different status, return address
+
 A routine may need to deal with possible error conditions.  For
 flexibility it may be better to return some error condition rather
 than displaying an error message. The caller may have another way of
@@ -99,6 +105,8 @@ value there, as we often use the incremented return when successful.
 Buffer advice
 =============
 
+.. index:: buffers; advice
+
 I/O buffers, or just buffers for short, were defined from the beginning
 in the HP-41 mainframe. However, they were first used by the Time
 module, about two years after the introduction.
@@ -127,6 +135,8 @@ the first non-zero register found is considered occupied.
 Non-null registers
 ------------------
 
+.. index:: buffers; null registers, null registers; in buffers
+
 The Time module buffer code take precautions to never store a zero
 value inside a buffer too. This is due to some 67/97 card reader bug
 which I have not been able to find out what it means. I suspect that the
@@ -138,6 +148,8 @@ the buffer to avoid potential memory corruption.
 
 System buffer
 =============
+
+.. index:: buffers; system, system buffer
 
 The OS4 module needs to store its own information somewhere.
 The mainframe code typically uses the 0--15 RAM address
@@ -154,6 +166,8 @@ registers that can be occupied when the buffer needs to grow.
 
 Keyboard
 ========
+
+.. index:: keyboard
 
 HP calculators before the arrival of the HP-41 used fixed keyboard
 layouts and an increasing number of shift keys culminating with the HP-67 that
@@ -179,6 +193,8 @@ in the current RPN program.
 
 Key-codes
 =========
+
+.. index:: key codes
 
 There are several ways key codes are represented in the HP-41.
 The key codes returned from the keyboard as read by a machine
@@ -213,6 +229,8 @@ keyboards are defined. This is further described in XXXX.
 
 Return to mainframe
 ===================
+
+.. index:: functions; returning from, return from functions
 
 The normal behavior for an MCODE function is to exit using a ``RTN``
 instruction. As the invocation mechanism push the address of ``NFRPU``

@@ -2,6 +2,8 @@
 Applications
 ************
 
+.. index:: shells; applications
+
 An application is a replacement for behavior, which typically includes
 modifications to the keyboard and the display behavior. You can see it
 as an alternative mode or working environment.
@@ -33,6 +35,8 @@ while preserving the overall HP-41 experience.
 Exiting
 =======
 
+.. index:: shells; exiting
+
 It is recommended that exiting an application shell is done with an
 ``EXITAPP`` function implemented as follows:
 
@@ -47,6 +51,8 @@ and it not previously unused for anything.
 
 Default display
 ===============
+
+.. index:: shells; default display, display; default
 
 Your application may have the notion of a "default display", which
 replaces the normal display of the X register.
@@ -67,6 +73,8 @@ flicker.
 
 Reducing flicker
 ----------------
+
+.. index:: reducing flicker, display; reducing flicker
 
 It is possible to reduce the flicker by having your function exit via
 OS4. This will cause the default application display to be shown and
@@ -116,6 +124,8 @@ user experience as the amount of flicker is reduced.
 More about the message flag
 ---------------------------
 
+.. index:: message flag
+
 The message flag is actually given a somewhat new meaning when we use
 it as a way to reduce flicker. We sometimes have it enabled when
 showing the default display for the application. This is in most
@@ -145,6 +155,8 @@ use it as follows:
 
 Stack lift
 ==========
+
+.. index:: stack lift
 
 You may want to mimic the behavior of the push flag, or stack lift
 disable (``ENTER`` and ``CLX`` functions) for your own environment.

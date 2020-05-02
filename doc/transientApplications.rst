@@ -2,6 +2,8 @@
 Transient applications
 **********************
 
+.. index:: shells; transient applications, transient applications
+
 A transient application is a variant of an application that is meant
 to be somewhat short lived. If you think about the original catalogs
 (1--3) and the clock display, then you get an idea of what a transient
@@ -51,6 +53,8 @@ much into details.
 Catalog
 -------
 
+.. index:: catalogs
+
 The catalog key can be replaced using a system shell. The catalog
 itself can be implemented as a transient application when the catalog
 is stopped and waiting for key input. This allows the calculator to go
@@ -63,6 +67,8 @@ stack handle it, very much like the built in original catalogs
 Periodic display
 ----------------
 
+.. index:: display; periodic update
+
 The clock is a good example of this. We can show an updating time
 display which is terminated whenever a key is pressed. Another way
 would be to periodically show a changing value obtained from some
@@ -70,6 +76,8 @@ external hardware, like a GPS or a multi-meter.
 
 Custom input
 ------------
+
+.. index:: custom input, input; custom
 
 Waiting for key input in response to a menu and perhaps dispatching on
 it in an RPN program could be another way to use for a transient
@@ -82,6 +90,8 @@ interval timer.
 
 Scratch area
 ============
+
+.. index:: scratch area
 
 Application shells may need to keep some kind of state. The normal way
 of doing this is to allocate a buffer. The typical case is an

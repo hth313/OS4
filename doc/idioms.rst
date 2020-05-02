@@ -16,6 +16,8 @@ it in different, perhaps even better ways, by all means do so.
 Error returns
 =============
 
+.. index:: error returns
+
 Often we want to tell whether a routine succeeded or if there was an
 error. When we are concerned about giving a specific error, we can
 exit to a suitable error exit in mainframe. Such exits may be
@@ -109,6 +111,8 @@ that you cannot use the ``C[6:3]`` field to carry any return value.
 Call backs
 ==========
 
+.. index:: call backs
+
 A similar technique can be used for implementing call backs. We can
 make a call and keep a call back pointer at ``(P+1)``. In fact, we
 can easily have multiple call backs by just adding pointers.
@@ -160,6 +164,8 @@ The final return from ``routine`` is made by making a goto to the
 Code pointers
 ==============
 
+.. index:: packed pointers, pointers; packed
+
 As a ROM word is only 10 bits long, we are lacking a few bits to make
 up a full 16-bit code pointer. Instead of using two words, we can get
 away with only using 10 bits by observing two things.
@@ -185,7 +191,6 @@ it would look as follows:
 
                  ldi  .low12 label
                  gosub routine
-
 
                  ...
                  .section code
@@ -215,6 +220,8 @@ example, but there may be other ways depending on the circumstances.
 
 Call backs with code pointers
 =============================
+
+.. index:: call backs
 
 The call backs presented above used ordinary ``GOTO`` instructions in
 a similar fashion as what was done with error returns. As the ``GOTO``
@@ -275,6 +282,8 @@ have both variant around.
 Optional call backs
 --------------------
 
+.. index:: call backs
+
 If we want to have optional code pointers, that is, the caller may not
 need to provide a call back at all, it can be done in two ways. We can
 either read the word and test it for 0. Such value is easy to test
@@ -301,6 +310,8 @@ and is perhaps somewhat more natural.
 
 Combined call backs
 -------------------
+
+.. index:: call backs
 
 While the call back routine is not large, it is not trivial either. We
 want to avoid code duplication so it may be a good idea to arrange

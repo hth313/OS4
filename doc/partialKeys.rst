@@ -2,6 +2,8 @@
 Partial key sequences
 *********************
 
+.. index:: partial key sequences
+
 Some functions prompt for arguments. Internally these are called
 partial key sequences. The OS4 module provides various support for
 prompting functions built on top of this mechanism.
@@ -110,6 +112,8 @@ prompting XROM functions:
 
 Custom prompting
 ================
+
+.. index:: custom prompting
 
 Custom prompting can be used if you want full control of the prompting
 behavior. This only works for non-programmable functions. Typical use

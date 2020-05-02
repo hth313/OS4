@@ -65,8 +65,8 @@ the standard display. As this take a very short moment, the standard X
 value is very briefly shown. The effect is basically a brief display
 flicker.
 
-Function return
----------------
+Reducing flicker
+----------------
 
 It is possible to reduce the flicker by having your function exit via
 OS4. This will cause the default application display to be shown and
@@ -112,6 +112,36 @@ written with applications in mind, they just exit the usual way, which
 still works, but with some minor display flicker. Using the
 ``shellDisplay`` routine whenever possible provides a more pleasant
 user experience as the amount of flicker is reduced.
+
+More about the message flag
+---------------------------
+
+The message flag is actually given a somewhat new meaning when we use
+it as a way to reduce flicker. We sometimes have it enabled when
+showing the default display for the application. This is in most
+situations not a problem, but it matters with the backarrow
+key. Pressing the backarrow key have different meanings depending on
+the state of the calculator. If a message is shown backarrow removes
+the message and reverts back to the default display. If a message is
+not shown, it acts as clear the X register and disable stack lift.
+
+We can get this behavior in the application, but it requires that we
+actually know if a message is being shown or the message flag is used
+for blocking the built in display of X. Looking at the message flag
+alone is not enough to tell this. OS4 provides a routine for this
+purpose called ``displayingMessage`` that answers the question.
+
+In your own ``CLX`` style routine (bound to the backarrow key) you can
+use it as follows:
+
+.. code-block:: ca65
+
+                 .name   "CLX'"
+   CLX':         gosub   displayingMessage
+                 goto    showX         ; (P+1) clear shown message
+                 s11=0                 ; disable stack lift
+                 ....                  ; clear X
+
 
 Stack lift
 ==========

@@ -21,6 +21,8 @@ Welcome to OS4's documentation!
    shells
    applications
    transientApplications
+   systemShells
+   extensionHandlers
    secondary
    semimerged
    partialKeys

@@ -23,6 +23,7 @@ Welcome to OS4's documentation!
    transientApplications
    systemShells
    extensionHandlers
+   keyboards
    secondary
    semimerged
    partialKeys

@@ -225,7 +225,8 @@ if few keys are defined, while still being reasonable fast.
 
 As also secondary functions can be bound to keyboard definitions,
 there are some further schemes and details on how more advanced
-keyboards are defined. This is further described in XXXX.
+keyboards are defined. This is further described in
+:ref:`defining-keyboards`.
 
 Return to mainframe
 ===================

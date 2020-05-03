@@ -496,7 +496,7 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
               c=c+1   m
               a=c     x
               cxisa
-              ?a#0    x             ; extended FAT?
+              ?a#0    xs            ; extended FAT?
               gonc    invokeSecondary10 ; yes
               rcr     2             ; no, a 2-byte instruction
               acex    x
@@ -522,7 +522,8 @@ secondary:    a=a-c   x             ; A.X= offset to secondary
 ;;; invokeSecondary docend
 
 invokeSecondary10:
-              a=c     x             ; A.X= secondary index
+              asl     x             ; A[2]= upper two bits from first word
+              a=a+c   x             ; A.X= secondary index
 invokeSecondary:
               gosub   secondaryAddress_B1
               ?a#0    m

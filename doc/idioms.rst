@@ -83,7 +83,7 @@ by incrementing the return address. This is done in the following way:
                  c=c+1   m             ; skip to P+2
                  gotoc                 ; return
 
-The ``gotoc`` instruction is very useful here as it simply loads the
+The ``GOTOC`` instruction is very useful here as it simply loads the
 program counter with ``C[6:3]``, meaning we take the address field of
 C and jump to it, exactly what we want here.
 

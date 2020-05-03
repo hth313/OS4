@@ -63,7 +63,7 @@ top key rows. With OS4 such dynamic assignments are optional.
 
 Basically everything works as you are used to, except that the HP-41
 no longer is limited to its standard built-in keyboard layout. You get complete
-flexibility to alter the basic behaviour while retaining all the
+flexibility to alter the basic behavior while retaining all the
 capabilities you are used to have.
 
 Message system
@@ -172,8 +172,8 @@ systems allow for up to  four banks, this includes the MLDL-2000,
 Clonix and HP-41CL.
 
 The 1LG9 only act on bank switch instruction executed from /within/
-its own memory. The MLDL-2000 and HP-41CL mimics this behaviour by
-pairing, so that page 8 and 9 are bank swithed together, then pages
+its own memory. The MLDL-2000 and HP-41CL mimics this behavior by
+pairing, so that page 8 and 9 are bank switched together, then pages
 following are paired in the same way. The original Clonix module on
 the other hand switches banks for all pages it serves and how that
 manifests itself depends on the size of the Clonix module and more
@@ -192,7 +192,7 @@ module and try to leave secondary banks active while not in control,
 while you *may* get such setup to work in a given setup, it may
 fail when a user loads your module image to another memory system or
 calculator configuration. Thus, it is probably safest to avoid such
-practises.
+practices.
 
 Catalogs
 ========

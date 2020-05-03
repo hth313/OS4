@@ -21,7 +21,7 @@ Postfix operands
 .. index:: functions; postfix operands, postfix operands
 
 As we cannot alter the mainframe, there is no way to store a fully
-merged XROm function in a program step. What we can do is storing it
+merged XROM function in a program step. What we can do is storing it
 in two parts, first the XROM function and then its argument. As the
 argument can be any byte, it is not possible to store it raw by
 itself, as it may grab following bytes making the program impossible

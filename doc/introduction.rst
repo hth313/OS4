@@ -90,9 +90,9 @@ are some suggested reading:
 * The *Owner's Manuals* supplied with the HP-41, Hewlett Packard Company
 * *MCODE Programming for Beginners*, Ken Emery, 1985
 * *Extend your HP-41*, W Mier-Jedrzejowicz, 1985
+* NutStudio Tools Documentation
 * A programmer's handbook, Poul Kaarup
 * The VASM listings (annotated mainframe source code)
-* Boost manual
 
 Document conventions
 --------------------

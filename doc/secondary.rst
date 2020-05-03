@@ -10,7 +10,7 @@ primary functions are not enough.
 
 The ``XEQ'`` replacement function in the Boost module can be used to
 access secondary functions by name, just as any other function. The
-replacemnt ``ASN'`` function also allows them to be assigned to keys
+replacement ``ASN'`` function also allows them to be assigned to keys
 in essentially the same way as ordinary XROM functions.
 
 Storing secondary functions in programs is also possible using the

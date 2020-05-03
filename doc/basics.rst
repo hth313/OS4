@@ -141,7 +141,7 @@ The Time module buffer code take precautions to never store a zero
 value inside a buffer too. This is due to some 67/97 card reader bug
 which I have not been able to find out what it means. I suspect that the
 card reader (at least early versions) may scan for free registers
-looking at indvidual registers also inside buffers.
+looking at individual registers also inside buffers.
 
 As a result, you should probably avoid storing empty registers inside
 the buffer to avoid potential memory corruption.

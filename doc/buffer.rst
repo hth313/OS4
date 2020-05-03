@@ -11,14 +11,14 @@ programs, the so called free area.
 The buffer number used is 15 which is a buffer number that is probably
 not used by any other module as of this writing. 15 is normally used
 for key assignments, so how can this work you may wonder. Well, a
-buffer as defined ny HP is supposed to have the first two nibbles
-(4-bit values) set the same way. This allowes for 14 buffers, numbered
+buffer as defined by HP is supposed to have the first two nibbles
+(4-bit values) set the same way. This allows for 14 buffers, numbered
 1--14. The time module uses buffer 10, so it set the first two nibbles
 to ``AA`` (``A`` hex is 10 decimal) for its buffer. However, ``FF`` would
 not work as it could be mistaken for a key assignment register. The
 answer is that we usually put ``1F`` there instead. The first nibble can
 actually be any non-zero value except 15 and work properly with all
-existing software. Taking advantage of this allowes for having buffer
+existing software. Taking advantage of this allows for having buffer
 0 and 15, for a total of 16 buffers. Buffer 0 is already used by the
 Ladybug module which from version 1A takes advantage of the OS4 module,
 which leaves 15 for the OS4 system buffer.
@@ -36,7 +36,7 @@ actions on the buffer, finding the area inside the buffer is just a
 small detail.
 
 The sizes are in the buffer header, but as they is a little shortage
-of room, two of the sizes are single nibble and the reamining two uses
+of room, two of the sizes are single nibble while the remaining uses
 two nibbles. These have been chosen so that the two smaller ones are
 less likely to need a lot of registers.
 
@@ -58,7 +58,7 @@ postfix argument, the default argument is stored here. For dual
 postfix functions, this field is used to hold the first entered
 argument.
 
-The remaning for fields ``BF``, ``SC``, ``KA`` and ``SH`` are the
+The remaining for fields ``BF``, ``SC``, ``KA`` and ``SH`` are the
 sizes of the different areas that follows the header. The sizes are
 naturally used to tell the size of a field, so we know where it ends,
 but it is also used when calculating the start address of a given
@@ -140,7 +140,7 @@ existing assignments and one to merge key assignments. With respect to
 secondary assignments, they both behave as merging as they are put on
 "top of" existing secondary assignments. This is because they are
 unaware of the concept of secondary assignments. In this case the user
-may need to run a routine to clear secondary assignement separately.
+may need to run a routine to clear secondary assignment separately.
 
 This also means that if you load key assignments over a secondary
 assignment, the primary (ordinary) assignment takes precedence, but if

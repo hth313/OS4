@@ -9,7 +9,7 @@ partial key sequences. The OS4 module provides various support for
 prompting functions built on top of this mechanism.
 
 One of several nice features of the prompting system on the HP-41 is
-that the calculator goes to sleep between key presses to redude power
+that the calculator goes to sleep between key presses to reduce power
 consumption.
 
 

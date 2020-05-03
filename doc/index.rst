@@ -27,5 +27,4 @@ Welcome to OS4's documentation!
    semimerged
    partialKeys
 
-   gettingStarted
    reference

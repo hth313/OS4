@@ -2,6 +2,22 @@
 Entry points reference
 **********************
 
+API version check
+=================
+
+**checkApiVersionOS4**
+----------------------
+
+.. index:: API version check, version check
+
+**Entry point:** ``4F80``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; checkApiVersionOS4 docstart
+   :end-before:  ;;; checkApiVersionOS4 docend
+
+
 Fundamentals
 ============
 
@@ -221,20 +237,24 @@ out and prevent further actions when the timer is missing.
    :start-after: ;;; ensureTimer docstart
    :end-before:  ;;; ensureTimer docend
 
-API version check
-=================
+Data entry
+==========
 
-**checkApiVersionOS4**
-----------------------
-
-.. index:: API version check, version check
-
-**Entry point:** ``4F80``
+**Entry point:** ``4F2E``
 
 .. literalinclude:: ../src/core.s
    :language: none
-   :start-after: ;;; checkApiVersionOS4 docstart
-   :end-before:  ;;; checkApiVersionOS4 docend
+   :start-after: ;;; clearSystemDataEntry docstart
+   :end-before:  ;;; clearSystemDataEntry docend
+
+.. index:: data entry
+
+**Entry point:** ``4F22``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; fastDataEntry docstart
+   :end-before:  ;;; fastDataEntry docend
 
 
 Assignments

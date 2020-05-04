@@ -11,7 +11,7 @@ Classes of functions
 There are three main classes of functions, ordinary functions,
 prompting functions and execute direct functions.
 
-In addition there is digit and alpha entry keys (including backspace),
+In addition there is data entry keys (including backspace),
 but they not really normal functions, instead they are special handled
 input.
 

@@ -187,20 +187,23 @@ deepWake:     disoff                ; get the display to a known
 10$:          gosub   LDSST0
               golong  WKUP60
 
+;;; fastDataEntry docstart
 ;;; **********************************************************************
 ;;;
-;;; fastDigitEntry  - fast additional digit entry handling
+;;; fastDataEntry  - fast additional data entry handling
 ;;;
-;;; Routine to handle additional digit entry when a digit entry routine finds
+;;; Routine to handle additional data entry when a data entry routine finds
 ;;; that there is another key down. The idea here is to bypass the I/O poll
 ;;; vector to speed things up.
 ;;;
 ;;; **********************************************************************
+;;; fastDataEntry docend
 
               .extern topShell, nextShell, keyHandler, clearClock
+              .public fastDataEntry
               .section code
 bufferScan0:  gosub   LDSST0
-fastDigitEntry:
+fastDataEntry:
 bufferScan:   c=c+c   xs
               c=c+c   xs
               c=c+c   xs
@@ -841,7 +844,7 @@ BankSwitchers: .macro
               .extern findSecondaryAssignments
               .extern topExtension, shellDisplay, getXAdr, shellName
               .extern keyKeyboard, argument, NXBYTP, NXBYT
-              .extern clearSystemDigitEntry, reclaimSystemBuffer
+              .extern clearSystemDataEntry, reclaimSystemBuffer
               .extern displayDone, sendMessage, keyDispatch
               .extern shrinkBuffer, allocScratch, clearScratch, scratchArea
               .extern exitTransientApp, hasActiveTransientApp
@@ -874,13 +877,13 @@ BankSwitchers: .macro
               golong  keyKeyboard   ; 0x4f1c
               golong  argument      ; 0x4f1e
               golong  RTNP2         ; 0x4f20 xargument  / acceptAllValues
-              golong  fastDigitEntry ; 0x4f22
+              golong  fastDataEntry ; 0x4f22
               golong  NXBYTP        ; 0x4f24
               golong  NXBYT         ; 0x4f26
               golong  noRoom        ; 0x4f28
               golong  errorMessage  ; 0x4f2a
               golong  errorExit     ; 0x4f2c
-              golong  clearSystemDigitEntry ; 0x4f2e
+              golong  clearSystemDataEntry ; 0x4f2e
               golong  reclaimSystemBuffer ; 0x4f30
               golong  displayDone   ; 0x4f32
               golong  sendMessage   ; 0x4f34

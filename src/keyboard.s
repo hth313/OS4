@@ -11,7 +11,7 @@
 ;;;
 ;;; Handle a key press according to the given keyboard. This will resolve
 ;;; auto assignment, assignments, decode and execute instructions according
-;;; to a keyboard table. Additionally, it allows for custom digit entry
+;;; to a keyboard table. Additionally, it allows for custom data entry
 ;;; and termination.
 ;;;
 ;;; Invoke this routine using:
@@ -139,7 +139,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 
               bcex                  ; yes, save adr in B
               c=n
-              gosub   appClearDigitEntry ; clear digit entry flag
+              gosub   appClearDataEntry ; clear data entry flag
               bcex
               golong  PARS60        ; do auto assigned user language label
 
@@ -154,7 +154,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               gosub   jumpC4        ; call the transient termination vector
               golong  disableThisShell
 35$:          c=n                   ; use system replacement
-              golong  appClearDigitEntry ; clear app digit first
+              golong  appClearDataEntry ; clear app data first
 
 40$:          c=regn  14            ; key not reassigned
               cstex                 ; bring up SS0
@@ -215,15 +215,15 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 48$:          spopnd                ; we will handle the key, no going back now
               c=c-1   xs            ; XROM override?
               goc     50$           ; yes
-              c=c-1   xs            ; digit entry?
-              golc    digitEntry    ; yes
-              c=c-1   xs            ; built-in, ends digit entry?
+              c=c-1   xs            ; data entry?
+              golc    dataEntry     ; yes
+              c=c-1   xs            ; built-in, ends data entry?
               gonc    45$           ; no
-;;; Builtin function. We always end digit entry here. There are some builtins
-;;; that do not clear digit entry, but that should be handled by having 000 and
+;;; Builtin function. We always end data entry here. There are some builtins
+;;; that do not clear data entry, but that should be handled by having 000 and
 ;;; falling back to default keyboard, not by coming here.
               cnex                  ; save function code
-              gosub   appClearDigitEntry
+              gosub   appClearDataEntry
               c=n                   ; restore function code
               c=c-1   x             ; adjust function code, it is offset by
                                     ; one to allow for 000 meaning pass through
@@ -255,7 +255,7 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               abex    x
               c=c+a   x             ; C[3:0]= complete 2 byte XROM
               cnex                  ; N[3:0]= complete 2 byte XROM
-              gosub   appClearDigitEntry ; XROM ends digit entry
+              gosub   appClearDataEntry ; XROM ends data entry
               c=n
 58$:          golong  RAK70
 
@@ -432,8 +432,8 @@ gotoFunction: c=0
               acex    m
               gotoc
 
-;;; Handle digit entry and backspace.
-digitEntry:   a=c     x             ; A[1:0]= digit
+;;; Handle data entry and backspace.
+dataEntry:    a=c     x             ; A[1:0]= data value
               c=c+1   x             ; check for backspace
               gonc    112$          ; not backspace
               c=regn  14            ; backspace
@@ -453,15 +453,15 @@ digitEntry:   a=c     x             ; A[1:0]= digit
               gonc    112$          ; no
               rcr     2
               cstex
-              ?s2=1                 ; digit entry?
+              ?s2=1                 ; data entry?
               goc     112$          ; yes
               cstex                 ; bring up SS0
               ldi     11            ; program mode delete
               golong  PARS56
 
-112$:         acex    x             ; C[1:0]= digit
+112$:         acex    x             ; C[1:0]= data value
               pt=     0
-              g=c                   ; G= digit
+              g=c                   ; G= data value
               gosub   systemBuffer
               goto    113$          ; (P+1) should not happen
               c=data                ; (P+2) set display override
@@ -471,7 +471,7 @@ digitEntry:   a=c     x             ; A[1:0]= digit
               data=c
 
 113$:         gosub LDSST0          ; set message flag as we are doing some kind
-              s5=1                  ;  of digit entry, we assume a custom display
+              s5=1                  ;  of data entry, we assume a custom display
               c=st
               regn=c  14
               c=n                   ; C[6:3]= keyboard descriptor table
@@ -479,7 +479,7 @@ digitEntry:   a=c     x             ; A[1:0]= digit
               c=g
               c=0     xs            ; C[2:0]= key value
                                     ;   0FF = backspace
-              golong  jumpC1        ; go and handle digit
+              golong  jumpC1        ; go and handle data
 
 ;;; Key needs a secondary. The entry is basically an offset to it which
 ;;; means it is located somewhere after the normal key table.
@@ -530,23 +530,25 @@ invokeSecondary:
               golc    foundXXROM
               golong  noXXROM
 
+;;; clearSystemDataEntry docstart
 ;;; **********************************************************************
 ;;;
-;;; appClearDigitEntry - reset the system digit entry flag
+;;; clearSystemDataEntry - reset the system data entry flag
 ;;;
 ;;; Uses: C, enables chip 0
 ;;;
 ;;; **********************************************************************
+;;; clearSystemDataEntry docend
 
-              .public clearSystemDigitEntry
+              .public clearSystemDataEntry
               .section code, reorder
-appClearDigitEntry:
+appClearDataEntry:
               c=c+1   m
               c=c+1   m
               cxisa
               ?c#0    x
-              rtnnc                 ; does not define any digit entry
-              gosub   jumpPacked    ; tell app to clear digit entry
+              rtnnc                 ; does not define any data entry
+              gosub   jumpPacked    ; tell app to clear data entry
                                     ; must preserve: B, N and M!!!
               gosub   systemBuffer
               nop                   ; (P+1) filler, we know it exists
@@ -555,8 +557,9 @@ appClearDigitEntry:
               st=0    Flag_Pause
               cstex
               data=c
-;;; * fall into clearSystemDigitEntry
-clearSystemDigitEntry:
+;;; * fall into clearSystemDataEntry
+
+clearSystemDataEntry:
               c=0
               dadd=c
               c=regn  14
@@ -579,7 +582,7 @@ clearSystemDigitEntry:
 ;;; IN: Key down, C[2:0] holds table length minus 1
 ;;;     Last entry in table must be 000 to mark end of table.
 ;;;
-;;; OUT: C.X= 0 (to make it easy to increment for digit keys)
+;;; OUT: C.X= 0 (to make it easy to increment for data entry keys)
 ;;;
 ;;; USED: A, C
 ;;;

@@ -57,13 +57,13 @@ shellName:    .equlab 0x4f1a
 keyKeyboard:  .equlab 0x4f1c
 argument:     .equlab argumentEntry
 xargument:    .equlab xargumentEntry
-fastDigitEntry: .equlab 0x4f22
+fastDataEntry: .equlab 0x4f22
 NXBYTP:       .equlab 0x4f24
 NXBYT:        .equlab 0x4f26
 noRoom:       .equlab 0x4f28
 errorMessage: .equlab 0x4f2a
 errorExit:    .equlab 0x4f2c
-clearSystemDigitEntry: .equlab 0x4f2e
+clearSystemDataEntry: .equlab 0x4f2e
 reclaimSystemBuffer .equlab 0x4f30
 displayDone:  .equlab 0x4f32
 sendMessage   .equlab 0x4f34
@@ -255,15 +255,15 @@ LFE(entry):   .fatrpn `\prefix\entry`
 
 ;;; Builtin function in a key table.
 ;;;
-;;; BuiltinKey - builtin function that ends digit entry.
+;;; BuiltinKey - builtin function that ends data entry.
 ;;; This is the normal case and it is offsetted by 1 to allow for using CAT
 ;;; which is 000, which means Text-15 is not possible.
 ;;; 000 in the table means pass through to next system shell key table.
 ;;;
-;;; BuiltinKeyKeepDigitEntry - builtin function (not ending digit entry)
+;;; BuiltinKeyKeepDataEntry - builtin function (not ending data entry)
 ;;; Mainly used for SHIFT and USER.
-#define BuiltinKey(n)                 ((n) + 0x201)
-#define BuiltinKeyKeepDigitEntry(n)   ((n) + 0x300)
+#define BuiltinKey(n)                ((n) + 0x201)
+#define BuiltinKeyKeepDataEntry(n)   ((n) + 0x300)
 
 ;;; **********************************************************************
 ;;;

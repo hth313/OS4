@@ -38,8 +38,8 @@ As with the built-in keyboards, we use the upper two bits in the
 
 0. XROM function (1--63), XXROM if 64--255
 1. Digit entry
-2. Built-in function, ending digit entry
-3. Built-in function, not ending digit entry
+2. Built-in function, ending data entry
+3. Built-in function, not ending data entry
 
 As the value 0 means the key is not defined, the XROM function with
 identity 0 is not possible to bind to a key. This is normally the XROM

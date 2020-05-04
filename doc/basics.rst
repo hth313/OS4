@@ -211,7 +211,7 @@ possible to tell a deleted assignment apart from an active assignment.
 
 Internal key tables are just an array of function codes where we take
 advantage of the extra two bits in a ROM word to decode a special
-meanings, like a digit entry key or a function that ends digit entry or
+meanings, like a data entry key or a function that ends digit entry or
 not. As we want to allow storing also XROM functions on keyboard, the
 actual encoding used by OS4 differs somewhat from the ones used in the
 operating system.

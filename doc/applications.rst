@@ -93,7 +93,7 @@ instruction. There are exceptions to this:
    mainframe is no longer on the stack.
 2. You want to return using an alternative way, typically ``NFRC``
    (when you do not want to set the push flag) or ``NRFKB`` (when the
-   function is XKD or during digit entry).
+   function is XKD or during data entry).
 
 When using an application the default X display is shown on return to
 mainframe. If your application defines an alternative routine to show
@@ -189,3 +189,22 @@ In any case, it can be good to have tests of stack lift behavior for
 your application. This is after all a much forgotten detail. The
 Ladybug module contains test code that inspects the behavior of the
 push flag for its functions.
+
+Data entry
+==========
+
+.. index:: flag; data entry, data entry flag
+
+If you application handles numeric data entry in a non-standard way,
+you need a flag for telling if such data entry is active. This is flag
+45 in the flag register. You need to share this flag with the system
+as the Time module may reset this flag due to an alarm.
+
+It is not entirely unlikely that your own environment has its own set
+of flag and accessing system flag 45 may be awkward. In such case it
+can be a good idea to copy this particular flag to the CPU flag
+register together with your own mode flags. The Ladybug does it this
+way, copying the system data entry to a local flag when entering its
+data entry code. The internal flag is then written to the system flag
+before giving control back.
+

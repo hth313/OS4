@@ -264,6 +264,55 @@ This is an application shell and we only provide an alternative
 keyboard in both standard and user mode. There is no display override
 as we use the standard display of X.
 
+Key handlers
+============
+
+.. index:: keyboards; structure
+
+Shell descriptors point to keyboard handlers which is another
+structure that is defined as follows:
+
+.. code-block:: ca65
+
+                 .align  4
+   keyHandler:   gosub   keyKeyboard   ; does not return
+                 .con    (1 << KeyFlagSparseTable) ; flags
+                 .con    .low12 doDataEntry
+                 .con    .low12 clearDataEntry ; end data entry
+                 .con    .low12 keyTable
+                 .con    .low12 transientTermination
+
+This record normally starts with a call to the ``keyKeyboard`` routine
+that expects the fields that follows.
+
+The flag field describes certain properties of the keyboard, such as
+if it allows A--J auto assignment, if the keyboard table is sparse and
+if this is a transient application that should auto terminate on a key
+that is not handled by it. See ``OS4.h`` for more details.
+
+The field with ``doDataEntry`` is the routine that handles data
+entry. If the keyboard table do not define data entry keys, you can
+set this field to zero.
+
+The field with ``clearDataEntry`` is called whenever we end data
+entry. Certain keys end data entry and this field is called when that
+happens to notify to the application to end data entry. This field
+should be defined if your application needs to be informed when this
+happens.
+
+The field with ``keyTable`` is the actual keyboard table, refer to
+:ref:`defining-keyboards` for more information about how that is done.
+
+The field ``transientTermination` is called when a transient
+application is auto terminated by pressing a key not defined by its
+key table. You only need to set this field up if you set the
+``KeyFlagTransientApp`` bit in the flag field.
+
+.. note::
+
+   The reason there is a call to ``keyKeyboard`` is to allow for
+   flexibility in having very different keyboard behavior. At the
+   moment the ``keyKeyboard`` routine is the only one provided.
 
 Internal representation
 =======================

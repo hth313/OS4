@@ -4,6 +4,8 @@
 Defining keyboards
 ******************
 
+.. index:: keyboards; defining
+
 In this chapter we will look at how to define keyboards. A keyboard is
 essentially a mapping of a key-code to a function. The key-code is in
 0--79 form, which means that we transform a key press to an index
@@ -99,6 +101,8 @@ that it is a two byte function:
 Sparse keyboard tables
 ======================
 
+.. index:: keyboards; sparse
+
 Sparse keyboard tables are useful when only a few keys are
 defined. They are just a simple linear search table where each entry
 is a key code (0--79 form) followed by its function definition.
@@ -122,6 +126,8 @@ the upper bits in the word is set:
 
 Full keyboard tables
 ====================
+
+.. index:: keyboards; full
 
 A full keyboard defines all 80 keys using an array. This is done very
 similar to how the built-in keyboard are defined, but we use OS4 style
@@ -162,3 +168,90 @@ function definitions:
                  .con    0x101         ; 1
                  .con    0x100         ; 0
                  ...
+
+Anonymous keys
+==============
+
+.. index:: keyboard; anonymous XKD
+
+For catalogs and other transient applications you may want to have
+special function only available in that mode. Typical examples are
+single step, start running the catalog and perhaps some special
+functions available only inside that transient application.
+
+Naming that function and allocating an XROM or XXROM for it may seem
+like a lot of overhead. OS4 provides a way of creating anonymous
+execute direct functions that are only present inside that mode.
+
+From the user point of view, it works like any execute direct
+function, or special key press, i.e. pressing the "C" key to clear the
+current entry in a busy waiting catalog. In both cases, there is no
+preview of the function and it is not programmable.
+
+.. note::
+
+   In the built in catalogs 1--3 this is handled by execute direction
+   functions like ``SST``. For busy waiting catalogs 4-6 it is a
+   simple key dispatch loop without any real function. The user
+   experience of them are essentially identical even though they are
+   implemented in very different ways.
+
+OS4 provides a way to generate a special execute direct form that are
+well suited for this purpose. They only work with sparse keyboards,
+which is not a huge limitation as such transient applications
+typically only binds perhaps 5-10 functions. Here is an example of how
+a catalog keyboard can look like:
+
+.. code-block:: ca65
+
+                 .section table, rodata
+                 .align  4
+                 .public keyTableCAT7
+   keyTableCAT7: .con    40            ; SQRT
+                 .con    KeyXKD
+                 .con    66            ; SST
+                 .con    KeyXKD
+                 .con    74            ; BST
+                 .con    KeyXKD
+                 .con    67            ; <-
+                 .con    KeyXKD
+                 .con    55            ; R/S
+                 .con    KeyXKD
+                 .con    2             ; Shift
+                 .con    0x30e
+                 .con    10            ; Shifted shift
+                 .con    0x30e
+                 .con    70            ; User
+                 .con    0x30c
+                 .con    78            ; Shifted user
+                 .con    0x30c
+                 .con    0x100         ; end of table
+
+                 ;; The XKD pointers
+                 .extern CAT7_Clear, CAT7_SST, CAT7_BST, CAT7_BACKARROW, CAT7_RUN
+                 .con    .low12 CAT7_Clear
+                 .con    .low12 CAT7_SST
+                 .con    .low12 CAT7_BST
+                 .con    .low12 CAT7_BACKARROW
+                 .con    .low12 CAT7_RUN
+
+All such functions has the special value ``KeyXKD`` and the key table
+is immediately followed by a table of packed pointers to the key
+handler routines. The OS4 key table scanner simply counts the number
+of ``KeyXKD`` values seen while scanning the table. If the key pressed
+is ``KeyXKD``, the accumulated count is added to the start of the
+execute direct pointer table to determine the correct handler.
+Thus, there are no padding or gaps in the execute direct table in case
+there are "real" functions intermixed in the sparse key table.
+
+.. note::
+
+   The reason why this only works for sparse key tables are
+   twofold. First, the ``KeyXKD`` value is 0, which is already taken
+   for meaning an empty key in a full keyboard. Second, the following
+   table relies on that we have visited all entries before it. Doing
+   something similar on a full keyboard would either means that we
+   would need to scan the up to 80 character long table, or have a
+   second table of the same size, which would be rather wasteful. It
+   is also typical that transient applications where this is useful
+   only defines a small set of keys.

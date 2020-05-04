@@ -242,7 +242,7 @@ Data entry
 
 **Entry point:** ``4F2E``
 
-.. literalinclude:: ../src/core.s
+.. literalinclude:: ../src/keyboard.s
    :language: none
    :start-after: ;;; clearSystemDataEntry docstart
    :end-before:  ;;; clearSystemDataEntry docend

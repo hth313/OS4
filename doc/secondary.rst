@@ -99,6 +99,15 @@ A secondary assignment that belongs to a module that is removed (no
 longer plugged in) shows up as ``XXROM ii,kkk`` if the key is pressed
 and held.
 
+.. note::
+
+   Secondary function on assigned keys are only searched for when
+   there is shells in the shell stack. If you have secondary
+   assignments and remove every application and system shell from the
+   stack, secondary assignments become invisible. This is unlikely to
+   happen in reality as you need to have the ``ASN'`` function from
+   the Boost module (or similar) to create them and that is made
+   possible by a system shell.
 
 In RPN programs
 ===============
@@ -135,16 +144,17 @@ skipped when executed.
 If a secondary function in program belongs to a module that is not
 plugged in, it is shown as an XROM (the prefix XROM) followed by the
 text literal. This is because in a program, the tables in the module
-are needed to decode the real function number.When bound to a key, the
+are needed to decode the real function number. When assigned to a key, the
 actual full secondary index number is stored in the assignment, so it
-will be displayed as ``XXROM`` if the module is removed.
+can be displayed as ``XXROM`` when the key is kept pressed, also when
+the module is removed.
 
 .. note::
    A secondary function bound to a key that belongs to a module that is
    not plugged in cannot be entered in a program. This is because the
    use of a XROM prefix function requires the secondary FAT tables
    to determine which XROM acts as prefix and to properly calculate
-   its secondary (adjusted) index.
+   its index in that table.
 
 Defining
 ========
@@ -157,10 +167,9 @@ that it is a prompting function. The first words at the entry point
 may be ``000`` to indicate a non-programmable and optionally execute
 direct (XKD).
 
-The only minor thing that differs here is that the secondary
-function is somewhat more flexible as it may be placed entirely in a
-secondary bank while normal XROM functions must start in the primary
-bank.
+Secondary functions can start in any bank, they do not have to be in
+the primary bank as is the case with normal XROM functions. You should
+however exit with the primary bank enabled.
 
 Secondary FAT
 =============
@@ -194,7 +203,7 @@ consists of several parts:
 
 #. The actual secondary FAT is pointed to from the secondary FAT
    header. This FAT is defined in the same way as the ordinary XROM
-   FAT. It may be located in any bank, but all functions in it must be
+   FAT. It can be located in any bank, but all functions in it must be
    (or at least start) in the same bank. This bank is enabled by the
    bank switch routine in its secondary FAT header.
 
@@ -202,6 +211,139 @@ The bank switch routine should either be ``RTN`` for a primary bank,
 or one of the ``ENROM`` instructions followed by a ``RTN`` and that
 ``RTN`` instruction must be located at the following address in the
 bank it enables. No registers should be affected by this code snippet.
+
+Root pointer
+------------
+
+.. index:: secondary FAT; root pointer
+
+The root pointer is just a packed pointer stored at location
+``0xFC2``:
+
+.. code-block:: ca65
+
+                 .section PlaceMeAtFC2
+   fatRoot:      .con    .low12 secondary1 ; Root pointer for secondary FAT headers
+
+                 ...
+
+You also need to set one of the upper bits in the module identity
+area, in the word immediately before the checksum:
+
+.. code-block:: ca65
+
+   ;;; **********************************************************************
+   ;;;
+   ;;; Poll vectors, module identifier and checksum for primary bank
+   ;;;
+   ;;; **********************************************************************
+
+                 .section pollVectors
+                 nop                   ; Pause
+                 nop                   ; Running
+                 nop                   ; Wake w/o key
+                 nop                   ; Powoff
+                 nop                   ; I/O
+                 goto    deepWake      ; Deep wake-up
+                 goto    deepWake      ; Memory lost
+                 .con    1             ; A
+                 .con    '1'           ; 1
+                 .con    0x20f         ; O (tagged for having banks)
+                 .con    0x202         ; B (tagged as having secondaries)
+                 .con    0             ; checksum position
+
+Secondary FAT header
+--------------------
+
+.. index:: secondary FAT header
+
+The secondary FAT header are small records that must be in the primary
+bank. They form a linked list starting from root pointer. The first
+word points to the next secondary FAT header record and the last one
+has this word set to 0.
+
+.. code-block:: ca65
+
+   ;;; * First secondary FAT header, serving bank 1
+                 .section Secondary1, reorder
+                 .align  4
+   secondary1:   .con    .low12 secondary2 ; pointer to next table
+                 .con    (FAT1End - FAT1Start) / 2
+                 .con    0             ; prefix XROM (XROM 6,0 - ROM header)
+                 .con    0             ; start index
+                 .con    .low12 FAT1Start
+                 rtn                   ; this one is in bank 1,
+                                       ; no need to switch bank
+
+   ;;; * Second secondary FAT header, serving bank 2
+
+                 .section Secondary1, reorder
+                 .align  4
+   secondary2:   .con    0             ; no next table
+                 .con    (FAT2End - FAT2Start) / 2
+                 .con    1             ; prefix XROM (XROM 6,1 - (BPFX2))
+                 .con    256           ; start index
+                 .con    .low12 FAT2Start
+                 switchBank 2          ; this one is in bank 2
+                 rtn
+
+The second field is the number of entries in the secondary FAT we
+describe. This is used for range checking lookups in the actual
+function table.
+
+The prefix XROM field is the function number in the main XROM of this
+module that serves as the prefix XROM used in programs.
+
+.. index:: secondary FAT; reserving identities
+
+The start index is the function number of the first secondary function
+stored in this table. Each prefix XROM can serve up to 256 functions
+and we have a full range of 4096 secondary functions. Thus, we can
+just step this by 256 for each secondary FAT header, which allows for
+adding functions later to the function table without affecting any
+offsets of already existing secondary functions. We essentially leave
+gaps for future secondary function to be appended to the secondary
+function table.
+
+A packed pointer to the actual function table follows. This function
+table that can be located in any bank and the address following is a
+routine to enable the bank it is located in.
+If it is located in the primary bank, no change is needed so it
+can just return. If it actually wants to switch the bank it needs and
+appropriate ``ENROM`` instruction followed by a ``RTN`` instruction
+that must be in the bank we switched to! This can be accomplished
+using some clever code arrangement, but is easy if you use the
+``switchBank`` macro which is defined as follows:
+
+.. code-block:: ca65
+
+   switchBank:   .macro  n
+                 enrom\n
+   10$:
+                 .section Code\n
+                 .shadow 10$
+                 .endm
+
+Secondary FAT
+-------------
+
+.. index:: secondary FAT
+
+The actual secondary FAT looks exactly the same as the ordinary
+primary FAT that starts at address ``0x002`` in the module page. The
+secondary FAT can be located anywhere, but it must be aligned as it is
+pointed out from the secondary FAT header using a packed pointer:
+
+.. code-block:: ca65
+
+                 .section Secondary2
+                 .align  4
+   FAT2Start:    .fat    COMPILE
+                 .fat    RAMED
+   FAT2End:      .con    0,0
+
+Here we define two functions and terminate the table using two zero
+values.
 
 Design constraints
 ==================

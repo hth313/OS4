@@ -107,7 +107,26 @@ In RPN programs
 
 In program mode a normal XROM works as a prefix for running
 secondary functions coupled with the semi-merged ability provided by
-OS4.
+OS4. Each secondary FAT header table is paired with one such prefix
+XROM function.
+
+You need to set aside one XROM function for each secondary FAT, which
+is defined in the following way:
+
+.. code-block:: ca65
+
+                 .name   "(BPFX2)"     ; short name for prefix function
+   Prefix2:      gosub   runSecondary  ; Must be first!
+                 .con    1             ; I am secondary prefix XROM 6,1
+                 ;; pops return address and never comes back
+
+The name is not so important as it is normally suppressed by the
+decorated view of the secondary function, but it can be seen briefly
+and also when stepping an RPN program by keeping the ``SST`` key
+down. The function is just a call to ``runSecondary`` followed by the
+XROM function number of this function. This number is matched with
+the value stored in secondary FAT header tables when scanning for the
+appropriate table.
 
 As with all semi-merged functions, the fully decorated function is
 shown in program mode followed by a text literal that is automatically

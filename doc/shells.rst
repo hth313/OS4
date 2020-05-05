@@ -144,7 +144,7 @@ which act on a given message.
 Shell structure
 ===============
 
-..index shells; structure
+.. index:: shells; structure
 
 A shell is defined using a structure with several elements as follows:
 
@@ -166,7 +166,7 @@ the use of the ``.low12`` relocation operator).
 Kind field
 ----------
 
-..index shells; kind
+.. index:: shells; kind
 
 The kind field tells what kind of shell this entry represents. The
 values are defined in ``OS4.h`` and are either
@@ -303,7 +303,7 @@ happens.
 The field with ``keyTable`` is the actual keyboard table, refer to
 :ref:`defining-keyboards` for more information about how that is done.
 
-The field ``transientTermination` is called when a transient
+The field ``transientTermination`` is called when a transient
 application is auto terminated by pressing a key not defined by its
 key table. You only need to set this field up if you set the
 ``KeyFlagTransientApp`` bit in the flag field.
@@ -331,12 +331,13 @@ space.
 
 Not every address is actually possible. First of all it must be
 aligned to an even 4-bit word address. This limitation is imposed by
-the API, not the shell descriptor which could actually handle
-unaligned addresses. Second, modules can be plugged in and removed,
-they can also be moved to a different page while the calculator is
-off. To handle this, the page numbers 0 and 1 (which points to the
-mainframe OS firmware) have special meaning in the reconfiguration
-process when the calculator is turned on, see further below.
+the API, not the shell descriptor itself which can actually handle
+unaligned addresses. Second, modules can be removed or moved to a
+different page while the calculator is off. To handle this the page
+numbers 0 and 1 (which actually points to the mainframe OS firmware)
+have special meanings in the reconfiguration process. No shell can
+point to these pages. The reconfiguration is executed when the
+calculator is turned on, see further below.
 
 Kind field
 ----------
@@ -351,9 +352,16 @@ XROM number
 The last two digits are the XROM number of the owning module. They
 exist to make the descriptor number (quite) unique and for
 identification of the owning module. As modules can be moved, the page
-may change and only the 12-bit page offset is fixed. Adding the XROM
-ensures that we both can identify the owning module in case two modules
-happen to use the same page address for different shells.
+may change and only the 12-bit page offset is fixed. Including the XROM
+in the descriptor ensures that we both can identify the owning module
+in case two modules happen to use the same page address for different
+shells.
+
+An example descriptor is ``AC00410`` (hex number). The ``AC00`` is
+the actual address of the shell descriptor. ``4`` says it is an
+application. Finally ``10`` is 16 decimal, which means it belong to a
+module with XROM 16 (which is currently plugged into page address
+``A000``).
 
 Activation
 ==========

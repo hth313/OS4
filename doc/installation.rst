@@ -11,7 +11,7 @@ How this is done depends on your hardware or emulator.
 
 The module emulator you use must support a banked page 4 and also
 allow for independent bank switching of page groups. The HP-41CL and
-MLDL-2000 supports this. MLDLs and module emulation hardware from long
+MLDL-2000 support this. MLDLs and module emulation hardware from long
 ago will probably not be able to support OS4.
 
 .. index:: Clonix

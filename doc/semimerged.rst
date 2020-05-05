@@ -217,27 +217,30 @@ header, this function is not marked as a prompting function.
 The first two ``NOP`` instructions signal that this is a
 non-programmable execute direct function.
 
-When this function is entered in a program, it is actually executed
-rather than just stored. This will cause the ``argument`` routine to
-be executed and this one will detect if we are actually in program
-mode and will set up the display properly and put the calculator in a
-state where it can accept input with the expected display.
+Even though this is marked as a non-programmable function, it can be
+entered in a program. What happens is that when ``argument`` detects
+that it is executed in program mode, it inserts the appropriate
+program steps and alters the display to make it look as if it was
+entered in the program and is now prompting for its argument.
+The calculator is put in a state where it can accept input with the
+look of the display that you might expect from such action.
 
 The execute direct feature is there to ensure that the function
-executes immediately on key down. If you press and hold the ``RCL``
+executes immediately on key down. If you press and hold the normal ``RCL``
 key, it will put up its name and prompt immediately before you release
 the key. A function such as ``SIN`` will go through a timeout and
 cause a ``NULL`` message if held for long enough.
 
 Using execute direct means that we can mimic the behavior of ``RCL``,
-it acts immediate and does not go through the ``NULL`` test.
+as it acts immediately on key press and it will not go through the
+``NULL`` test.
 
 .. note ::
 
    The execute direct feature is partially broken with XROM functions
    in the HP-41 mainframe and only works properly in program mode.
    Outside program mode it will actually go through the NULL test, but
-   there is in practice not so much harm from this.
+   there is in practice no real harm from this.
 
 .. note ::
    If you have the 41CL, there is an updated mainframe firmware which
@@ -252,15 +255,15 @@ the upper bits are used to signal if we accept direct stack arguments
 or not.
 
 In program mode this function does not return. In run-mode it will
-appear as this function returns with the argument given by the user in
-``ST``, ``G`` and ``C[1:0]``.
+appear as this function returns with the argument filled in by the
+user in the ``ST``, ``G`` and ``C[1:0]`` registers.
 
 .. note::
    Technically, the whole function actually re-executes in run-mode
    and the state is set up so that the second time it picks up the
-   entered argument (or takes it from program memory if you are
-   running a program) and returns with it, by skipping the control
-   word that follows the call.
+   entered argument. In a running program it picks the argument from
+   the following text literal in program memory (advancing the program
+   pointer to skip the text literal instruction).
 
 The second half of the semi-merged feature is not seen at all in the
 function prelude. It consists of a hook that is called in program mode

@@ -27,18 +27,20 @@ Secondary FAT
 
 .. index:: functions; secondary FAT, secondary FAT
 
-The secondary FAT is split in two parts. The main structure is a
+The secondary function address table (FAT) consists of two parts.
+The header structure is a
 linked list of secondary FAT headers that are located in the primary
-bank. This structure is rather small, typically 6-7 words. The actual
-FAT table is pointed to by the header structure and this is similar to
-the ordinary FAT. This table is usually larger as it requires two
-words for each entry, so it is allowed to have it in any bank. All
-functions in it must however reside (or at least start) in the same
-bank as the secondary FAT that points to it.
+bank. This structure is rather small, typically 6--7 words. The actual
+FAT table is pointed to by the header structure and is similar to
+the ordinary FAT. This table requires more space as it requires two
+words for each function entry. It can be located in a secondary bank,
+however, all functions in it must be (or at least start) in the same
+bank.
 
-Each secondary FAT header table has an ordinary prefix XROM that is
-used when stored in an RPN program. Thus, each secondary FAT table can
-hold up to 256 functions.
+Each secondary FAT header table has an ordinary prefix XROM function
+associated with it. This function is used when one of the secondary
+functions are used in an RPN program. Thus, each secondary FAT table can
+hold up to 256 secondary functions.
 
 Execution by name
 =================
@@ -171,8 +173,8 @@ Secondary functions can start in any bank, they do not have to be in
 the primary bank as is the case with normal XROM functions. You should
 however exit with the primary bank enabled.
 
-Secondary FAT
-=============
+Secondary FAT structure
+=======================
 
 .. index:: functions; secondary FAT, secondary FAT
 
@@ -324,8 +326,8 @@ using some clever code arrangement, but is easy if you use the
                  .shadow 10$
                  .endm
 
-Secondary FAT
--------------
+Secondary FAT table
+-------------------
 
 .. index:: secondary FAT
 

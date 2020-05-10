@@ -7,28 +7,28 @@ Semi-merged functions
 Semi-merged function are prompting XROM functions that take postfix
 arguments. This is much like many built-in functions, i.e. ``RCL``.
 
-Instructions such as ``RCL`` is made up of two parts, the instruction
+Instructions such as ``RCL`` are made up from two parts, the instruction
 and its postfix argument. On the HP-41 they are displayed in programs
-as a fully merged instruction.
+as fully merged steps.
 
-The problem with XROM is that they cannot be entered in a program
-together with a postfix argument. The semi-merged feature makes this
-possible.
+The problem with XROM functions is that they cannot be entered in a
+program together with a postfix argument. The semi-merged feature
+makes this possible.
 
 Postfix operands
 ================
 
 .. index:: functions; postfix operands, postfix operands
 
-As we cannot alter the mainframe, there is no way to store a fully
+As we cannot alter the mainframe there is no way we can store a fully
 merged XROM function in a program step. What we can do is storing it
 in two parts, first the XROM function and then its argument. As the
 argument can be any byte, it is not possible to store it raw by
 itself, as it may grab following bytes making the program impossible
-to view and edit.
+to view and edit, and it can even corrupt program memory.
 
-Instead we wrap the postfix byte using a text literal. This means that
-there are actually two program steps:
+With semi-merged functions  we wrap the postfix byte using a text
+literal. This means that there are actually two program steps:
 
 .. code-block:: ca65
 
@@ -63,9 +63,9 @@ on the alpha register.
    show what is going on. This provides better control over program
    memory editing, as the postfix part actually does take a program
    step and will not be considered merged when following an
-   instruction that skips the next line. (You may still be able to use
+   instruction that skips the next line. You may still be able to use
    it after such skip instruction, but it will execute the text
-   literal in this case, altering the alpha register.)
+   literal in this case, altering the alpha register.
 
 .. index:: default operands, operands; default
 
@@ -84,8 +84,8 @@ default behavior. For a shift instruction, it means shift one step:
    12 ...        ; not a single letter text literal
 
 Such instruction costs two bytes (the XROM itself without any postfix
-operand). It executes as a single shift as shown. As it is a single
-instruction, it also works well following a test instruction.
+operand). As it is a single instruction, it also works well following
+a test instruction.
 
 If you enter the ``SL 01`` instruction, it takes advantage of the
 default and does not store a postfix byte in program memory.
@@ -98,9 +98,9 @@ when the instruction is shown.
    Some care is needed when using default behavior with prompting
    instructions. It will still look for its argument and if you have a
    single character alpha constant that you intended to be an alpha
-   constant, then it will become part of the previous
+   constant, it will become part of the previous
    instruction. This should seldom happen, but if it does, the easiest
-   way to deal with it is by rearranging instructions.
+   way to deal with it is probably to rearrange instructions.
 
 
 .. index:: single stepping
@@ -110,7 +110,7 @@ Single stepping
 
 When you single step a semi-merged instruction in run mode (to execute
 the program step by step), it works properly, but visual feedback of
-the instruction when the ``SST`` key is pressed and held, is just the
+the instruction when the ``SST`` key is pressed and held is just the
 bare instruction without any postfix operand.
 
 Dual operand functions
@@ -119,17 +119,19 @@ Dual operand functions
 .. index:: functions; dual operands, dual operand functions
 
 With OS4 you are not limited to a single postfix operand, a function
-may use two. This is useful things like comparisons or exchange
+can have two. This is useful things like comparisons or exchange
 between two registers.
 
-In the following example the ``<`` instruction is used to compare two
-register operands. As all dual operand instructions it is displayed
-infix in a program. A bit in its control word can be used to specify
-that it should be followed by a question mark, meant to indicate that
-it will optionally skip the next program line.
+In the following example the ``<`` function is used to compare two
+register operands. All dual operand functions are entered with the
+function first followed by the two postfix operands. In program
+memory a dual semi-merged program step is shown infix with the
+function name between its two operands. A bit in the control word
+can be used to specify that it should be followed by a question mark,
+meant to indicate that it will optionally skip the next program line.
 
-When entered the instruction is shown first followed by the prompt
-underscores:
+When entered the function is always displayed first followed by the
+prompt underscores:
 
 .. image:: _static/lcd-less-than-program-1.*
 
@@ -145,27 +147,21 @@ Here the second operand is partially entered:
 
 .. image:: _static/lcd-less-than-program-4.*
 
-When the instruction is complete it will show the text literal to
-accept further program steps. (Here shown with some weird
-characters due to limitations in the simulator used for screen
-capture. On a real calculator they will various characters, often with
-all segments on).
+When the function is complete it will show the text literal to
+accept the following program step. Here shown with some weird
+characters due to limitations in the font used. On a real calculator
+they will various characters, often with all segments on.
 
 .. image:: _static/lcd-less-than-program-5.*
 
 If we now back stop to the previous line we can see the decorated
-instruction. In this case it is somewhat too long for the display
+function. In this case it is somewhat too long for the display
 making the line number scroll off the display:
 
 .. image:: _static/lcd-less-than-program-6.*
 
-.. note::
-   During input the function name is shown first and the operands
-   follow it. Once completed the function name is shown between its
-   two arguments.
-
-The prompt mechanism is the same as the built-in one, synthetic status
-register operands cannot be keyed in. Using synthetic techniques, or
+The prompt mechanism is the same as the built-in one. Synthetic status
+register operands cannot be keyed in. Using synthetic techniques or
 hex editing the program makes it possible to have them in a program:
 
 .. image:: _static/lcd-less-than-program-7.*
@@ -176,8 +172,9 @@ hex editing the program makes it possible to have them in a program:
    text literal being shown when done. This is because two program
    steps are inserted up front in program memory which advances the
    program line counter twice. The display shows the decorated
-   semi-merged instruction with the current line number, which
-   corresponds to the text literal will be.
+   semi-merged function being entered with the current line number,
+   which corresponds to the program step where the text literal will
+   be.
 
 Secondary functions as semi-merged
 ==================================
@@ -193,14 +190,14 @@ bank.
 As a secondary function uses a text literal to indicate which function
 it is, a dual secondary function requires a text literal with three
 bytes. The first byte is the secondary function number, the remaining
-two are the two arguments. OS4 will merge all wrapped text literals
+two are the arguments. OS4 will merge all wrapped text literals
 to a single three character text literal in this case.
 
 
 Defining a function
 ===================
 
-To make a semi-merged function you must start with a specific prelude:
+A semi-merged function must start with a specific prelude:
 
 .. code-block:: ca65
 
@@ -212,12 +209,12 @@ To make a semi-merged function you must start with a specific prelude:
                  ...
 
 The first thing to observe is that there are no bits set in the name
-header, this function is not marked as a prompting function.
+header. This function is not marked as a prompting function.
 
 The first two ``NOP`` instructions signal that this is a
-non-programmable execute direct function.
+non-programmable execute direct function (XKD).
 
-Even though this is marked as a non-programmable function, it can be
+Even though this is marked as a non-programmable function it can be
 entered in a program. What happens is that when ``argument`` detects
 that it is executed in program mode, it inserts the appropriate
 program steps and alters the display to make it look as if it was
@@ -227,11 +224,11 @@ look of the display that you might expect from such action.
 
 The execute direct feature is there to ensure that the function
 executes immediately on key down. If you press and hold the normal ``RCL``
-key, it will put up its name and prompt immediately before you release
-the key. A function such as ``SIN`` will go through a timeout and
-cause a ``NULL`` message if held for long enough.
+key, it will put up its name and prompt immediately, you do not need
+to release the key. A function such as ``SIN`` will go through a
+timeout and cause a ``NULL`` message if held for long enough.
 
-Using execute direct means that we can mimic the behavior of ``RCL``,
+Using execute direct means that we can mimic the behavior of ``RCL``
 as it acts immediately on key press and it will not go through the
 ``NULL`` test.
 
@@ -243,8 +240,8 @@ as it acts immediately on key press and it will not go through the
    there is in practice no real harm from this.
 
 .. note ::
-   If you have the 41CL, there is an updated mainframe firmware which
-   corrects this bug.
+   If you have the 41CL, there is an updated mainframe firmware
+   available that corrects this bug.
 
 The ``argument`` routine is what makes this function become
 semi-merged, or at least half of it. As mentioned, the purpose of this
@@ -262,8 +259,8 @@ user in the ``ST``, ``G`` and ``C[1:0]`` registers.
    Technically, the whole function actually re-executes in run-mode
    and the state is set up so that the second time it picks up the
    entered argument. In a running program it picks the argument from
-   the following text literal in program memory (advancing the program
-   pointer to skip the text literal instruction).
+   the following text literal in program memory and advances the program
+   pointer to skip the text literal.
 
 The second half of the semi-merged feature is not seen at all in the
 function prelude. It consists of a hook that is called in program mode
@@ -271,9 +268,8 @@ for each program line. This hook does two things. First, it detects
 when we are entering a semi-merged argument and will ensure the
 display looks right and the program memory is written to in the
 correct way, forming the text literal and also prune it if the default
-argument is entered. Second, it will display semi-merged program lines
-in the decorated fashion, which happens when we are not entering an
-argument.
+argument is entered. Second, when not entering a program step it will
+display semi-merged program steps in the decorated fashion.
 
 Dual arguments
 --------------
@@ -295,7 +291,7 @@ default postfix argument. This word now only holds flags as defined in
 the ``OS4.h``. The function above is marked to have a trailing
 question mark in the name to indicate that this function optionally
 skips a step. There are also flag bits that allow for telling if stack
-arguments are accepted or not, for each of the two arguments.
+arguments are accepted or not for each of the two arguments.
 
 The argument bytes are returned in ``A[3:2]`` (first argument) and
 ``A[1:0]`` (second argument).
@@ -305,7 +301,7 @@ Rolling your own
 ================
 
 The above postfix operands are simple to use, but what if you really
-need something very different. One example is the Ladybug module which
+need something very different? One example is the Ladybug module which
 stores integer literals as program steps.
 
 In the Ladybug module this is implemented by special handling numeric
@@ -323,5 +319,4 @@ keyed. The actual display is done using the ``xargument`` form:
 The ``GOSUB`` to the ``xargument`` entry marks that this is a special
 form. The address following the ``GOSUB`` is called when it should be
 displayed in program memory. You need to implement the code to
-actually display the program step, probably by fetching bytes from the
-text literal that follows the ``#LIT`` function.
+actually display the program step on your own.

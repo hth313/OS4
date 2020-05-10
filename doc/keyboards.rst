@@ -9,10 +9,10 @@ Defining keyboards
 In this chapter we will look at how to define keyboards. A keyboard is
 essentially a mapping of a key-code to a function. The key-code is in
 0--79 form, which means that we transform a key press to an index
-starting with 0 and ending with 79. There are no gaps in this
+starting from 0 and ending with 79. There are no gaps in this
 sequence, so it can become a simple array lookup.
 
-OS4 allows for two ways to define a keyboard, by using a full
+OS4 allows for two ways to define a keyboard. By using a full
 definition of all 80 keys or a linear search table.
 
 Defining a key
@@ -22,7 +22,7 @@ The function that is bound to a key is described by a single ROM word.
 
 The built-in keyboards only need to access functions that are
 built-in, there are no XROM or XXROM functions on these keyboards. For
-our purposes we want to be able to also use such functions on out
+our purposes we want to be able to also use such functions on our
 keyboards.
 
 As with the built-in keyboards, a single ROM word is used to describe
@@ -64,10 +64,13 @@ identities), it points to an extension word:
 The value stored is 64 plus the forward offset to the extension record
 which consists of two words.
 
-The ``offsetFAT1`` value is the function number of the first secondary
-function in that secondary FAT. Using a couple of labels, one at the
-entry (``myEntryFAT1``) and one at the start (``FAT1Start``) we can
-use the assembler to calculate the correct index of the function.
+The first word is normally 0 for a secondary function. The second word
+is the function number of the secondary function (0--1023).
+
+The calculation above uses various labels where the ``offsetFAT1``
+value is the first function number in a specific secondary FAT table
+while ``myEntryFAT1`` and ``FAT1Start`` are labels inside that FAT
+that instructs the assembler to calculate the desired function number.
 
 .. note::
 
@@ -107,8 +110,8 @@ Sparse keyboard tables are useful when only a few keys are
 defined. They are just a simple linear search table where each entry
 is a key code (0--79 form) followed by its function definition.
 
-You will need to align the table as it will be pointed to from another
-record using a packed pointer. It also need an end marker where
+As usual you need to align the table as it will be pointed to from another
+record using a packed pointer. The table also needs an end marker where
 the upper bits in the word is set:
 
 .. code-block:: ca65
@@ -175,7 +178,7 @@ Anonymous keys
 .. index:: keyboard; anonymous XKD
 
 For catalogs and other transient applications you may want to have
-special function only available in that mode. Typical examples are
+special functions only available in that mode. Typical examples are
 single step, start running the catalog and perhaps some special
 functions available only inside that transient application.
 
@@ -190,14 +193,14 @@ preview of the function and it is not programmable.
 
 .. note::
 
-   In the built in catalogs 1--3 this is handled by execute direction
+   In the built in catalogs 1--3 this is handled by execute direct
    functions like ``SST``. For busy waiting catalogs 4-6 it is a
    simple key dispatch loop without any real function. The user
    experience of them are essentially identical even though they are
    implemented in very different ways.
 
-OS4 provides a way to generate a special execute direct form that are
-well suited for this purpose. They only work with sparse keyboards,
+OS4 provides a way to generate a special execute direct function form
+that are well suited for this purpose. They only work with sparse keyboards,
 which is not a huge limitation as such transient applications
 typically only binds perhaps 5-10 functions. Here is an example of how
 a catalog keyboard can look like:
@@ -235,7 +238,7 @@ a catalog keyboard can look like:
                  .con    .low12 CAT7_BACKARROW
                  .con    .low12 CAT7_RUN
 
-All such functions has the special value ``KeyXKD`` and the key table
+All such functions have the special value ``KeyXKD`` and the key table
 is immediately followed by a table of packed pointers to the key
 handler routines. The OS4 key table scanner simply counts the number
 of ``KeyXKD`` values seen while scanning the table. If the key pressed
@@ -251,7 +254,7 @@ there are "real" functions intermixed in the sparse key table.
    for meaning an empty key in a full keyboard. Second, the following
    table relies on that we have visited all entries before it. Doing
    something similar on a full keyboard would either means that we
-   would need to scan the up to 80 character long table, or have a
+   would need to scan the up to 80 entries long table, or have a
    second table of the same size, which would be rather wasteful. It
    is also typical that transient applications where this is useful
-   only defines a small set of keys.
+   only defines a small number of keys.

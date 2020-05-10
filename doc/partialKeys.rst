@@ -18,45 +18,46 @@ State
 
 Two bytes called ``ptemp1`` and ``ptemp2`` are used to keep track of
 the state during partial key sequences. While the partial key sequence
-is active, these are kept in either the ``ST`` (flag) and ``G``
+is active they are kept in either the ``ST`` (flag) and ``G``
 registers.
 
 When not processing key presses, ``ptemp2`` is preserved in a status
-register and ``ptemp1`` is rebuilt each time as it contains information
-about what kind of key was just pressed.
+register (in chip 0) and ``ptemp1`` is rebuilt each time as it
+contains information about what kind of key was just pressed.
 The address of the code that will handle the next key press is kept on
 the top of the processor stack. Combined, these can be seen as a
 continuation, or put another way, the information context needed to
-process the next key is saved for future use.
+process the next key press is saved for future use.
 
 Display prompt
 ==============
 
 Functions that prompt for input have bits set in the function name
-header to it is a prompting function.
+header to tell it is a prompting function.
 This also tells the code that is decoding which function to
 run that it first needs to prompt for an argument before it can
 actually run. At this point, the function code is saved in a status
 register and the upper bits are stored in the ``ptemp2`` state
 byte. The value of these bits informs what class of prompting function
-this is. Among other things it controls the number of initial underscores.
+it belongs to. Among other things it controls the number of initial
+underscores.
 
 The function name is written to the LCD followed by a
-blank, then prompt underscores are added using a call to a ``NEXT``
-routine where the numeric suffix tells now many underscores to add, i.e.
+blank and prompt underscores are added by a call to a ``NEXT``
+routine where its numeric suffix tells now many underscores to add, i.e.
 ``NEXT2`` adds two underscores. The ``NEXT`` routine will not return
-until a key is pressed and the calculator goes to standby.
+until a key is pressed and the calculator goes to sleep.
 A partial key sequence flag is also set to indicate that the
 calculator is processing a prompt. The return address to the caller of
 ``NEXT`` is kept on the processor stack while the calculator is in
-light standby, waiting for the next key press to act upon.
+light sleep waiting for the next key press.
 
 Before giving control back, all underscores are removed from the
 display then it returns to the address following the call to ``NEXT``
 if back-arrow key was pressed, or to the following address if some
 other key was pressed. This makes it easy to decode back-arrow key and
-``ptemp1`` is at this point set up in the ``ST`` flag register, making
-it easy to dispatch on different classes of keys.
+``ptemp1`` is set up in the ``ST`` flag register, making it easy to
+dispatch on different classes of keys.
 
 If you accept the input you append what was keyed to the LCD, which
 can be one or more characters, i.e. the top rows keys often
@@ -68,7 +69,7 @@ Rolling your own
 ================
 
 For certain functions it is desirable to use the prompt mechanism, but
-it poses several problems as using prompting XROM functions requires
+there are several problems as with prompting XROM functions which requires
 some care. The operating system is quite permissive in allowing
 prompting XROMs, but there are limitations on what actually works in
 practice.
@@ -78,10 +79,10 @@ Known bugs and limitations
 
 There are two main classes of prompting functions, those that take
 alpha arguments and those that take numeric arguments. HP utilized
-alpha input for XROM functions, but they are not programmable. Numeric
-input with XROMs was not used by HP, but it is  also possible.
+alpha input for XROM functions but they are not programmable. Numeric
+input with XROMs was not used by HP, but is also possible.
 Unfortunately, there are some bugs in the code related to
-this, which will be discussed further down.
+this, which will be discussed below.
 
 
 ``PRP`` (print program) in the printer is an example of an XROM that
@@ -98,17 +99,22 @@ program it is non-programmable.
 
 Prompting XROM functions work up to a point. There is no built-in
 support for representing them in a program so they need to be
-non-programmable. Later we will look at semi-merged functions which is
-provided by OS4 and it is a way to work around this limitation.
+non-programmable. In the previous chapter we looked at semi-merged
+functions which is provided by OS4 and it is a way to work around this
+limitation.
 There are also some bugs and unexpected behavior related to numeric
 prompting XROM functions:
 
 #. If the function is allowed to prompt for a stack register, the
-   function being built gets corrupted.
+   XROM function being built becomes corrupted.
 
 #. The printer will also get confused and print the wrong function
    postfix.
 
+.. note::
+
+   The semi-merged postfix mechanism contains code that works around
+   the problem with entered stack registers corrupting the instruction.
 
 Custom prompting
 ================
@@ -150,87 +156,88 @@ takeover function. The number of underscores in the initial
 prompt is determined by the bits in the name header. An ordinary partial
 key sequence function is started and the return address for the next
 key processing is initially set to inside mainframe (which depends on
-the prompt bits in the name header, as usual). OS4 detects that there
+the prompt bits in the name header). OS4 detects that there
 is a call to ``partialKey`` as first real instruction in the function
-that is prompting, and alters the return address that points somewhere
-in mainframe, to instead be the return address of the call to
+that is prompting and alters the return address that points somewhere
+in mainframe so that it instead is the return address of the call to
 ``partialKey``, plus one.
 
 When the first key is pressed in response to the prompt, it is handled
-by the code following the call to ``partialKey``. The normal
+by the code following the call to ``partialKey`` plus one. The normal
 back-arrow handler is first, then processing for other keys, which is
 how the ``NEXT`` routines work in mainframe.
 
-Thus, the purpose of the name field bits is only to put up the initial
-prompt. The main purpose of the marker is to tell OS4 that the
-function wants to do its own processing. When this happens, OS4 alters
-the return address kept on the stack for the next key processing to
-point to your own key handler code.
+The purpose of the name field bits is only to put up the initial
+prompt. The purpose of the ``GOSUB partialKey`` marker is to tell OS4
+that the function wants to do its own processing.
+OS4 alters the return address kept on the stack for the next key
+processing to point to your own key handler code.
 
 When the prompt has been fully filled in you should jump to one of the
 null test entry points, i.e. ``NULT_``, ``NULT_3`` or ``NULT_4`` to do
-null testing and if key is released execute the function.
+null testing and if key is released in time execute the function.
 
 Execution is done the normal way by actually running the function. As
-the first instruction is a call to ``partialKey``, it will get
-executed. So far it only acted as a marker for redirecting
+the first instruction is a call to ``partialKey`` it will get
+executed. Previously it has only acted as a marker for redirecting
 (overriding) the prompt handler. Executing it will do nothing as it
 immediately returns to the next line (the one the prompt handler
 skipped over before). It should be a short jump to the actual
 code that performs the function.
 
-Then what about the collected prompt data? Normally alpha input is in
+What about the collected prompt input data? Normally, alpha input is in
 the Q register and a numeric operand is in ``A.X``. If you want
 something else you need to store it somewhere before you called the
 null test handler code. As the Q registers is available for prompt
-arguments, it can be a good place.
+arguments, it can be a good choice.
 
 .. note::
    Make a jump to ``XABTSEQ`` to abort partial key processing. This
    works almost identical to ``ABTSEQ`` in mainframe which has the same
-   purpose, but ``XABTSEQ`` performs some additional clean-ups for the
-   purpose of OS4.
+   purpose, except that ``XABTSEQ`` performs some additional clean-ups
+   for the purpose of OS4.
 
 .. note::
-   The boost module uses this to provide replacements for ``XEQ`` and
-   ``ASN``, but you are not limited to improving existing
+   The Boost module uses this to provide replacements for ``XEQ`` and
+   ``ASN``. However, you are not limited to improving existing
    functionality, you can provide something completely new.
 
 Design considerations
 ---------------------
 
-Some extension modules (like CCD) shows prompt underscores immediately
-for more than one field, i.e. the two arguments of an ``XROM``. 
+Some extension modules (like CCD) show prompt underscores immediately
+for more than one field, i.e. the two arguments of an ``XROM``.
 This may be seen as user friendly, but existing base functionality
 like ``ASN`` do not present up front that it will also prompt for a
 key once you entered the function name. In addition, the
 key prompt is a single underscore, even though the actual key pressed
 will be presented as a two digit number.
 
-Thus, you are rather free to do whatever you want and it is nothing
-wrong to take a field at a time and just prompt for the next thing,
-Even if you know that you eventually will prompt for additional things
+Thus, you are rather free to do whatever you want and there is nothing
+unusual with taking a field at a time and gradually prompt for the next thing,
+even if you know that you eventually will prompt for additional things
 following a known pattern. On the other hand, making it more elaborate
 may make it easier for the user to understand it. The take-away is
-that both ways have been in used for long and are accepted, there are
-no right or wrong.
+that both ways have been in used for long and are accepted, there is
+nothing right or wrong.
 
 Limitations
 -----------
 
 If you decide to use the prompt mechanism offered by mainframe with
-your XROM function, it is possible to do so, but normal limitations
+your XROM function it is possible to do so, but normal limitations
 apply. The bug with stack operands exists (unless you use a corrected
-mainframe ROM), the function must be non-programmable and you function
+mainframe ROM). The function must be non-programmable and your function
 cannot be a secondary functions. The ``CAT'`` catalog replacement
 function in the Boost module is currently implemented this way.
 
 If you take over prompt handling but in the end make use of existing
-functionality in mainframe, it will not work properly with secondary
+functionality in mainframe it will not work properly with secondary
 functions. One example of this is the ``ASN'`` assign replacement
-function in the Boost module, it uses the mainframe code to ask for
-the key-code as its final step. This forces it to be an ordinary XROM
-function.
+function in the Boost module. It uses the mainframe code to ask for
+the key-code as its final step. After this it tries to execute the
+function from mainframe and it cannot execute secondary
+functions. This forces it to be an ordinary XROM function.
 
 
 Support functions
@@ -240,8 +247,8 @@ Some prompt support functionality can be found in the Boost
 module. The ``parseNumber`` routine can be used for requesting decimal
 numbers. This can prompt for a given number of digits and has an
 accept predicate, making it possible to check the input to be in a
-specific range, i.e. 0--511 or 1--31. Impossible input is detected early
-which causes a blink.
+specific range, i.e. 0--511 or 1--31. Impossible input is detected as
+soon as possible, resulting in refused input and a display blink.
 
 .. code-block:: ca65
 

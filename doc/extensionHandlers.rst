@@ -6,12 +6,12 @@ Extension handlers
 
 Extension handlers implement a generic message system and can be seen
 as a more flexible variant of poll vectors. They are descriptors like
-shells and are stored in the shell stack. Their structure is however
-very different from the shells and they do not participate in key
-handling or display the way they other entities do.
+shells and are stored in the shell stack. Their structure is very
+different from the shells and they do not participate in key
+handling or the default display.
 
 Some event is propagated to defined handlers that act on
-it. The extension handler mechanism is more flexible in that it can
+it. The extension handler mechanism is flexible in that it can
 pass a message specific state in the ``N`` register. This can be used for
 parameters, or some kind of accumulator that is updated by the message
 handlers where the final state may be passed back as a result. A
@@ -26,10 +26,10 @@ poll vectors that simply scan a fixed offset on each of the ROM pages.
 
 The extensible catalog mechanism in the Boost module (``CAT'``
 function) sends a message to extension handlers that a given catalog
-is desired. Here each extension handler in turn checks if this catalog
+number is desired. Each extension handler checks if this catalog
 number is something it implements and in that cases it prevents
 further propagation of the message and the requested catalog is
-shown. If no message handler implement the catalog, the message will
+shown. If no message handler implements the catalog, the message will
 return to the originator (``CAT'`` function) which then performs some
 suitable default action.
 
@@ -48,7 +48,7 @@ Extension structure
 .. index:: extension handlers; structure
 
 The data structure used by extension points is very different from the
-various shells. Only the first identifier word is "shared" with
+various shells. Only the first identifier word is shared with
 them. The rest is just a list of the message numbers it will handle
 coupled with a pointer to the handler itself.
 
@@ -66,14 +66,14 @@ The extension structure is fairly simple:
 
 As usual it needs to be aligned. The first word must be
 ``GenericExtension`` to separate it from being some kind of shell.
-After this follows pairs of the message identity (number) and its
-handler. The table must end with ``ExtensionListEnd``.
+After this follows pairs of the message identity (number) and the
+corresponding handler. The table must end with ``ExtensionListEnd``.
 
 Using a list means that a module only needs to define one extension
-structure, which saves precious RAM space.
+structure and one shell descriptor, which saves precious RAM space.
 
 .. note::
-   Of course, if you want to use more than one record in order to
+   If you want to use more than one record in order to
    provide optional functionality in groups that are independently
    activated, it can make sense to do that using multiple records.
 
@@ -117,18 +117,18 @@ poll vector:
                  .con    0             ; checksum position
 
 
-The routine that sends the message does so using ``sendMessage``, which
-takes the message number and optionally some message specific data in
-the ``N`` register.
+The routine that sends the message does it using the ``sendMessage``
+routine, which takes the message number and optionally some message
+specific data in the ``N`` register.
 
-Any called routine can inspect, update or return a value in ``N``. Each
-message defines on its own how ``N`` is used. A message handler can
+Any called routine can inspect, update or return the value in ``N``. Each
+message type defines on its own how ``N`` is used. A message handler can
 prevent further propagation of the message by popping the return
 stack. If further message propagation is desired, then it should not
-pop the return stack and also preserve the ``M`` register, as it
+pop the return stack and also preserve the ``M`` register as it
 contains the shell stack traversal state which is needed to properly
-pass it the next handler. In both cases, use ``RTN`` when done, or
-exit in some message specific way.
+pass it the next handler. In both cases return using a ``RTN``
+instruction when done, or exit in some message specific way.
 
 How many subroutine levels you can use depends on the context in which
 the message was sent. It is recommended to use as few as possible and
@@ -149,13 +149,13 @@ Here is how a ``catHandler`` could look:
                  gonc    doCat16       ; yes
                  c=c+1   x
                  ?a#c                  ; cat 17?
-                 rtnc                  ; not one of mine
+                 rtnc                  ; no, not one of mine
    doCat17:      ...
 
    doCat16:      ...
 
 This takes the catalog number from ``N.X`` which is where the ``CAT'``
-function places it. If the passed number is not one of mine, we return
+function places it. If the passed number is not one of mine, return
 to the caller which is the dispatch loop. It will continue scanning
 for other catalog handlers. As the scan state is kept in ``M``, we must
 not touch it.

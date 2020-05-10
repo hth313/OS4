@@ -10,7 +10,7 @@ makes your code easier to read by other people. However, you should not take
 idioms presented here as the whole truth. Feel free to invent your own
 and explore MCODE with an open mind. They are just some good ideas on
 which you can base your own code on. If you feel that you  want to do
-it in different, perhaps even better ways, by all means do so.
+it in different ways, by all means do so.
 
 
 Error returns
@@ -19,10 +19,11 @@ Error returns
 .. index:: error returns
 
 Often we want to tell whether a routine succeeded or if there was an
-error. When we are concerned about giving a specific error, we can
-exit to a suitable error exit in mainframe. Such exits may be
-``ERRDE`` for showing ``DATA ERROR``, and there are some other
-routines for other standard error messages.
+error. When we want to report an error we can use one of the error
+exit routines provided by mainframe. Such exits are ``ERRDE`` for
+showing ``DATA ERROR``, and some other routines for other standard
+error messages. OS4 also provides some additional error handler
+routines with other messages.
 
 A routine typically becomes more flexible if it does not exit with an
 error message, but rather returns in a way to signal an error,
@@ -31,15 +32,15 @@ more flexible as a caller can take other actions on the error
 condition than just exiting with an error message.
 
 Normally we would return an error value, like zero which is easy to
-test for by the caller. The Nut CPU has an alternative idiom by
+test for by the caller. On the Nut CPU there is an alternative idiom by
 returning to different locations depending on whether there was an
-error or success (or different results). This is rather unusual, but
-works exceptionally well on the Nut instruction set for two
-reasons. Almost all instructions are of the same size (one
+error or success (or even different classes of results). This is
+rather unusual, but works exceptionally well on the Nut instruction
+set for two reasons. First, almost all instructions are of the same size (one
 word). Second, it is is very easy to handle returns to different
 locations. A simple return is just the ``RTN`` instruction, or one of the
-conditional ``RTNC`` or ``RTNNC``. Returning to an incremented
-location is also quite simple as shown below.
+conditional ``RTNC`` or ``RTNNC`` instructions. Returning to an incremented
+location is also very simple as shown below.
 
 If we want to return back that we failed, we return to something
 called ``(P+1)``. This is fancy for doing a normal return. If we
@@ -60,7 +61,7 @@ What it means is that a caller may look as follows
 In the actual ``findBuffer`` routine, we test for various error
 conditions, such as if running out of the buffer area or finding the
 permanent ``.END.``. In the code we can test various conditions, like
-if we step into (or beyond) ``.END.`` or find an unused register. In
+if we stepped to the register with ``.END.`` or found an unused register. In
 such cases we can do a test and conditionally return, which will take
 us to ``(P+1)`` of the caller:
 
@@ -75,38 +76,37 @@ us to ``(P+1)`` of the caller:
 
 
 When we find what we are looking for, we want to return to ``(P+2)``,
-by incrementing the return address. This is done in the following way:
+which is done by incrementing the return address.
+This is done in the following way:
 
 .. code-block:: ca65
 
    RTNP2:        stk=c                 ; C[6:3]= return address
-                 c=c+1   m             ; skip to P+2
+                 c=c+1   m             ; advance to (P+2)
                  gotoc                 ; return
 
 The ``GOTOC`` instruction is very useful here as it simply loads the
 program counter with ``C[6:3]``, meaning we take the address field of
-C and jump to it, exactly what we want here.
+C and jump to it, which is exactly what we want to do here.
 
-As can be seen, single word conditional returns will handle errors,
-and a three word sequence will allow us to return to ``(P+2)``. On the
+As can be seen, a single conditional ``RTN`` instruction can handle errors,
+and a short three word sequence will allow us to return to ``(P+2)``. On the
 caller side, a single word branch (``GOTO``) will take us somewhere to
 deal with the error condition. There are no error value or flags
-passed back, or any tests needed at the call site. It gets very small
+passed back, nor any tests needed at the call site. It gets very small
 and simple.
 
-It is now known who came up with this trick first, but it is used
+It is not known who came up with this trick first, but it is used
 extensively in the Time module. You will find code in the mainframe
 that does not employ this technique, but rather returning 0 or setting
-a flag (as in the HP-IL module). The advantage of the return to
-different locations is that it saves an instruction and there is no
-need to find a suitable register location or flag for carrying the
-information. It typically will cost two more instructions in the
-routine, but there are often more than one call to it, so you quickly save
-code doing it. A minor disadvantage is that you typically need to act
-on the condition immediately, there is no room for making something in
-common and then check the return/error code. Another minor problem is
-that you cannot use the ``C[6:3]`` field to carry any return value.
+a flag (as in the HP-IL module).
 
+The main advantage of the return to different locations idiom is that
+it saves an instruction on each call site.
+
+A disadvantage is that you need to act on the condition immediately.
+Another problem is that you cannot use the ``C[6:3]`` field to carry
+any return value.
 
 Call backs
 ==========
@@ -128,7 +128,7 @@ can easily have multiple call backs by just adding pointers.
 
                  ...
 
-    handler1:    [do-stuff]
+    handler1:    do-stuff ...
                  rtn
 
 
@@ -153,11 +153,11 @@ Later we can call a routine using:
                  gotoc
 
 Here we make use of having the base call back pointer in
-``M[6:3]``. We trash part of the C register here. On the other hand,
-using a page relative call (3-word), it would also destroy most of C
-making it hard to pass any value to the call back in C.
+``M[6:3]``. Note that it trashes part of the C register. However,
+making any page relative call (3-word) also destroys most of C
+register.
 
-The final return from ``routine`` is made by making a goto to the
+The final return from ``routine`` is made by jumping back to its
 ``callBackN`` routine.
 
 
@@ -166,18 +166,18 @@ Code pointers
 
 .. index:: packed pointers, pointers; packed
 
-As a ROM word is only 10 bits long, we are lacking a few bits to make
-up a full 16-bit code pointer. Instead of using two words, we can get
+As a ROM word is only 10 bits long. We are lacking a few bits to make
+a full 16-bit code pointer. Instead of using two words, we can get
 away with only using 10 bits by observing two things.
 
 First, the code that are providing the code pointer is in a page
 relocatable module. Normally, we do not know which page we will be
 executing from. This can be found at run-time using the ``PCTOC`` in
 the operating system. In practice, it is often easier to leave it to
-the called routine to figure it out (as it has the return address on
-the stack).
+the called routine to figure it out (as it has the return address to
+it on the stack).
 
-Second, with the page taken care of, we have 12 bits to represent
+Second, with the page sort of taken care of, we have 12 bits to represent
 using 10 bits. We can do this by aligning the code so that the
 address we want to pass on is aligned to an even 4-word address.
 
@@ -225,13 +225,13 @@ Call backs with code pointers
 
 The call backs presented above used ordinary ``GOTO`` instructions in
 a similar fashion as what was done with error returns. As the ``GOTO``
-instruction only reaches 63/64 words distance, having a couple of
-routines may result in that some ``GOTO``s may be out of range.
+instruction only reaches 63--64 words distance, having a couple of
+routines may result in that some ``GOTO`` may be out of range.
 
 There is nothing that says that the ``(P+N)`` words need to be
-``GOTO`` instructions, we could use 10-bit code pointers instead and
-have reachability anywhere in the 4k page (given that we align our
-call backs).
+``GOTO`` instructions. We could actually use 10-bit code pointers
+instead and have reachability anywhere in the 4k page (given that we
+align our call backs).
 
 Our invocation of routine would then become:
 
@@ -245,7 +245,7 @@ Our invocation of routine would then become:
 
                  ...
 
-   handler1:     [do-stuff]
+   handler1:     do-stuff ...
                  rtn
 
 Our routine for a start look as before, as we still want to keep
@@ -284,11 +284,11 @@ Optional call backs
 
 .. index:: call backs
 
-If we want to have optional code pointers, that is, the caller may not
-need to provide a call back at all, it can be done in two ways. We can
-either read the word and test it for 0. Such value is easy to test
-for and cannot be legal as it would take us to the first address of
-the page where there is data (XROM identity and FAT):
+We may want to have optional code pointers. That is, the caller may not
+need to provide a call back at all. This can be done in a couple of
+ways. We can either read the word and test it for 0. Such value is
+easy to test for and cannot be legal anyway as it would take us to the
+first address of the page where there is data (XROM identity and FAT):
 
 .. code-block:: ca65
 
@@ -341,5 +341,5 @@ these routines together so that they can share code:
                  gotoc
 
 As can be seen, the cost for an additional ``(P+N)`` routine is three
-words. One word to add one more for the new entry and two words to
-create the ``(P+N-1)`` entry.
+words. One word to add one more to the address and two words to
+create the ``(P+N-1)`` entry point.

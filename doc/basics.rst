@@ -4,7 +4,7 @@ Basics
 
 In this chapter we go through some concepts that are used internally
 in OS4. This is not a primer on MCODE programming or the Nut CPU, you
-are expected to have some basic understanding of MCODE programming.
+are expected to be familiar with MCODE programming.
 
 Addressing
 ==========
@@ -15,18 +15,19 @@ ROM addressing is done using 16-bit addresses. This gives a total of
 64K of addressable memory space. The HP-41 mainframe divides this up
 in 4K blocks and treats each such block as a page. There is really
 nothing magic about having such 4K blocks in the Nut architecture, it
-is just a way of dividing up the memory to allow for extensibility.
+is just a way of dividing up the memory to allow for modular
+extensibility.
 
-Each memory location holds a 10-bit word and as most instructions are
+Each memory location holds a 10-bit word and most instructions are
 single word. The only exceptions are the absolute jump and go
-subroutine instructions which takes two words. However, they are able
-to reach any fixed location in the 16-bit addressing space.
-(The ``POWOFF`` instruction needs to be followed by a ``NOP``, so it can be seen
-as taking two words as well).
+subroutine instructions which takes two words. However, the good news
+is that they are able to reach any fixed location in the 16-bit
+address space. (The ``POWOFF`` instruction needs to be followed by
+a ``NOP``, so it can be seen as taking two words as well).
 
 As the Nut CPU has notoriously bad addressing capabilities, the only
 way to read data from the ROM space is using the ``CXISA`` instruction
-which expects an address in the ``6:3`` field of the C register.
+which expects an address in the ``[6:3]`` field of the C register.
 
 Packed pointer
 --------------
@@ -41,11 +42,11 @@ from it or having some pointer to some ROM structure at hand. Thus,
 the 4-bit page address is typically known through some context we
 already have.
 
-Here we have a slight problem as we need 12 bits to describe such
+Here we have a slight problem as we need 12 bits for a page
 address and a ROM word is only 10 bits wide. To make it possible to
 describe a location inside the entire page, OS4 uses a concept called
-a packed pointer which is a 12-bit page pointer right shifted two
-locations, resulting in a single 10-bit value.
+a packed pointer which is a 12-bit page pointer shifted right two
+bit positions, resulting in a single 10-bit value.
 
 To unpack a packed pointer, the 10 bit value is left shifted two times
 and combined with the page address. This means that the actual address
@@ -56,8 +57,8 @@ In other words, we can describe an address within my own module using
 a single 10-bit word and it can be placed anywhere in a page
 relocatable module, provided we follow the alignment constraint.
 
-If you are using NutStudio tools the ``.align`` directive allows you
-to easily specify an alignment of four and the ``.low12`` relocation
+If you are using NutStudio tools the ``.align`` directive makes it
+easy to specify an alignment of four and the ``.low12`` relocation
 operator makes it possible to obtain a packed pointer:
 
 .. code-block:: ca65
@@ -71,9 +72,9 @@ Return status
 .. index:: return; different status, return address
 
 A routine may need to deal with possible error conditions.  For
-flexibility it may be better to return some error condition rather
+flexibility it may be better to return with some error condition rather
 than displaying an error message. The caller may have another way of
-dealing with a failure, than showing an error message.
+dealing with a failure than showing an error message.
 
 Due to the nature of the Nut CPU it turns out that it is often easy to
 do this by returning to different locations rather than returning
@@ -87,10 +88,11 @@ some kind of error code. At the call site it looks like this:
 
 We call this ``(P+n)`` and this works well thanks that almost all
 instructions are single word (including short jumps) and we most often
-want to branch to some alternative location and do something else.
+want to branch to some alternative location to handle the case.
 
 The caller will just ``RTN`` to get to ``(P+1)``, and the success case
-``(P+2)`` means it needs to return to the following location:
+``(P+2)`` means it needs to return to the following location, which
+can be done as follows:
 
 .. code-block:: ca65
 
@@ -99,7 +101,7 @@ The caller will just ``RTN`` to get to ``(P+1)``, and the success case
                  gotoc
 
 The disadvantage here is that we clobber the address field
-(``6:3``) of the C register, which means that we cannot pass any return
+``[6:3]`` of the C register, which means that we cannot pass any return
 value there, as we often use the incremented return when successful.
 
 Buffer advice
@@ -109,7 +111,7 @@ Buffer advice
 
 I/O buffers, or just buffers for short, were defined from the beginning
 in the HP-41 mainframe. However, they were first used by the Time
-module, about two years after the introduction.
+module, about two years after the introduction of the HP-41.
 
 A buffer can have any size from a single register up to 255
 registers. The first word is called the buffer header and the leftmost
@@ -138,7 +140,7 @@ Non-null registers
 .. index:: buffers; null registers, null registers; in buffers
 
 The Time module buffer code take precautions to never store a zero
-value inside a buffer too. This is due to some 67/97 card reader bug
+value inside a buffer too. This is due to a 67/97 card reader bug
 which I have not been able to find out what it means. I suspect that the
 card reader (at least early versions) may scan for free registers
 looking at individual registers also inside buffers.
@@ -151,11 +153,11 @@ System buffer
 
 .. index:: buffers; system, system buffer
 
-The OS4 module needs to store its own information somewhere.
+The OS4 module needs to store its own state somewhere.
 The mainframe code typically uses the 0--15 RAM address
 status area for such purposes, so that space already occupied. The
 safest way to find some free memory is to use a buffer and the OS4
-module allocated a system buffer with number 15.
+module allocates a system buffer with number 15.
 
 The advantages of using a buffer are that it is a safe area and it can
 grow (and shrink) dynamically as needed, rather than being fixed.
@@ -179,17 +181,17 @@ As you are probably familiar with the HP-41, you know about its
 ability to reassign keys, keys that talk and can be NULLed (to inspect
 the current behavior).
 There are actually a lot of different aspects on how the keyboard can
-be reassigned and different classes of functional behavior that may
-not be obvious until you look closer at it.
+be reassigned and different classes of functions that may not be
+obvious until you look closer at it.
 
 
 Reassigned keys
 ---------------
 
 Keys can be reassigned and change behavior in user mode. If in doubt,
-you can press and hold the key to see its current behavior. On top of
-this, the top two rows are dynamically bound to single letter labels
-in the current RPN program.
+you can press and hold the key to see its current behavior. In
+addition to explicit assignments, local alpha labels in the current
+RPN program is scanned when one of the two top row keys is pressed.
 
 Key-codes
 =========
@@ -205,9 +207,10 @@ keyboard. Internally though, the 0--79 and 1--80 forms are used. These
 forms are easily converted between by increment (or decrement) the
 key code by one. The reason for the two forms is that the internal
 key tables use an index starting at 0 (0--79 form), but 0 is reserved
-for an empty assignment slot in the key assignment registers, so the
-number is incremented by one, giving the 1--80 form, which makes it
-possible to tell a deleted assignment apart from an active assignment.
+for an empty assignment slot in the key assignment registers. The
+solution is to increment the key-code by one, giving the 1--80 form,
+which makes it possible to tell an inactive assignment apart from an
+active assignment.
 
 Internal key tables are just an array of function codes where we take
 advantage of the extra two bits in a ROM word to decode a special
@@ -237,12 +240,12 @@ The normal behavior for an MCODE function is to exit using a ``RTN``
 instruction. As the invocation mechanism push the address of ``NFRPU``
 on the stack before giving control, this is where we will normally
 return. This exit point enables stack lift (sets the internal push
-flag, CPU flag 11) and falls into ``NFRC``.
+flag, which is CPU flag 11) and falls into ``NFRC``.
 
 If you used up all four levels of CPU stack, you must exit back using
 a ``GOLONG`` instruction instead. By design, XKD functions (seldom
 used functions that execute immediately on key down) does not have
-``NFRPU`` pushed on the stack, so they also must ``GOLONG`` back. Such
-functions may want to return back to ``NFRKB`` instead as it waits for
-key release and resets the keyboard (useful as it acted immediately on
-key down).
+``NFRPU`` pushed on the stack, so they also must always ``GOLONG``
+back. Such functions may want to return back to ``NFRKB`` instead as
+it waits for key release and resets the keyboard (useful as it acted
+immediately on key down).

@@ -29,10 +29,11 @@ routines.
 
 .. index:: jump via packed pointer
 
-These are a set of routines that fetched a packed pointer by offset
-from a given address. By using the ``GOSUB`` instruction to one of
-these entries, you perform a subroutine call to it. You can also use
-the ``GOLONG`` instruction to transfer control to it.
+This is a set of routines that fetch a packed pointer by offset
+displacement from a given base address and pass control to it. By
+using the ``GOSUB`` instruction to one of these routines you perform a
+table indirect call to a packed pointer address. You can also use the
+``GOLONG`` instruction to just transfer control to it.
 
 .. literalinclude:: ../src/core.s
    :language: none
@@ -77,8 +78,8 @@ skipping one or two instructions ahead in the return location.
 
 .. index:: unpack a packed pointer
 
-These routines reads a packed pointer with a displacement, but does
-not do any other actions based on the result.
+These routines read a packed pointer by offset displacement from a
+given base address and returns the resulting address.
 
 .. literalinclude:: ../src/core.s
    :language: none
@@ -117,7 +118,7 @@ Error handling
 
 These error routines are the same as found in the Extended functions
 module and later 41CX. They are provided in OS4 as they do not exist
-in 41C and 41CV. Thus, if you rely on OS4 they are now available to
+in 41C and 41CV. Thus, if you rely on OS4 they are now available on
 all HP-41 variants.
 
 **displayError**
@@ -173,8 +174,8 @@ all HP-41 variants.
 Ensure environment
 ==================
 
-Some code may require certain optional hardware to be available to
-work properly. These routines allow for testing such requirements and
+Some code may require certain optional hardware to be available for
+correct operation. These routines allow for testing such requirements and
 give a sensible error if the resource is not present.
 
 **ensureDrive**
@@ -183,7 +184,8 @@ give a sensible error if the resource is not present.
 .. index:: HP-IL mass storage; testing for
 
 Check for the mass storage HP-IL drive. This tests both that we have
-an HP-IL module as some mass storage device connected to the loop.
+an HP-IL module as well as some mass storage device connected to the
+HP-IL loop.
 
 **Entry point:** ``4F68``
 
@@ -211,8 +213,8 @@ an HP-IL module as some mass storage device connected to the loop.
 
 .. index:: 41CX; testing for
 
-Testing for 41CX is intended mainly to ensure that the entry points
-for accessing extended memory is available.
+Testing for 41CX is intended to ensure that the entry points for
+accessing extended memory is available.
 
 **Entry point:** ``4F46``
 
@@ -332,8 +334,7 @@ buffers which are stored inside the system buffer.
 
 **Entry point:** ``4F06``
 
-This routine has two entry points, one to find the system buffer and
-one that takes the buffer number (0--15) from ``C.X``.
+This routine is used to locate a buffer.
 
 .. literalinclude:: ../src/buffer.s
    :language: none
@@ -593,7 +594,7 @@ register while making successive calls.
 **Entry point:** ``4F16``
 
 This is similar to ``topShell`` but searches for extension points in
-the shell stack instead.
+the shell stack.
 
 **shellDisplay**
 ----------------
@@ -672,8 +673,8 @@ These functions define semi-merged prompting functions.
 
 .. note::
    A call to these routines are expected to appear first in a
-   function. The OS4 code will inspect the start of such functions and
-   expects it to look this way.
+   function. The OS4 code inspects the start of potential such
+   functions and expects it to look in a particular way.
 
 **argument**
 ------------
@@ -719,7 +720,7 @@ Secondary functions
 -----------
 
 This is a variant of the ``ASRCH`` routine in mainframe. This routine
-works the same, but will also locate secondary functions.
+works the same but will also locate secondary functions.
 
 **Entry point:** ``4F4E``
 
@@ -845,7 +846,7 @@ Catalog
 Extended memory
 ===============
 
-..index:: extended memory, memory; extended
+.. index:: extended memory, memory; extended
 
 **getXAdr**
 -----------

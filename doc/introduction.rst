@@ -8,10 +8,10 @@ that were originally designed into the HP-41 mainframe (the name used
 by HP for the HP-41 firmware).
 
 OS4 is a support module and requires other extension modules to expose
-its capabilities to the user. One such module is Boost which makes
-good use of OS4. You can also use OS4 in your own module projects.
+its capabilities to the user. Examples of such modules are Ladybug and
+Boost. You can also use OS4 in your own module projects.
 
-At a very high level, OS4 does the following:
+At a very high level OS4 does the following:
 
 #. Removes the 64 function limitation for a single plug-in module
    page.
@@ -27,14 +27,14 @@ At a very high level, OS4 does the following:
    something else.
 
 #. Support for writing temporary modes, such as input modes, updating
-   clock style modes or catalogs. The interval timer can be borrowed
+   clock style modes and catalogs. The interval timer can be borrowed
    (if timer chip present) to allow for periodic updates and timeouts
    in such modes.
 
 Plug-in module
 ==============
 
-OS4 is a module image file that needs to be put in some programmable
+OS4 is a module image file that needs to be loaded in some programmable
 plug-in module hardware. This can be a Clonix module, an MLDL or the
 HP-41CL. It is also possible to use OS4 on HP-41 emulators.
 
@@ -54,8 +54,8 @@ Resource requirements
 =====================
 
 OS4 allocates some space from the free memory pool. How much is taken
-depends on what you actually do with it, but expect around 2-7
-registers for modest use.
+depends on what you actually do with it, but expect 2-7 registers for
+modest use.
 
 Apart from this, OS4 does not impose any restrictions on the
 environment and will run comfortable on any HP-41C, HP-41CV, HP-41CX
@@ -66,13 +66,13 @@ There is no XROM number used by this module as it is in page 4.
 Using this guide
 ================
 
-This guide is aimed to MCODE developers that want to explore and
-develop modules utilizing OS4. It can also be of interest to those
-that want to know how it works internally or want to study how to
-write HP-41 MCODE.
-
 If you only want to use OS4 because another module requires it, simply
 load the module image to page 4 and put this guide aside.
+
+This guide is aimed to MCODE developers that want to explore and
+develop modules using OS4. It can also be of interest to those
+that want to know how it works internally or want to study how to
+write HP-41 MCODE.
 
 This guide assumes that you have a working knowledge of:
 
@@ -97,8 +97,8 @@ Document conventions
 
 Code examples are typically done in lower case as the author feels it
 somewhat more relaxing to the eyes. If MCODE instructions are
-discussed in the text they are however in upper case to make them
-stand out more.
+discussed in the text they are in upper case to make them stand out
+more.
 
 The development tools used in this guide is NutStudio tools which
 contains a macro assembler, a linker, a librarian and a debugger. The
@@ -106,8 +106,8 @@ debugger includes a simulator and a comprehensive scripting
 abilities. The assembler and linker fully supports generating banked
 modules and can generate ELF/DWARF images to allow for source level
 debugging. This has been a very useful tool chain in developing and
-testing OS4. VisualStudio Code has been used as a debugger front-end
-(user interface).
+testing OS4. VisualStudio Code has been used as the a main debugger
+front-end (user interface).
 
 License
 =======

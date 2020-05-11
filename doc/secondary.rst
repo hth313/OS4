@@ -41,6 +41,8 @@ associated with it. This function is used to represent secondary
 functions in RPN programs. As a result each secondary FAT table can
 hold up to 256 secondary functions.
 
+.. figure:: _static/secondaryFat.*
+
 Execution by name
 =================
 

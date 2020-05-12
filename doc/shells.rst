@@ -129,7 +129,7 @@ below all application shells in the shell stack. All system shells
 are active and each one is always consulted in the stacking order
 until a handler is found. They are typically used for
 replacing single (or a few) keys, providing alternative or additional
-functionality. One example is a replacement for the assign (ASN)
+functionality. One example is a replacement for the assign (``ASN``)
 function that could be implemented using a system shell.
 
 Extension handlers
@@ -292,9 +292,9 @@ This record normally starts with a call to the ``keyKeyboard`` routine
 that expects the fields that follows.
 
 The flag field describes certain properties of the keyboard, such as
-if it allows A--J auto assignment, if the keyboard table is sparse and
-whether this (transient application) should auto terminate on a key
-that is not handled by it. See ``OS4.h`` for more details.
+if it allows top rows (A--J) auto assignment, if the keyboard table is
+sparse and whether this (transient application) should auto terminate
+on a key that is not handled by it. See ``OS4.h`` for more details.
 
 The field with ``doDataEntry`` is the routine that handles data
 entry. If the keyboard table does not define any data entry keys, you

@@ -548,8 +548,16 @@ appClearDataEntry:
               cxisa
               ?c#0    x
               rtnnc                 ; does not define any data entry
+              bcex                  ; preserve B.X on stack
+;;; Finding a buffer destroys B.X, which we will call below and
+;;; it is likely that any application clear digit entry may do
+;;; this as well. We preserve B[13] and B[2:0] on the stack.
+              rcr     -4
+              stk=c
+              rcr     4
+              bcex
               gosub   jumpPacked    ; tell app to clear data entry
-                                    ; must preserve: B, N and M!!!
+                                    ; must preserve: B[13:4], N and M!!!
               gosub   systemBuffer
               nop                   ; (P+1) filler, we know it exists
               c=data
@@ -557,6 +565,11 @@ appClearDataEntry:
               st=0    Flag_Pause
               cstex
               data=c
+              bcex                  ; restore B[3:0]
+              rcr     -4
+              c=stk
+              rcr     4
+              bcex
 ;;; * fall into clearSystemDataEntry
 
 clearSystemDataEntry:

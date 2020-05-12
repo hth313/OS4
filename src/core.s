@@ -69,14 +69,17 @@ lightWake:    c=0     x
               ?s5=1                 ; message flag?
               goc     checkPause    ; yes, leave display alone
               ?s7=1                 ; alpha mode?
-              goc     checkPause    ; yes, leave display alone
-              c=regn 14
+              gonc    10$           ; no
+              ?s3=1                 ; yes, also program mode?
+              goc     20$           ; yes
+              goto    checkPause    ; no, leave display alone
+10$:          c=regn  14
               c=c+c   xs
               c=c+c   xs
               goc     LocalMEMCHK   ; data entry in progress
               c=c+c   xs
               goc     LocalMEMCHK   ; partial key in progress
-              ?s3=1                 ; program mode?
+20$:          ?s3=1                 ; program mode?
               golc    doPRGM        ; yes, we may need to display certain
                                     ; instructions in a custom way
               gosub   disableOrphanShells

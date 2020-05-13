@@ -38,6 +38,18 @@ A four word sequence at the end of a module that contains a short
 identification of the module. Some bits are used to mark if the module
 is banked and if it has secondary functions.
 
+.. glossary:: Mainframe
+
+The name HP used internally for the HP-41 firmware. (Normally it means
+a very powerful computer.)
+
+.. glossary:: MCODE
+
+The machine language used on the HP-41. HP originally called it
+microcode,  which is misleading as it usually means something
+else. The term M-Code was coined in the user community (where the "M"
+could refer to either), and later it became MCODE.
+
 .. glossary:: Primary bank
 
 Bank 1 in a banked module.

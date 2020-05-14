@@ -140,7 +140,6 @@ clearAssignment10:
               nop                   ; (P+1) will not happen
               nop                   ; (P+2) will not happen
               c=m                   ; reset bitmap bit
-              acex
               c=a-c
               data=c
 
@@ -222,12 +221,11 @@ testAssignBit10:
               ?s1=1                 ; shiftset?
               goc     7$            ; yes
               c=regn  10            ; load unshifted bits
-7$:           m=c                   ; M= bit map
+7$:           acex                  ; A= bitmap register value
+              m=c                   ; M= mask (bit we are testing)
               c=c&a                 ; row,col bit set?
               ?c#0                  ; normally assigned?
               golc    RTNP2_B2      ; yes, return to (P+2)
-              acex
-              m=c                   ; M= bit we are testing
               gosub   assignArea
               rtn                   ; (P+1) no secondary assignments, return to (P+1)
                                     ;   as not assigned
@@ -402,7 +400,7 @@ assignSecondary10:
               nop                   ; (P+2) system assigned
                                     ;        (should not happen as we cleared it)
               c=m
-              c=a+c
+              c=c|a
               data=c                ; write it back
               c=n                   ; get return address back from N
               rcr     4

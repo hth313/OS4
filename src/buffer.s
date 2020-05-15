@@ -651,9 +651,10 @@ shrinkBuffer_B2:
 ;;; scratchArea docend
 
               .section code, reorder
-              .public scratchArea
+              .public scratchArea, scratchArea10
 scratchArea:  gosub   systemBuffer
               rtn                   ; (P+1) no system buffer
+scratchArea10:
               gosub   scratchOffset
               c=a+c   x
               dadd=c

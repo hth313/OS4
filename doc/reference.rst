@@ -836,7 +836,9 @@ Catalog
 **catalog**
 -----------
 
-**Entry point:** ``4F7C``
+**Entry point:** ``4F7C`` (catalog)
+
+**Entry point:**  ``4F7E`` (catalogWithSize)
 
 .. literalinclude:: ../src/catalog.s
    :language: none

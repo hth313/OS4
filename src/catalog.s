@@ -10,8 +10,15 @@
 ;;; catalog - generic catalog support
 ;;;
 ;;; Assume a single register state that is held in N while running.
-;;; The state is saved in the scratch area while stopped. This area is
-;;; allocated up front.
+;;; The state is saved in the Q register while stopped.
+;;;
+;;; Alternative entry point:
+;;; catalogWithSize - same as catalog, but useful when the state needs
+;;;   more than one register. Put the needed size in C.X which will
+;;;   allocate the scratch area of this size. The N register is still
+;;;   a single state register while running and it is saved in the
+;;;   Q register. The scratch area is allocated up front and will
+;;;   result in NO ROOM if not enough registers are available.
 ;;;
 ;;; The calling sequence is:
 ;;;           gosub   catalog
@@ -35,17 +42,16 @@
               .extern noRoom, errorMessage, errorExit, allocScratch
               .extern jumpC0, jumpC1, hasActiveTransientApp
               .extern exitTransientApp, keyDispatch, activateShell
-              .extern scratchArea
+              .extern systemBuffer
 toNoRoom:     golong  noRoom
 catEmpty:     gosub   errorMessage
               .messl  "CAT EMPTY"
               golong  errorExit
 
-catalog:      ldi     1             ; request one scratch register
 catalogWithSize:
               gosub   allocScratch  ; make room for state while stopped
               goto    toNoRoom
-              c=stk
+catalog:      c=stk
               spopnd                ; drop second return addresses
               spopnd
               stk=c
@@ -109,8 +115,9 @@ stopCatalog:  c=stk
               cxisa
               gosub   activateShell
               goto    noRoom10
-return:       gosub   scratchArea   ; save state and return to OS
+return:       c=0                   ; select chip 0
+              dadd=c
               c=n
-              data=c
+              regn=c  Q             ; save state in Q
               gosub   STMSGF        ; set message flag
               golong  NFRKB         ; give control back to OS

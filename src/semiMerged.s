@@ -924,6 +924,17 @@ xeqKeyboard:
                                     ; C[6:3]= XADR
               gosub   secondaryProgram
               nop                   ; (P+1) we know this exists
+              c=0                   ; C[13]=0
+              ?s8=1                 ; dual?
+              gonc    57$           ; no
+              c=c+1   s             ; yes
+57$:          c=c-1   m             ; C.M= all bits set
+                                    ; C[13:2]= marker for valid secondary
+                                    ;          function code in REG9, used
+                                    ;          to protect against call of the
+                                    ;          prefix function out of context
+                                    ;          from the keyboard, i.e. assigned
+                                    ;          to a key
               bcex    x             ; C[1:0]= adjusted function number
               regn=c  9             ; save in REGN9/Q
               c=regn  10

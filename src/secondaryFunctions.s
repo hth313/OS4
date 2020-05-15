@@ -684,6 +684,14 @@ runSecondary: s8=0                  ; not Text 1
               ?s4=1                 ; no, single stepping?
               goc     25$           ; yes
               c=regn  9             ; read function code
+              c=c+1   m             ; check validity of it
+                                    ; C.M should have all bits set
+              gonc    toERRNE       ; nope
+              c=c-1   s             ; C.S -= 1
+              goc     23$           ; done, clobber REGN9.M
+              c=c-1   m             ; accept once more, restore all bits set
+                                    ;  in REGN9.M
+23$:          regn=c  9
               goto    35$
 
 25$:          s9=1                  ; secondary identifier from program memory

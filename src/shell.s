@@ -76,11 +76,12 @@
 ;;; activateShell docend
 
               .section code, reorder
-              .public activateShell
+              .public activateShell, activateShell10
               .extern ensureSystemBuffer, insertShellB, insertShellC, noRoom
 activateShell:
               c=stk                 ; get page
               stk=c
+activateShell10:
               gosub   shellHandle
               gosub   ensureSystemBuffer
               rtn                   ; (P+1) no room
@@ -754,37 +755,6 @@ nextShell:    c=m                   ; C= shell scan state
 10$:          a=c
 ts40:         a=0     s             ; first slot
               goto    ts16          ; loop again
-
-
-;;; **********************************************************************
-;;;
-;;; disableThisShell - end current shell
-;;;
-;;; Assuming that we are scanning the shell stack, disable the current
-;;; shell. Intended to be used when a transient App encounters a default
-;;; key that also means that it should end.
-;;;
-;;; In: M - shell scan state
-;;; Uses: A, C, DADD, PT=6
-;;;
-;;; **********************************************************************
-
-              .section code, reorder
-              .public disableThisShell
-disableThisShell:
-              c=m
-              a=c
-              dadd=c
-              c=data
-              ?a#0    s
-              goc     10$
-              pt=     6
-              c=0     pt
-              goto    20$
-10$:          c=0     s
-20$:          data=c
-              rtn
-
 
 ;;; **********************************************************************
 ;;;

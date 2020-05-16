@@ -37,6 +37,7 @@
               .extern disableThisShell, unpack0, testAssignBit
               .extern secondaryAssignment_B2, secondaryAddress
               .extern resetBank, secondaryProgram, secondaryAddress_B1
+              .extern bufferScan20, exitTransientApp
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -148,13 +149,16 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
 30$:          c=n                   ; no key behavior defined
               cxisa                 ; read descriptor word
               rcr     -1
-              c=c+c   s             ; is this a transient App that ends on
+              c=c+c   xs            ; is this a transient App that ends on
                                     ;  undefined key?
                                     ; (KeyFlagTransientApp, assumed to be 7)
               gonc    35$           ; no
               c=n                   ; yes, terminate it
               gosub   jumpC4        ; call the transient termination vector
-              golong  disableThisShell
+              gosub   exitTransientApp
+              golong  bufferScan20  ; we busted the return address, and we can
+                                    ; just start over with scanning the shell
+                                    ; stack
 35$:          c=n                   ; use system replacement
               golong  appClearDataEntry ; clear app data first
 

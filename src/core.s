@@ -216,11 +216,12 @@ bufferScan:   c=c+c   xs
               ?s1=1                 ; catalog flag set?
               goc     catflag       ; yes, check what key it really is
 
+              .public bufferScan20
 bufferScan10: pt=     3
               c=keys
               c=c+c   pt            ; OFF key?
               golc    OFF           ; yes
-              gosub   topShell
+bufferScan20: gosub   topShell
               goto    toWKUP20_SS0  ; (P+1) no buffer, ordinary keyboard logic
               goto    30$           ; (P+2) no shell, ordinary keyboard logic
               gosub   resetFlags    ; (P+3)

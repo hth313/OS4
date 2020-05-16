@@ -67,9 +67,10 @@
 ;;; activateShell - activate a given Shell
 ;;;
 ;;; In: C.X - packed pointer to shell structure
+;;;     !! Must be called from same page as shell structure !!
 ;;; Out: Returns to (P+1) if not enough free memory
 ;;;      Returns to (P+2) on success
-;;; Uses: A, B, C, M, G, ST, active PT, +2 sub levels
+;;; Uses: A, B, C, M, G, ST, active PT, +3 sub levels
 ;;;
 ;;; **********************************************************************
 ;;; activateShell docend
@@ -450,7 +451,7 @@ exitReclaim10:
 ;;;
 ;;; In: Nothing
 ;;; Out: Nothing
-;;; Uses: A[12], A.X, C, B.X, active PT, DADD, +2 sub levels
+;;; Uses: A, B.X, C, M, ST, active PT, DADD, +3 sub levels
 ;;;
 ;;; **********************************************************************
 ;;; exitTransientApp docend

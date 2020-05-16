@@ -270,7 +270,7 @@ reclaimSystemBuffer:
 ;;; If register was inserted, return to (P+2) with:
 ;;; Out: A.X= buffer header address
 ;;;      B.X= the location of the newly added space
-;;; Uses: A, B, C, G, DADD, active PT set to 10, +1 sub level
+;;; Uses: A, B, C, G, DADD, active PT set to 10, +2 sub level
 ;;;
 ;;; **********************************************************************
 

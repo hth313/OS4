@@ -106,6 +106,11 @@ catalog:      .equlab 0x4f7c
 catalogWithSize: .equlab 0x4f7e
 checkApiVersionOS4: .equlab 0x4f80
 ensureTimer:  .equlab 0x4f82
+catalogStep:  .equlab 0x4f84
+catalogBack:  .equlab 0x4f86
+catalogEnd:   .equlab 0x4f88
+catalogRun:   .equlab 0x4f8a
+catalogReturn: .equlab 0x4f8c
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

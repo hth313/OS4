@@ -833,17 +833,71 @@ Catalog
 
 .. index:: catalogs
 
+The catalog functionality provides a framework that factors out most
+of the structure around running a catalog.
+
 **catalog**
 -----------
 
-**Entry point:** ``4F7C`` (catalog)
+**Entry point:** ``4F7C`` ``catalog``
 
-**Entry point:**  ``4F7E`` (catalogWithSize)
+**Entry point:**  ``4F7E`` ``catalogWithSize``
 
 .. literalinclude:: ../src/catalog.s
    :language: none
    :start-after: ;;; catalog docstart
    :end-before:  ;;; catalog docend
+
+**catalogEnd**
+--------------
+
+**Entry point:** ``4F88``
+
+.. literalinclude:: ../src/catalog.s
+   :language: none
+   :start-after: ;;; catalogEnd docstart
+   :end-before:  ;;; catalogEnd docend
+
+**catalogReturn**
+-----------------
+
+**Entry point:** ``4F8C``
+
+.. literalinclude:: ../src/catalog.s
+   :language: none
+   :start-after: ;;; catalogReturn docstart
+   :end-before:  ;;; catalogReturn docend
+
+**catalogStep**
+---------------
+
+**Entry point:** ``4F84``
+
+.. literalinclude:: ../src/catalog.s
+   :language: none
+   :start-after: ;;; catalogStep docstart
+   :end-before:  ;;; catalogStep docend
+
+**catalogBack**
+---------------
+
+**Entry point:** ``4F86``
+
+.. literalinclude:: ../src/catalog.s
+   :language: none
+   :start-after: ;;; catalogBack docstart
+   :end-before:  ;;; catalogBack docend
+
+**catalogRun**
+--------------
+
+**Entry point:** ``4F8A``
+
+.. literalinclude:: ../src/catalog.s
+   :language: none
+   :start-after: ;;; catalogRun docstart
+   :end-before:  ;;; catalogRun docend
+
 
 Extended memory
 ===============

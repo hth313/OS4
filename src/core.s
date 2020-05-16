@@ -862,6 +862,8 @@ BankSwitchers: .macro
               .extern growHostedBuffer, shrinkHostedBuffer, packHostedBuffers
               .extern dualArgument, exitApp
               .extern catEmpty, catalog, catalogWithSize, displayingMessage
+              .extern catalogStep, catalogBack, catalogEnd, catalogRun
+              .extern catalogReturn
               .public secondaryAddress_B1
 
               golong  activateShell ; 0x4f00
@@ -942,6 +944,11 @@ runSecondaryB2Location:
               golong  catalogWithSize ; 0x4f7e
               golong  checkApiVersionOS4 ; 0x4f80
               golong  ensureTimer   ; 0x4f82
+              golong  catalogStep   ; 0x4f84
+              golong  catalogBack   ; 0x4f86
+              golong  catalogEnd    ; 0x4f88
+              golong  catalogRun    ; 0x4f8a
+              golong  catalogReturn ; 0x4f8c
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab
               .section code2

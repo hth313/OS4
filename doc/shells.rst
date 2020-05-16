@@ -247,6 +247,14 @@ The intended use is to have a user friendly text representation of the
 shell. A shell catalog that visualizes the shell stack could make use
 of it.
 
+Timeout handler
+---------------
+
+This fields points to a handler which is called when there is a
+timeout event. This field is only valid for application shells.
+
+Set this field to 0 if no timeout handler is provided.
+
 An example
 ----------
 
@@ -257,11 +265,12 @@ replaced. Its shell definition could look as follows:
 
                  .align  4
    tvmShell:     .con    AppShell
-                 .con    0             ; no display handler defined
+                 .con    0                 ; no display handler defined
                  .con    .low12 keyHandler ; standard keys
                  .con    .low12 keyHandler ; user keys
                  .con    0                 ; alpha keys, use default
                  .con    .low12 myName
+                 .con    0                 ; no timeout handler
 
                  .align  4
    myName:       .messl  "TVM"

@@ -806,6 +806,9 @@ Timer
 OS4 allows for using the interval timer which can be useful for
 timeouts or periodic updates of the display.
 
+Only the active application will receive timeout events. The timeout
+handler is in the shell descriptor (at offset 6).
+
 **setTimeout**
 ---------------
 

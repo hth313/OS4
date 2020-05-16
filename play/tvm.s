@@ -18,7 +18,7 @@ tvmShell:     .con    AppShell
               .con    .low12 keyHandler ; user keys
               .con    0                 ; alpha keys, use default
               .con    .low12 myName
-              .con    0                 ; no timeouts
+              .con    0                 ; no timeout handler
 
               .section PlayCode
               .align  4

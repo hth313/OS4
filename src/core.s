@@ -741,8 +741,9 @@ ensure41CX:   ldi     25
 
               .public ensureTimer, hasTimer
 ensureTimer:  gosub   hasTimer
+              goto    10$
               rtn
-              gosub   errorMessage
+10$:          gosub   errorMessage
               .messl  "NO TIMER"
 errorExitPop10:
               goto    errorExitPop
@@ -754,8 +755,8 @@ hasTimer:     ldi     26            ; Time module XROM number
               c=0     wpt           ; 5000
               cxisa
               ?a#c    x             ; XROM 26 there?
-              rtnnc                 ; yes
-              golong  RTNP2         ; no
+              rtnc                  ; no
+              golong  RTNP2         ; yes
 
 ;;; checkApiVersionOS4 docstart
 ;;; **********************************************************************

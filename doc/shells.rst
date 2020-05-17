@@ -155,11 +155,12 @@ It is defined as follows:
 
                  .align 4
    myShell:      .con    kind
-                 .con    .low12 displayRoutine
+                 .con    .low12 displayHandler
                  .con    .low12 standardKeys
                  .con    .low12 userKeys
                  .con    .low12 alphaKeys
                  .con    .low12 appendName
+                 .con    .low12 timeoutHandler
 
 The structure must start on an address aligned by 4. It contains
 several pointers that also must be aligned by 4 (which can be seen by

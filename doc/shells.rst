@@ -279,6 +279,8 @@ This is an application shell and it provides an alternative
 keyboard that is used in both standard and user mode. There is no
 display override as it relies on the standard display of X.
 
+.. _auto-terminate-transapps:
+
 Key handlers
 ============
 
@@ -291,7 +293,7 @@ structure. It is defined as follows:
 
                  .align  4
    keyHandler:   gosub   keyKeyboard   ; does not return
-                 .con    (1 << KeyFlagSparseTable) ; flags
+                 .con    (1 << KeyFlagSparseTable) | (1 << KeyFlagTransientApp) ; flags
                  .con    .low12 doDataEntry
                  .con    .low12 clearDataEntry ; end data entry
                  .con    .low12 keyTable
@@ -317,10 +319,15 @@ your application needs to be informed when this happens.
 The field with ``keyTable`` is the actual keyboard table. Refer to
 :ref:`defining-keyboards` for more information about how this is done.
 
-The field ``transientTermination`` is called when a transient
-application is auto terminated by pressing a key not defined by its
-key table. You only need to set this field up if you set the
-``KeyFlagTransientApp`` bit in the flag field.
+.. index:: transient applications; auto termination
+
+The field ``transientTermination`` is used when the
+``KeyFlagTransientApp`` bit is set. This field shall be set to either
+0 or a valid packed pointer to a routine that does additional things
+needed on auto termination. The default behavior removes the transient
+application and the scratch area, which should suffice in most cases.
+This routine is called before the transient application and scratch
+area are removed.
 
 Custom key handler
 ------------------

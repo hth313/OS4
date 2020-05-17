@@ -43,6 +43,24 @@ from other applications:
    additional resources like the scratch storage area (as anonymous
    buffer) or the interval timer.
 
+Creation
+========
+
+A transient application is defined mostly in the same way as an
+application. Use the ``TransAppShell`` kind (instead of ``AppShell``).
+
+Termination
+===========
+
+Transient applications normally auto terminate when a key not handled
+by it is pressed. For this to work with a defined keyboard you need to
+set the ``KeyFlagTransientApp`` bit and also define the termination
+entry, see :ref:`auto-terminate-transapps`
+
+If you are using your own custom keyboard handler, you need to remove
+the shell yourself by calling ``exitTransientApp``.
+
+
 Ideas
 =====
 

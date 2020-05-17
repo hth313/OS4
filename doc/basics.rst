@@ -193,7 +193,7 @@ you can press and hold the key to see its current behavior. In
 addition to explicit assignments, local alpha labels in the current
 RPN program is scanned when one of the two top row keys is pressed.
 
-Key-codes
+Key codes
 =========
 
 .. index:: key codes

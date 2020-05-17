@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Stop on failure
+set -e
+
+# Build module and documentaiton
+pushd src
+make
+popd
+pushd doc
+make html
+make latexpdf
+markdown  ReleaseNotes.md >ReleaseNotes.html
+popd
+
+# Set up a dist folder
+rm -rf dist
+mkdir dist
+cp src/OS4.mod dist/
+cp src/OS4.mod2 dist/
+cp -R doc/_build/html dist/doc
+cp doc/_build/latex/OS4.pdf dist/doc
+cp doc/ReleaseNotes.html dist/
+
+# Unpack .rom files from the MOD2 file for 41CL
+pushd dist
+modtool --extract-rom-pages OS4.mod2
+popd
+
+# Clean up some stuff we do not want
+rm -rf dist/doc/_sources
+rm dist/doc/.buildinfo
+
+# Pack a .zip
+pushd dist
+zip -r OS4 *
+popd

@@ -290,7 +290,7 @@ of secondary functions which reside in the system buffer.
 
 **Entry point:** ``4F52``
 
-This routine will remove an assignment to a given key-code no matter
+This routine will remove an assignment to a given key code no matter
 if it is a primary or secondary assignment (or both).
 
 .. literalinclude:: ../src/assignment.s

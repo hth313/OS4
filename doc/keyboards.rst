@@ -7,7 +7,7 @@ Defining keyboards
 .. index:: keyboards; defining
 
 In this chapter we will look at how to define keyboards. A keyboard is
-essentially a mapping of a key-code to a function. The key-code is in
+essentially a mapping of a key code to a function. The key code is in
 0--79 form, which means that we transform a key press to an index
 starting from 0 and ending with 79. There are no gaps in this
 sequence, so it can become a simple array lookup.

@@ -122,7 +122,7 @@ to keys and are stored in the secondary assignment area. Two
 assignments can be stored in one register. This gives seven nibbles
 to describe one assignment. The function code has a two nibbles XROM
 number and a three nibbles secondary function number. The two remaining
-nibbles are the key-code.
+nibbles are the key code.
 
 Due to using a single nibble being used for the size of this area, there is a
 limit of 30 secondary functions being assigned to keys.

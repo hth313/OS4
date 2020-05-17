@@ -208,7 +208,7 @@ forms are easily converted between by increment (or decrement) the
 key code by one. The reason for the two forms is that the internal
 key tables use an index starting at 0 (0--79 form), but 0 is reserved
 for an empty assignment slot in the key assignment registers. The
-solution is to increment the key-code by one, giving the 1--80 form,
+solution is to increment the key code by one, giving the 1--80 form,
 which makes it possible to tell an inactive assignment apart from an
 active assignment.
 
@@ -222,7 +222,7 @@ operating system.
 If most of the keys are given a meaning it makes sense to define a
 keyboard like an array indexed in 0--79 form, just like the built in
 keyboards. As an alternative, OS4 provides a way of defining a sparse
-keyboard where a 0--79 key-code is stored paired with its
+keyboard where a 0--79 key code is stored paired with its
 function. In this case a linear scan is used, which saves space
 if few keys are defined, while still being reasonable fast.
 

@@ -235,7 +235,7 @@ If you take over prompt handling but in the end make use of existing
 functionality in mainframe it will not work properly with secondary
 functions. One example of this is the ``ASN'`` assign replacement
 function in the Boost module. It uses the mainframe code to ask for
-the key-code as its final step. After this it tries to execute the
+the key code as its final step. After this it tries to execute the
 function from mainframe and it cannot execute secondary
 functions. This forces it to be an ordinary XROM function.
 

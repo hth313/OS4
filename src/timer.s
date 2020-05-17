@@ -18,8 +18,6 @@
 ;;; cursor or field.
 ;;;
 ;;; In: C[4:0] - timeout in hundreds of seconds, BCD coded
-;;;     C.X - zero means a single timeout
-;;;           non-zero means a periodic timeout for animation
 ;;; Out: Returns to (P+1) if the timer does not exist
 ;;;      Returns to (P+2) if the timer exists and was initialized,
 ;;;          timer is now armed for a timeout.
@@ -55,7 +53,8 @@ setTimeout:   bcex                  ; B= timeout
               wsint                 ; write & start interval timer
               gosub   systemBuffer
               goto    clearTimeout  ; (P+1) no system buffer
-              c=data                ; set Flag_IntervalTimer
+              c=data                ; set Flag_IntervalTimer, to indicate
+                                    ;  we are borrowing it
               cstex
               st=1    Flag_IntervalTimer
               cstex
@@ -117,7 +116,7 @@ checkTimeout: gosub   systemBuffer
               c=c+c   xs
               c=c+c   xs            ; partial key in progress?
               gonc    10$           ; no
-              a=0     s
+              a=0     s             ; yes, notify partial key about timeout
               a=a+1   s             ; A.S= non-zero to indicate a timeout
               rtn                   ; return to backarrow key press entry
                                     ; which normally have A.S=0

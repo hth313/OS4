@@ -111,6 +111,7 @@ catalogBack:  .equlab 0x4f86
 catalogEnd:   .equlab 0x4f88
 catalogRun:   .equlab 0x4f8a
 catalogReturn: .equlab 0x4f8c
+assignKeycode: .equlab 0x4f8e
 jumpC5:       .equlab 0x4d00
 jumpC4:       .equlab 0x4d01
 jumpC3:       .equlab 0x4d02

@@ -800,6 +800,17 @@ Keyboard
    :start-after: ;;; keyDispatch docstart
    :end-before:  ;;; keyDispatch docend
 
+**assignKeycode**
+-----------------
+
+**Entry point:** ``4F8E``
+
+.. literalinclude:: ../src/assignment.s
+   :language: none
+   :start-after: ;;; assignKeycode docstart
+   :end-before:  ;;; assignKeycode docend
+   :lines: 1-4, 6-
+
 Timer
 =====
 

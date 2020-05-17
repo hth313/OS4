@@ -536,3 +536,57 @@ clearSecondaryAssignments:
               bcex    x             ; C.X= offset to first register to remove
               gosub   shrinkBuffer_B2 ; remove the secondary assignment area
 10$:          golong  enableBank1
+
+
+;;; assignKeycode docstart
+;;; **********************************************************************
+;;;
+;;; assignKeycode - convert key code to the way it is shown by assign
+;;;
+;;; Note: This routine is in bank 2, but returns in bank 1
+;;; In: C.X - key code as returned by C=KEYS
+;;; Out: C - key code as floating point number
+;;; Uses: A, C, PT, +0 sub levels
+;;;
+;;; **********************************************************************
+;;; assignKeycode docend
+
+              .section code2, reorder
+              .public assignKeycode
+assignKeycode:
+              a=c     x
+              pt=     0
+              c=c+c   pt            ; check for OFF key
+              gonc    30$           ; not OFF key
+              c=0                   ; OFF key = keycode 01
+              goto    40$
+30$:          ldi     0xc4          ; USER, PRGM, ALPHA
+              ?a<c    x             ; is it a top row key?
+              goc     50$           ; no
+              a=a-c   x             ; now top row keys = 00, 02, 01, 00
+              c=0
+              lc      3
+              acex    x
+              c=a-c   x             ; now top row keys = 00, 01, 02, 03
+40$:          c=c+1   x             ; now top row keys = 01, 02, 03, 04
+              rcr     2             ; C= 0X000000000000
+              goto    80$
+50$:          asl     x
+              a=a+1   xs            ; 3's from the actual column
+              pt=     2
+              c=0
+              lc      2
+              c=c-1   wpt           ; C= 0x2FF (300 - 1)
+60$:          a=a-c   x             ; loop to subtract 3 from old column
+              gonc    60$
+              ldi     0x31
+              ?a#c    pt            ; row 3?
+              goc     70$           ; no, skip column adjustment
+              ?a#c    wpt           ; ENTER key?
+              gonc    70$           ; yes, skip column adjustment
+              a=a-1   x             ; correct row 3 column numbers
+70$:          a=a+1   pt            ; row 0 - 7 => row 1 - 8
+              acex    wpt           ; C= keycode
+              rcr     3             ; make normalized form
+              c=c+1   x
+80$:          golong  enableBank1   ; return and restore bank 1

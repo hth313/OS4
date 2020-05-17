@@ -322,11 +322,40 @@ application is auto terminated by pressing a key not defined by its
 key table. You only need to set this field up if you set the
 ``KeyFlagTransientApp`` bit in the flag field.
 
-.. note::
+Custom key handler
+------------------
 
-   The reason there is a call to ``keyKeyboard`` is to allow for
-   flexibility in having very different keyboard behaviors. At the
-   moment the ``keyKeyboard`` routine is the only one provided.
+.. index:: keyboards; custom key handler
+
+While ``keyKeyboard`` is very convenient when handling keyboard
+layouts and reassignments, you are not bound to use it.
+A simple key input routine could use a custom key handler instead:
+
+.. code-block:: ca65
+
+                 .align  4
+   keyHandler:   gosub   clearTimeout
+                 gosub   exitTransientApp
+                 c=keys
+                 rcr     3
+                 c=0     xs            ; C.X= key code
+                 gosub   assignKeycode
+                 bcex                  ; B= floating point key code
+                 gosub   RSTKB         ; reset key board
+                 s13=1                 ; continue executing
+                 golong  RCL           ; push keycode on stack
+
+This example is from the ``KEY`` function in the Boost module. It has
+already set up a timeout and a transient application, so these are
+first removed. Then the key code is fetched and the ``assignKeycode``
+routine to convert it to a user friendly key code, the same as used in
+assignments. Finally, it resets the keyboard (wait until key is
+released) and push the key code on stack and continue execution.
+
+.. note::
+   As can be seen the key handler is really a routine. The structure
+   used with ``keyKeyboard`` is picked up from the return address left
+   on the stack after the call to it.
 
 Internal representation
 =======================

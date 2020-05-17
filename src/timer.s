@@ -92,12 +92,13 @@ clearTimeout: gosub   ENTMR
 ;;; We check for an interval timer timeout and if have it in use.
 ;;; If doing partial key sequence, return to the backarrow entry point
 ;;; with A.S non-zero to indicate a timeout.
-;;; If not doing partial keys, we send out a notification.
+;;; If not doing partial keys, find active application and invoke its
+;;; timeout vector.
 ;;;
 ;;; **********************************************************************
 
               .public checkTimeout
-              .extern noTimeout, topShell, jumpC5
+              .extern noTimeout, topShell, jumpC6
 checkTimeout: gosub   systemBuffer
               goto    50$           ; (P+1) no system buffer
               c=data                ; read buffer header
@@ -126,8 +127,7 @@ checkTimeout: gosub   systemBuffer
               ?s9=1                 ; did we find an applicaton?
               gonc    50$           ; no
               acex    m
-              c=c+1   m
-              gosub   jumpC5        ; call timeout vector (if it exists)
+              gosub   jumpC6        ; call timeout vector (if it exists)
 
 50$:          gosub   LDSST0
               golong  noTimeout

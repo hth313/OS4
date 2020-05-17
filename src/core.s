@@ -396,7 +396,7 @@ pause:        cstex                 ; restore flags
 ;;; jumpC0 - jump via a packed pointer
 ;;; jumpC1 - jump via a packed pointer, increment by 1
 ;;;   ...
-;;; jumpC5 - jump via a packed pointer, increment by 5
+;;; jumpC6 - jump via a packed pointer, increment by 6
 ;;; jumpPacked - C[6] has page and C.X holds packed pointer
 ;;;
 ;;; Assume that C[6:3] points somewhere in a table of code pointers, well
@@ -425,8 +425,9 @@ pause:        cstex                 ; restore flags
 ;;; **********************************************************************
 ;;; jumpPacked docend
 
-              .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5
+              .public jumpC0, jumpC1, jumpC2, jumpC3, jumpC4, jumpC5, jumpC6
               .public jumpPacked
+jumpC6:       c=c+1   m
 jumpC5:       c=c+1   m
 jumpC4:       c=c+1   m
 jumpC3:       c=c+1   m
@@ -541,7 +542,7 @@ jumpP2:       c=c+1   m
 ;;; unpack - unpack a packed pointer in C[6:3]
 ;;; unpack1 - unpack a packed pointer in C[6:3] + 1
 ;;;  ...
-;;; unpack5 - unpack a packed pointer in C[6:3] + 5
+;;; unpack6 - unpack a packed pointer in C[6:3] + 6
 ;;;
 ;;; Change a base pointer to what a packed field pointer points to.
 ;;; Basically base.member in C.
@@ -552,7 +553,9 @@ jumpP2:       c=c+1   m
 ;;; **********************************************************************
 ;;; unpack docend
 
-              .public unpack, unpack0, unpack1, unpack2, unpack3, unpack4, unpack5
+              .public unpack, unpack0, unpack1, unpack2, unpack3, unpack4
+              .public unpack5, unpack6
+unpack6:      c=c+1   m
 unpack5:      c=c+1   m
 unpack4:      c=c+1   m
 unpack3:      c=c+1   m

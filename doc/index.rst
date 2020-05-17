@@ -27,6 +27,7 @@ Welcome to OS4's documentation!
    secondary
    semimerged
    partialKeys
+   timer
 
    reference
    glossary

@@ -230,4 +230,3 @@ keyHandler:   gosub   keyKeyboard   ; does not return
               .con    0             ; end digit entry
               .con    .low12 keyTableTVM
                                     ; no transient termination entry needed
-                                    ; we do not have keyboard secondaries

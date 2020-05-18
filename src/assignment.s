@@ -543,7 +543,8 @@ clearSecondaryAssignments:
 ;;;
 ;;; assignKeycode - convert key code to the way it is shown by assign
 ;;;
-;;; Note: This routine is in bank 2, but returns in bank 1
+;;; Note: This routine is in bank 2, but returns in bank 1.
+;;;       Code taken from Extended Functions module.
 ;;; In: C.X - key code as returned by C=KEYS
 ;;; Out: C - key code as floating point number
 ;;; Uses: A, C, PT, +0 sub levels

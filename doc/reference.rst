@@ -94,7 +94,7 @@ Return to mainframe
 XFNRC
 -----
 
-**Entry point:** ``4D2E``
+**Entry point:** ``4D30``
 
 .. literalinclude:: ../src/core.s
    :language: none
@@ -104,7 +104,7 @@ XFNRC
 XFNRPU
 ------
 
-**Entry point:** ``4D32``
+**Entry point:** ``4D34``
 
 .. literalinclude:: ../src/core.s
    :language: none

@@ -1,5 +1,5 @@
-The HP-41 OS4 module
-====================
+The OS4 module for the HP-41
+============================
 
 Welcome to the OS4 module for the HP-41 calculator!
 OS4 is a powerful extension module which removes several limitations

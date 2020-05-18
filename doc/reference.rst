@@ -5,8 +5,8 @@ Entry points reference
 API version check
 =================
 
-**checkApiVersionOS4**
-----------------------
+checkApiVersionOS4
+------------------
 
 .. index:: API version check, version check
 
@@ -24,8 +24,8 @@ Fundamentals
 Basic building blocks for dealing with packed pointers and other small
 routines.
 
-**jump via packed pointer**
----------------------------
+jump via packed pointer
+-----------------------
 
 .. index:: jump via packed pointer
 
@@ -40,8 +40,8 @@ table indirect call to a packed pointer address. You can also use the
    :start-after: ;;; jumpPacked docstart
    :end-before:  ;;; jumpPacked docend
 
-**call aligned subroutine**
----------------------------
+call aligned subroutine
+-----------------------
 
 .. index:: call aligned subroutine, aligned subroutine
 
@@ -55,8 +55,8 @@ subroutine level and can access the full 4K page.
    :start-after: ;;; gosubAligned docstart
    :end-before:  ;;; gosubAligned docend
 
-**return skipping ahead**
--------------------------
+return skipping ahead
+---------------------
 
 .. index:: return skipping ahead
 
@@ -73,8 +73,8 @@ skipping one or two instructions ahead in the return location.
    :start-after: ;;; RTNP3 docstart
    :end-before:  ;;; RTNP3 docend
 
-**unpack a packed pointer**
----------------------------
+unpack a packed pointer
+-----------------------
 
 .. index:: unpack a packed pointer
 
@@ -91,8 +91,8 @@ Return to mainframe
 
 .. index:: return to mainframe, mainframe; return to
 
-**XFNRC**
----------
+XFNRC
+-----
 
 **Entry point:** ``4D2C``
 
@@ -101,8 +101,8 @@ Return to mainframe
    :start-after: ;;; XNFRC docstart
    :end-before:  ;;; XNFRC docend
 
-**XFNRPU**
-----------
+XFNRPU
+------
 
 **Entry point:** ``4D30``
 
@@ -121,8 +121,8 @@ module and later 41CX. They are provided in OS4 as they do not exist
 in 41C and 41CV. Thus, if you rely on OS4 they are now available on
 all HP-41 variants.
 
-**displayError**
-----------------
+displayError
+------------
 
 **Entry point:** ``4F82``
 
@@ -131,8 +131,8 @@ all HP-41 variants.
    :start-after: ;;; displayError docstart
    :end-before:  ;;; displayError docend
 
-**errorMessage**
-----------------
+errorMessage
+------------
 
 **Entry point:** ``4F2A``
 
@@ -141,8 +141,8 @@ all HP-41 variants.
    :start-after: ;;; errorMessage docstart
    :end-before:  ;;; errorMessage docend
 
-**errorExit**
--------------
+errorExit
+---------
 
 **Entry point:** ``4F2C``
 
@@ -151,8 +151,8 @@ all HP-41 variants.
    :start-after: ;;; errorExit docstart
    :end-before:  ;;; errorExit docend
 
-**noRoom**
-----------
+noRoom
+------
 
 **Entry point:** ``4F28``
 
@@ -161,8 +161,8 @@ all HP-41 variants.
    :start-after: ;;; noRoom docstart
    :end-before:  ;;; noRoom docend
 
-**noSysBuf**
-------------
+noSysBuf
+--------
 
 **Entry point:** ``4F4A``
 
@@ -178,8 +178,8 @@ Some code may require certain optional hardware to be available for
 correct operation. These routines allow for testing such requirements and
 give a sensible error if the resource is not present.
 
-**ensureDrive**
----------------
+ensureDrive
+-----------
 
 .. index:: HP-IL mass storage; testing for
 
@@ -195,8 +195,8 @@ HP-IL loop.
    :end-before:  ;;; ensureDrive docend
    :lines: 1-3, 5-
 
-**ensureHPIL**
---------------
+ensureHPIL
+----------
 
 .. index:: HP-IL; testing for
 
@@ -208,8 +208,8 @@ HP-IL loop.
    :end-before:  ;;; ensureDrive docend
    :lines: 1-2, 4-
 
-**ensure41CX**
---------------
+ensure41CX
+----------
 
 .. index:: 41CX; testing for
 
@@ -223,8 +223,8 @@ accessing extended memory is available.
    :start-after: ;;; ensure41CX docstart
    :end-before:  ;;; ensure41CX docend
 
-**ensureTimer**
----------------
+ensureTimer
+-----------
 
 .. index:: timer; testing for
 
@@ -267,8 +267,8 @@ Assignments
 Functions related to assignments are mainly for handling assignments
 of secondary functions which reside in the system buffer.
 
-**assignSecondary**
--------------------
+assignSecondary
+---------------
 
 .. index:: assignments; secondary
 
@@ -285,8 +285,8 @@ of secondary functions which reside in the system buffer.
    ROOM" error exit. In this case any previous assignment made to the
    key is lost.
 
-**clearAssignment**
--------------------
+clearAssignment
+---------------
 
 **Entry point:** ``4F52``
 
@@ -299,8 +299,8 @@ if it is a primary or secondary assignment (or both).
    :end-before:  ;;; clearAssignment docend
    :lines: 1-4, 9-
 
-**clearSecondaryAssignments**
------------------------------
+clearSecondaryAssignments
+-------------------------
 
 **Entry point:** ``4F5E``
 
@@ -310,8 +310,8 @@ if it is a primary or secondary assignment (or both).
    :end-before:  ;;; clearSecondaryAssignments docend
    :lines: 1-4, 6-
 
-**findSecondaryAssignments**
-----------------------------
+findSecondaryAssignments
+------------------------
 
 **Entry point:** ``4F0C``
 
@@ -329,8 +329,8 @@ Buffers
 Buffer routines cover both ordinary I/O buffers, as well as hosted
 buffers which are stored inside the system buffer.
 
-**findBuffer**
---------------
+findBuffer
+----------
 
 **Entry point:** ``4F06``
 
@@ -347,8 +347,8 @@ This routine is used to locate a buffer.
    ``LDI`` instruction, which causes the upper two nibbles (``C[2:1]``
    of the ``C.X`` field) to be zero.
 
-**ensureBuffer**
-----------------
+ensureBuffer
+------------
 
 **Entry point:** ``4F08``
 
@@ -358,8 +358,8 @@ This routine is used to locate a buffer.
    :end-before:  ;;; ensureBuffer docend
    :lines: 1-3, 5-
 
-**reclaimSystemBuffer**
------------------------
+reclaimSystemBuffer
+-------------------
 
 **Entry point:** ``4F30``
 
@@ -368,8 +368,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; reclaimSystemBuffer docstart
    :end-before:  ;;; reclaimSystemBuffer docend
 
-**growBuffer**
---------------
+growBuffer
+----------
 
 **Entry point:** ``4F0A``
 
@@ -378,8 +378,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; growBuffer docstart
    :end-before:  ;;; growBuffer docend
 
-**shrinkBuffer**
-----------------
+shrinkBuffer
+------------
 
 **Entry point:** ``4F38``
 
@@ -388,8 +388,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; shrinkBuffer docstart
    :end-before:  ;;; shrinkBuffer docend
 
-**allocScratch**
-----------------
+allocScratch
+------------
 
 .. index:: scratch area
 
@@ -400,8 +400,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; allocScratch docstart
    :end-before:  ;;; allocScratch docend
 
-**scratchArea**
----------------
+scratchArea
+-----------
 
 **Entry point:** ``4F3E``
 
@@ -410,8 +410,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; scratchArea docstart
    :end-before:  ;;; scratchArea docend
 
-**clearScratch**
-----------------
+clearScratch
+------------
 
 **Entry point:** ``4F3C``
 
@@ -420,8 +420,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; clearScratch docstart
    :end-before:  ;;; clearScratch docend
 
-**newHostedBuffer**
--------------------
+newHostedBuffer
+---------------
 
 .. index:: buffers; hosted, hosted buffers
 
@@ -432,8 +432,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; newHostedBuffer docstart
    :end-before:  ;;; newHostedBuffer docend
 
-**findBufferHosted**
----------------------
+findBufferHosted
+----------------
 
 **Entry point:** ``4F6A``
 
@@ -442,8 +442,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; findBufferHosted docstart
    :end-before:  ;;; findBufferHosted docend
 
-**reclaimHostedBuffer**
------------------------
+reclaimHostedBuffer
+-------------------
 
 **Entry point:** ``4F6C``
 
@@ -452,8 +452,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; reclaimHostedBuffer docstart
    :end-before:  ;;; reclaimHostedBuffer docend
 
-**packHostedBuffers**
-----------------------
+packHostedBuffers
+-----------------
 
 **Entry point:** ``4F74``
 
@@ -462,8 +462,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; packHostedBuffers docstart
    :end-before:  ;;; packHostedBuffers docend
 
-**growHostedBuffer**
---------------------
+growHostedBuffer
+----------------
 
 **Entry point:** ``4F70``
 
@@ -472,8 +472,8 @@ This routine is used to locate a buffer.
    :start-after: ;;; growHostedBuffer docstart
    :end-before:  ;;; growHostedBuffer docend
 
-**shrinkHostedBuffer**
------------------------
+shrinkHostedBuffer
+------------------
 
 **Entry point:** ``4F72``
 
@@ -487,8 +487,8 @@ Shells
 
 .. index:: shells
 
-**activateShell**
------------------
+activateShell
+-------------
 
 .. index:: shells; activation, activation; of shells
 
@@ -499,8 +499,8 @@ Shells
    :start-after: ;;; activateShell docstart
    :end-before:  ;;; activateShell docend
 
-**exitShell**
--------------
+exitShell
+---------
 
 .. index:: shells; exiting
 
@@ -512,8 +512,8 @@ Shells
    :end-before:  ;;; exitShell docend
    :lines: 1-3, 5-10, 13-
 
-**reclaimShell**
-----------------
+reclaimShell
+------------
 
 .. index:: shells; reclaim, reclaim; shells
 
@@ -525,8 +525,8 @@ Shells
    :end-before:  ;;; exitShell docend
    :lines: 1-2, 4-5, 12-
 
-**exitTransientApp**
---------------------
+exitTransientApp
+----------------
 
 .. index:: shells; transient application, transient applications
 
@@ -537,8 +537,8 @@ Shells
    :start-after: ;;; exitTransientApp docstart
    :end-before:  ;;; exitTransientApp docend
 
-**exitApp**
------------
+exitApp
+-------
 
 .. index:: shells; exiting
 
@@ -549,8 +549,8 @@ Shells
    :start-after: ;;; exitApp docstart
    :end-before:  ;;; exitApp docend
 
-**hasActiveTransientApp**
--------------------------
+hasActiveTransientApp
+---------------------
 
 **Entry point:** ``4F42``
 
@@ -559,8 +559,8 @@ Shells
    :start-after: ;;; hasActiveTransientApp docstart
    :end-before:  ;;; hasActiveTransientApp docend
 
-**activeApp**
--------------
+activeApp
+---------
 
 **Entry point:** ``4F36``
 
@@ -569,8 +569,8 @@ Shells
    :start-after: ;;; activeApp docstart
    :end-before:  ;;; activeApp docend
 
-**topShell**
-------------
+topShell
+--------
 
 **Entry point:** ``4F14``
 
@@ -579,8 +579,8 @@ Shells
    :start-after: ;;; topShell docstart
    :end-before:  ;;; topShell docend
 
-**nextShell**
--------------
+nextShell
+---------
 
 **Entry point:** ``4F18``
 
@@ -588,16 +588,16 @@ This routine can be used to find the next successive shell after
 starting with a call to ``topShell``. You must preserve the ``M``
 register while making successive calls.
 
-**topExtension**
-----------------
+topExtension
+------------
 
 **Entry point:** ``4F16``
 
 This is similar to ``topShell`` but searches for extension points in
 the shell stack.
 
-**shellDisplay**
-----------------
+shellDisplay
+------------
 
 .. index:: shells; default display, display; default
 
@@ -608,8 +608,8 @@ the shell stack.
    :start-after: ;;; shellDisplay docstart
    :end-before:  ;;; shellDisplay docend
 
-**displayDone**
-----------------
+displayDone
+-----------
 
 .. index:: shells; default display, display; default
 
@@ -620,8 +620,8 @@ the shell stack.
    :start-after: ;;; displayDone docstart
    :end-before:  ;;; displayDone docend
 
-**displayingMessage**
----------------------
+displayingMessage
+-----------------
 
 .. index:: message flag
 
@@ -632,8 +632,8 @@ the shell stack.
    :start-after: ;;; displayingMessage docstart
    :end-before:  ;;; displayingMessage docend
 
-**sendMessage**
----------------
+sendMessage
+-----------
 
 .. index:: extension handlers
 
@@ -644,8 +644,8 @@ the shell stack.
    :start-after: ;;; sendMessage docstart
    :end-before:  ;;; sendMessage docend
 
-**shellName**
--------------
+shellName
+---------
 
 **Entry point:** ``4F1A``
 
@@ -654,8 +654,8 @@ the shell stack.
    :start-after: ;;; shellName docstart
    :end-before:  ;;; shellName docend
 
-**shellKeyboard**
------------------
+shellKeyboard
+-------------
 
 **Entry point:** ``4F4C``
 
@@ -676,8 +676,8 @@ These functions define semi-merged prompting functions.
    function. The OS4 code inspects the start of potential such
    functions and expects it to look in a particular way.
 
-**argument**
-------------
+argument
+--------
 
 **Entry point:** ``4F1E``
 
@@ -686,8 +686,8 @@ These functions define semi-merged prompting functions.
    :start-after: ;;; argument docstart
    :end-before:  ;;; argument docend
 
-**dualArgument**
-----------------
+dualArgument
+------------
 
 **Entry point:** ``4F76``
 
@@ -701,8 +701,8 @@ Partial key sequences
 
 .. index:: partial key sequences
 
-**XABTSEQ**
------------
+XABTSEQ
+-------
 
 **Entry point:** ``4F5C``
 
@@ -716,8 +716,8 @@ Secondary functions
 
 .. index:: secondary functions, functions; secondary
 
-**XASRCH**
------------
+XASRCH
+------
 
 This is a variant of the ``ASRCH`` routine in mainframe. This routine
 works the same but will also locate secondary functions.
@@ -729,8 +729,8 @@ works the same but will also locate secondary functions.
    :start-after: ;;; XASRCH docstart
    :end-before:  ;;; XASRCH docend
 
-**resetBank**
---------------
+resetBank
+---------
 
 .. index:: bank switching
 
@@ -742,8 +742,8 @@ works the same but will also locate secondary functions.
    :end-before:  ;;; resetBank docend
    :lines: 1-3, 5-
 
-**secondaryAddress**
---------------------
+secondaryAddress
+----------------
 
 .. index:: functions, secondary, secondary functions
 
@@ -755,8 +755,8 @@ works the same but will also locate secondary functions.
    :end-before:  ;;; secondaryAddress docend
    :lines: 1-3, 6-
 
-**runSecondary**
-----------------
+runSecondary
+------------
 
 **Entry point:** ``4F60``
 
@@ -765,8 +765,8 @@ works the same but will also locate secondary functions.
    :start-after: ;;; runSecondary docstart
    :end-before:  ;;; runSecondary docend
 
-**invokeSecondary**
--------------------
+invokeSecondary
+---------------
 
 **Entry point:** ``4F5A``
 
@@ -780,8 +780,8 @@ Keyboard
 
 .. index:: keyboard
 
-**keyKeyboard**
----------------
+keyKeyboard
+-----------
 
 **Entry point:** ``4F5A``
 
@@ -790,8 +790,8 @@ Keyboard
    :start-after: ;;; keyKeyboard docstart
    :end-before:  ;;; keyKeyboard docend
 
-**keyDispatch**
----------------
+keyDispatch
+-----------
 
 **Entry point:** ``4F66``
 
@@ -800,8 +800,8 @@ Keyboard
    :start-after: ;;; keyDispatch docstart
    :end-before:  ;;; keyDispatch docend
 
-**assignKeycode**
------------------
+assignKeycode
+-------------
 
 **Entry point:** ``4F8E``
 
@@ -820,8 +820,8 @@ timeouts or periodic updates of the display.
 Only the active application will receive timeout events. The timeout
 handler is in the shell descriptor (at offset 6).
 
-**setTimeout**
----------------
+setTimeout
+----------
 
 .. index:: timer
 
@@ -832,8 +832,8 @@ handler is in the shell descriptor (at offset 6).
    :start-after: ;;; setTimeout docstart
    :end-before:  ;;; setTimeout docend
 
-**clearTimeout**
-----------------
+clearTimeout
+------------
 
 **Entry point:** ``4F64``
 
@@ -850,8 +850,8 @@ Catalog
 The catalog functionality provides a framework that factors out most
 of the structure around running a catalog.
 
-**catalog**
------------
+catalog
+-------
 
 **Entry point:** ``4F7C`` ``catalog``
 
@@ -862,8 +862,8 @@ of the structure around running a catalog.
    :start-after: ;;; catalog docstart
    :end-before:  ;;; catalog docend
 
-**catalogEnd**
---------------
+catalogEnd
+----------
 
 **Entry point:** ``4F88``
 
@@ -872,8 +872,8 @@ of the structure around running a catalog.
    :start-after: ;;; catalogEnd docstart
    :end-before:  ;;; catalogEnd docend
 
-**catalogReturn**
------------------
+catalogReturn
+-------------
 
 **Entry point:** ``4F8C``
 
@@ -882,8 +882,8 @@ of the structure around running a catalog.
    :start-after: ;;; catalogReturn docstart
    :end-before:  ;;; catalogReturn docend
 
-**catalogStep**
----------------
+catalogStep
+-----------
 
 **Entry point:** ``4F84``
 
@@ -892,8 +892,8 @@ of the structure around running a catalog.
    :start-after: ;;; catalogStep docstart
    :end-before:  ;;; catalogStep docend
 
-**catalogBack**
----------------
+catalogBack
+-----------
 
 **Entry point:** ``4F86``
 
@@ -902,8 +902,8 @@ of the structure around running a catalog.
    :start-after: ;;; catalogBack docstart
    :end-before:  ;;; catalogBack docend
 
-**catalogRun**
---------------
+catalogRun
+----------
 
 **Entry point:** ``4F8A``
 
@@ -918,8 +918,8 @@ Extended memory
 
 .. index:: extended memory, memory; extended
 
-**getXAdr**
------------
+getXAdr
+-------
 
 **Entry point:** ``4F12``
 

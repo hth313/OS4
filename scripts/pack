@@ -15,9 +15,10 @@ popd
 
 # Set up a dist folder
 rm -rf dist
-mkdir dist
+mkdir -p dist/include
 cp src/OS4.mod dist/
 cp src/OS4.mod2 dist/
+cp src/OS4.h dist/include
 cp -R doc/_build/html dist/doc
 cp doc/_build/latex/OS4.pdf dist/doc
 cp doc/ReleaseNotes.html dist/

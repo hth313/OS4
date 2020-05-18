@@ -125,6 +125,7 @@ checkTimeout: gosub   systemBuffer
               goto    50$
               ?s9=1                 ; did we find an applicaton?
               gonc    50$           ; no
+              gosub   LDSST0
               acex    m
               gosub   jumpC6        ; call timeout vector (if it exists)
 

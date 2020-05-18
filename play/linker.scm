@@ -4,8 +4,7 @@
             (section (PlayFAT #x0) PlayCode PlayCode1 Lib41Code
                      PlayTable PlaySecondary1
                      (ExtensionHandlers #xF00)
-                     (CAT7Shell #xF04)
-                     (CatShell #xF0C)
+                     (CountShell #xF04)
                      (PlayBankSwitchers1 #xFC3)
                      RPN (PlayFC2 #xFC2) (PlayPoll #xFF4))
             (checksum #xFFF hp41)

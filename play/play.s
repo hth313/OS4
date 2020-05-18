@@ -7,6 +7,7 @@ XROMno:       .equ    7
 
               .section PlayFAT
               .extern N, I, PV, PMT, FV, TVM, TVMEXIT
+              .extern CNTDOWN
               .con    XROMno
               .con    (FatEnd - FatStart) / 2 ; number of entry points
 FatStart:
@@ -19,6 +20,7 @@ FatStart:
               FAT     PV
               FAT     PMT
               FAT     FV
+              .fat    CNTDOWN
 FatEnd:       .con    0,0
 
 ;;; ************************************************************

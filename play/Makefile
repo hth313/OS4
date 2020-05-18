@@ -1,6 +1,6 @@
 OS4 = ../src
 RPN_SRCS =
-SRCS = play.s poll.s tvm.s mockups.s
+SRCS = play.s poll.s tvm.s mockups.s countDown.s
 
 OBJS = $(SRCS:%.s=%.o) $(RPN_SRCS:%.rpn=%.o)
 MOD = playOS4.mod

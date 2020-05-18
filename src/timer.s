@@ -111,6 +111,9 @@ checkTimeout: gosub   systemBuffer
               cstex
               ?s4=1                 ; interval timer timeout?
               gonc    50$           ; no
+              s4=0                  ; yes, reset it to make it repeat
+              cstex
+              wrsts
               gosub   LDSST0
               c=c+c   xs
               c=c+c   xs

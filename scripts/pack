@@ -3,24 +3,36 @@
 # Stop on failure
 set -e
 
+# remove any stale documentation files
+rm -rf doc/_build
+
 # Build module and documentaiton
 pushd src
+make clean
+make
+popd
+pushd play
+make clean
 make
 popd
 pushd doc
 make html
 make latexpdf
+make epub
 markdown  ReleaseNotes.md >ReleaseNotes.html
 popd
 
 # Set up a dist folder
 rm -rf dist
 mkdir -p dist/include
+mkdir -p dist/doc/html
 cp src/OS4.mod dist/
 cp src/OS4.mod2 dist/
+cp play/playOS4.mod dist/
 cp src/OS4.h dist/include
-cp -R doc/_build/html dist/doc
+cp -R doc/_build/html dist/doc/
 cp doc/_build/latex/OS4.pdf dist/doc
+cp doc/_build/epub/OS4.epub dist/doc
 cp doc/ReleaseNotes.html dist/
 
 # Unpack .rom files from the MOD2 file for 41CL
@@ -29,8 +41,11 @@ modtool --extract-rom-pages OS4.mod2
 popd
 
 # Clean up some stuff we do not want
-rm -rf dist/doc/_sources
-rm dist/doc/.buildinfo
+rm -rf dist/doc/html/_sources
+rm -rf dist/doc/html/_static/*.pdf
+rm dist/doc/html/_static/coverGreen.jpg
+rm dist/doc/html/_static/coverGreenNoBackground.jpg
+rm dist/doc/html/.buildinfo
 
 # Pack a .zip
 pushd dist

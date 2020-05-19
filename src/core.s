@@ -82,10 +82,6 @@ lightWake:    c=0     x
 20$:          ?s3=1                 ; program mode?
               golc    doPRGM        ; yes, we may need to display certain
                                     ; instructions in a custom way
-              gosub   disableOrphanShells
-;;; Needed as all sub levels are consumed
-              .public disableOrphanShellsDone
-disableOrphanShellsDone:
               gosub   doDisplay     ; we may want to override the display
 
 ;;; Check for OS4 style pause.
@@ -174,21 +170,40 @@ deepWake:     disoff                ; get the display to a known
 ;;; Flag_ArgumentDual    = 0
 ;;; Flag_Pause           = 0     no pause
 ;;; Flag_SEC_PROXY       = 0     no secondary proxy in progress
-;;; Flag_OrphanShells    = 1     set Flag_OrphanShells flag to signal that
-;;;                              we need to check for orphaned shells
-;;;                              when power on processing is done
-;;;                              (releaseShells above has already marked
-;;;                               it properly)
 ;;; Flag_DisplayOverride = 0
 ;;; Flag_SEC_Argument    = 0
 ;;; Flag_IntervalTimer   = 0
               pt=     1
-              lc      0
-              lc      4
+              c=0     wpt
               data=c
               gosub   releaseHostedBuffers
-10$:          gosub   LDSST0
-              golong  WKUP60
+10$:          gosub   LDSST0        ; release all I/O buffers
+              c=regn  13
+              bcex                  ; chainhead to B.X
+              ldi     191
+              a=c                   ; current reg addr to A.X
+30$:          a=a+1   x
+40$:          ?a<b    x             ; still below chainhead?
+              gonc    50$           ; no - done.
+              c=a     x
+
+              dadd=c
+              c=data
+              ?c#0    w             ; is this reg occupied?
+              gonc    50$           ; no - done.
+              c=c+1   s             ; is it a key reassignment?
+              goc     30$           ; yes
+              c=0     s             ; no. must be an I/O buffer
+              data=c                ; release it
+              rcr     10            ; rotate size to C[1:0]
+              c=0     xs
+              a=a+c   x             ; skip over buffer
+              goto    40$
+
+50$:          ldi     7             ; deep sleep wake up notification
+              dadd=c                ; re-enable chip 0
+              gosub   ROMCHK
+              golong  disableOrphanShells
 
 ;;; fastDataEntry docstart
 ;;; **********************************************************************

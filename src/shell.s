@@ -1023,10 +1023,6 @@ sendMessage:  pt=     0
               gosub   topExtension
               rtn                   ; (P+1) no shells (no buffer)
               rtn                   ; (P+2) no shells (with buffer)
-              ?st=1   Flag_OrphanShells
-              rtnc                  ; in reclaim mode (power on), we do not
-                                    ;  send notifications as the listeners may
-                                    ;  not be ready
 10$:          pt=     0
               c=g                   ; C[1:0]= extension code
               c=0     xs            ; C.X= extension code
@@ -1088,27 +1084,16 @@ shellName:    gosub   unpack5
 ;;; disableOrphanShells - remove orphaned shells
 ;;;
 ;;; This routine is supposed to be called after a normal power on.
-;;; At the moment this is done before going to light sleep and a flag
-;;; Flag_OrphanShells is used to signal whether it is needed or not.
-;;; Any shell that was active before the most recent power down and
-;;; that has not been reclaimed are marked as unused.
 ;;;
 ;;; **********************************************************************
 
               .section code, reorder
               .public disableOrphanShells
               .extern shrinkBuffer, clearScratch, packHostedBuffers
-              .extern disableOrphanShellsDone
 disableOrphanShells:
               gosub   systemBuffer
               rtn                   ; (P+1) no buffer
-              st=c
-              ?st=1   Flag_OrphanShells
-              gonc    5$            ; done
               c=data                ; load buffer header
-              st=0    Flag_OrphanShells
-              c=st
-              data=c                ; reset Flag_OrphanShells
               rcr     4
               c=0     xs
               bcex    x             ; B.X= shell counter
@@ -1141,7 +1126,7 @@ disableOrphanShells:
 55$:          gosub   clearScratch
               gosub   packHostedBuffers
 5$:           gosub   ENCP00
-              golong  disableOrphanShellsDone
+              golong  0x01f0        ; pack I/O area and do the rest
 
 ;;; Prune unused shell registers. This is written in a somewhat inefficient
 ;;; way (we do not take advantage of that we may be able to delete multiple

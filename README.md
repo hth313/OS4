@@ -1,7 +1,6 @@
-The OS4 module for the HP-41
-============================
+OS4 for the HP-41
+=================
 
-Welcome to the OS4 module for the HP-41 calculator!
 OS4 is a powerful extension module which removes several limitations
 that were originally designed into the HP-41 mainframe (the name used
 by HP for the HP-41 firmware).

@@ -10,7 +10,7 @@ CNTDOWN:      ldi     .low12 countShell
               goto    toNoRoom
               gosub   ensureTimer
               c=0
-              ldi     100           ; repeat once per second
+              ldi     0x100         ; repeat once per second
               gosub   setTimeout
               nop                   ; (P+1) checked above that timer is present
               c=0     x

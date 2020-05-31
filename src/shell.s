@@ -1092,7 +1092,7 @@ shellName:    gosub   unpack5
               .extern shrinkBuffer, clearScratch, packHostedBuffers
 disableOrphanShells:
               gosub   systemBuffer
-              rtn                   ; (P+1) no buffer
+              goto    5$            ; (P+1) no buffer
               c=data                ; load buffer header
               rcr     4
               c=0     xs

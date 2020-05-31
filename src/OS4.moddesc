@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ModFile FileFormat="MOD1" Title="OS/ext" Version="1A" PartNumber="" Author="Håkan Thörngren" Copyright="Håkan Thörngren" License="MIT" Comments="" Category="2" Hardware="0" MemoryModules="0" XMemoryModules="0">
-  <Page Name="OS4" Identity="O41A" Page="4" PageGroup="0" Bank="1" BankGroup="1" RAM="0" WriteProtect="0" FAT="0"/>
-  <Page Name="OS4-2" Identity="O41A" Page="4" PageGroup="0" Bank="2" BankGroup="1" RAM="0" WriteProtect="0" FAT="0"/>
+<ModFile FileFormat="MOD1" Title="OS/ext" Version="1B" PartNumber="" Author="Håkan Thörngren" Copyright="Håkan Thörngren" License="MIT" Comments="" Category="2" Hardware="0" MemoryModules="0" XMemoryModules="0">
+  <Page Name="OS4" Identity="O41B" Page="4" PageGroup="0" Bank="1" BankGroup="1" RAM="0" WriteProtect="0" FAT="0"/>
+  <Page Name="OS4-2" Identity="O41B" Page="4" PageGroup="0" Bank="2" BankGroup="1" RAM="0" WriteProtect="0" FAT="0"/>
 </ModFile>

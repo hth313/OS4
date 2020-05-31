@@ -1018,7 +1018,7 @@ backingCall   .macro lab
 
 ;;; Reserved tail identificatios.
 tail:         .macro
-              .con    1             ; A
+              .con    2             ; B
               .con    '1'           ; 1
               .con    0x200 + '4'   ; 4 (banked)
               .con    0x0f          ; O

@@ -16,6 +16,18 @@ OS4 has been tested and is known to work with MLDL-2000 and HP-41CL.
 OS4 also works on emulators and so far been tested successfully on
 i41CX+ and dbnut (from NutStudio tools).
 
+## Version 1B
+
+Follow up release, May 2020.
+
+### Corrections
+
+* Loading OS4 by itself without Boost present caused the HP-41 not
+  being able to turn on properly.
+* The ensureHPIL routine would most likely report "`NO HP-IL`" even
+  when there was an HP-IL module present.
+* Secondary functions could not be execute if a printer was attached.
+
 ## Version 1A
 
 Initial release, May 2020.

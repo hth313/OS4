@@ -382,8 +382,12 @@ nullTest:     ldi     200
               gosub   ENCP00
 74$:                                ; key is up. go execute FCN
                                     ; first give printer a chance
-              ?s9=1
-              gsubc   PRT5          ; only print if found
+;;; Printing disabled. Two problems, first it prints the function
+;;; code (which is incorrect for secondary functions).
+;;; Second, it clobbers M where the information about the secondary
+;;; function is kept.
+;              ?s9=1
+;              gsubc   PRT5          ; only print if found
               gosub   RSTSEQ        ; clear SHIFTSET, PKSEQ,
                                     ; MSGFLAG, DATAENTRY,
                                     ; CATALOGFLAG, & PAUSING

@@ -6,12 +6,11 @@
 ;;; **********************************************************************
 
 #include "mainframe.h"
+#include "hpil.h"
 #include "internals.h"
 
 #define IN_OS4
 #include "OS4.h"
-
-CHKCST:       .equlab 0x7cdd
 
 ;;; **********************************************************************
 ;;;
@@ -681,25 +680,25 @@ errorMessage: gosub   ERRSUB
 ;;; **********************************************************************
 ;;;
 ;;; ensureDrive - ensure that an HP-IL moduld and mass storage exists
-;;; ensureHPIL - ensure that an HP-IL module is inserted
 ;;;
 ;;; This routine only returns if the HP-IL module is present, and there
-;;; is a mass storage drive (ensureDrive).
+;;; is a mass storage drive.
 ;;;
-;;; Uses: C, A.X
+;;; Uses: C, A, PT, +3 sub levels
 ;;;
 ;;; **********************************************************************
 ;;; ensureDrive docend
 
               .public ensureDrive, ensureHPIL
-ensureDrive:  c=0
-              gosub   CHKCST
+ensureDrive:  gosub   ensureHPIL    ; check presence of HP-IL module first
+              c=0
+              gosub   CHKCST        ; mass storage device present?
               ?c#0
-              goc     ensureHPIL
+              rtnc                  ; yes
               gosub   errorMessage
               .messl  "NO DRIVE"
-errorExitPop: spopnd                ; defensive measure
-                                    ; not strictly needed, but probably a good
+;;; * fall into errorExit
+
 ;;; errorExit docstart
 ;;; **********************************************************************
 ;;;
@@ -712,16 +711,29 @@ errorExit:    gosub   LEFTJ
               gosub   MSG105
               golong  ERR110
 
+;;; ensureHPIL docstart
+;;; **********************************************************************
+;;;
+;;; ensureHPIL - ensure that an HP-IL module is inserted
+;;;
+;;; This routine only returns if the HP-IL module is present.
+;;;
+;;; Uses: C, A.X, PT, +0 sub levels
+;;;
+;;; **********************************************************************
+;;; ensureHPIL docend
+
 ensureHPIL:   ldi     28            ; HP-IL XROM Id
               a=c     x
               c=0     m
+              pt=     6
               lc      7             ; address 7000
               cxisa                 ; fetch XROM Id from 7000
               ?a#c    x
               rtnnc
-              gosub errorMessage
-              .messl "NO HP-IL"
-              goto    errorExitPop
+              gosub   errorMessage
+              .messl  "NO HP-IL"
+              goto    errorExit
 
 ;;; ensure41CX docstart
 ;;; **********************************************************************
@@ -746,7 +758,7 @@ ensure41CX:   ldi     25
               rtnnc
               gosub   errorMessage
               .messl  "NO 41CX OS"
-              goto    errorExitPop
+              goto    errorExit
 
 ;;; ensureTimer docstart
 ;;; **********************************************************************
@@ -767,7 +779,7 @@ ensureTimer:  gosub   hasTimer
 10$:          gosub   errorMessage
               .messl  "NO TIMER"
 errorExitPop10:
-              goto    errorExitPop
+              goto    errorExit
 
 hasTimer:     ldi     26            ; Time module XROM number
               a=c     x

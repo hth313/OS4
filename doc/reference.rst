@@ -193,7 +193,6 @@ HP-IL loop.
    :language: none
    :start-after: ;;; ensureDrive docstart
    :end-before:  ;;; ensureDrive docend
-   :lines: 1-3, 5-
 
 ensureHPIL
 ----------
@@ -204,9 +203,8 @@ ensureHPIL
 
 .. literalinclude:: ../src/core.s
    :language: none
-   :start-after: ;;; ensureDrive docstart
-   :end-before:  ;;; ensureDrive docend
-   :lines: 1-2, 4-
+   :start-after: ;;; ensureHPIL docstart
+   :end-before:  ;;; ensureHPIL docend
 
 ensure41CX
 ----------

@@ -35,7 +35,6 @@ getXAdr:      m=c                   ; M.X= register number
               ?s0=1                 ; file found?
               golnc   FLNOFN        ; no -> "FL NOT FOUND"
               c=m                   ; C.X= register number
-              goc     ERRNE_J1      ; address overflow
               a=c     x             ; A.X= register
               c=n                   ; C= file header information
               c=c-1   s             ; inspect file type

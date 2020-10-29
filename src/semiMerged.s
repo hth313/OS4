@@ -697,6 +697,8 @@ argNotKnown:  ldi     Text1
               c=c-1   x             ; check one less
               ?a#c    x             ; default single argument?
               golc    ERRNE         ; no
+              abex    wpt
+              gosub   PUTPC
               c=m                   ; yes, use default argument instead
 finalize_relay:
               goto    finalize

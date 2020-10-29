@@ -22,6 +22,10 @@ Bug fix release, November 2020.
 
 ### Corrections
 
+* Secondary functions without any semi-merged argument would not
+  display properly in program mode. It could go and display DATA ERROR
+  or do weird things rather than showing the instruction.
+
 * Running secondary functions from program memory that did not have
   any semi-merged argument caused the execution of the instruction
   byte inside the text wrapper, which was the function number. This

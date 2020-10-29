@@ -384,13 +384,16 @@ doPRGM:       ?s12=1                ; PRIVATE ?
               gosub   PROMF2
               c=b     m
               gosub   isArgument    ; postfix argument?
-              goto    320$          ; no
+              goto    319$          ; no
               s2=1                  ; yes, indicate this is a secondary
               cnex                  ; M[3:0]=address (preserve C)
               m=c
               c=n
               golong  400$
 
+319$:         cnex
+              rcr     4
+              cnex                  ; N[6:3]= ROM address, for reset bank
 
 320$:         gosub   DF150         ; normal secondary, finalize line
               c=n

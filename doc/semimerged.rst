@@ -173,8 +173,7 @@ hex editing the program makes it possible to have them in a program:
    steps are inserted up front in program memory which advances the
    program line counter twice. The display shows the decorated
    semi-merged function being entered with the current line number,
-   which corresponds to the program step where the text literal will
-   be.
+   which corresponds to the program step of the text literal.
 
 Secondary functions as semi-merged
 ==================================

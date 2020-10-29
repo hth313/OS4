@@ -731,9 +731,6 @@ toERRNE:      golnc   ERRNE_B2      ; no, flag as error
               switchBank 1
               gosub   isArgument
               goto    75$           ; not semi-merged
-              ?s8=1                 ; semi-merged, does it use Text1 (actually
-                                    ;  lacking its semi-merged argument?)
-              goc     toErrneInBank1 ; yes, corrupt, say NONEXISTENT
               ?s9=1                 ; semi-merged, fetching from program memory?
               gonc    xgotoFunction ; no
               c=b     s             ; C.S= Text literal count - 1
@@ -741,9 +738,10 @@ toERRNE:      golnc   ERRNE_B2      ; no, flag as error
               gonc    72$           ; no
               c=c-1   s
 72$:          c=c-1   s
+              goc     73$           ; one short, this means default argument
               ?c#0    s             ; correct text literal length?
               goc     toErrneInBank1 ; no
-              gosub   systemBuffer
+73$:          gosub   systemBuffer
               goto    xgotoFunction ; (P+1) no system buffer, this will cause
                                     ;  and error later in argument handling
               c=data                ; tell argument handling that we are
@@ -752,9 +750,9 @@ toERRNE:      golnc   ERRNE_B2      ; no, flag as error
               cstex
               data=c
 
-              goto    xgotoFunction ; yes, we will need the text literal when
-                                    ;  fetching semi-merged operands, so we do
-                                    ;  not skip over it now
+              goto    xgotoFunction ; we will need the text literal when
+                                    ; fetching semi-merged operands, so we do
+                                    ; not skip over it now
 
 75$:          ?s8=1
 toErrneInBank1:

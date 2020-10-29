@@ -672,7 +672,7 @@ requestArgument:
               golong  requestArgument10
 
 singleArg:    c=g                   ; yes, move argument to C[1:0]
-              goto    finalize
+              goto    finalize_relay
 
 argNotKnown:  ldi     Text1
               ?st=1   Flag_SEC_Argument ; secondary?
@@ -693,11 +693,12 @@ argNotKnown:  ldi     Text1
 15$:          ?a#c    x             ; expected text literal follows?
               gonc    fetch10       ; yes
               ?s8=1                 ; no, dual argument?
-              goc     toERRNE       ; yes, these have no default so it must match
+              golc    ERRNE         ; yes, these have no default so it must match
               c=c-1   x             ; check one less
               ?a#c    x             ; default single argument?
-toERRNE:      golnc   ERRNE         ; no
+              golc    ERRNE         ; no
               c=m                   ; yes, use default argument instead
+finalize_relay:
               goto    finalize
 fetch10:      abex    wpt           ; argument follows in program
               gosub   INCAD

@@ -34,6 +34,9 @@ Bug fix release, November 2020.
   function that would skip the next line, it would not work as
   intended.
 
+* Secondary functions using default semi-merged operand did not work
+  properly and ended up giving `NONEXISTENT` error.
+
 ## Version 1B
 
 Follow up release, May 2020.

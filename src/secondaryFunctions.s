@@ -731,6 +731,9 @@ toERRNE:      golnc   ERRNE_B2      ; no, flag as error
               switchBank 1
               gosub   isArgument
               goto    75$           ; not semi-merged
+              ?s8=1                 ; semi-merged, does it use Text1 (actually
+                                    ;  lacking its semi-merged argument?)
+              goc     toErrneInBank1 ; yes, corrupt, say NONEXISTENT
               ?s9=1                 ; semi-merged, fetching from program memory?
               gonc    xgotoFunction ; no
               c=b     s             ; C.S= Text literal count - 1

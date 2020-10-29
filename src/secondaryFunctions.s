@@ -761,6 +761,7 @@ toErrneInBank1:
               golnc   ERRNE         ; not Text1
               c=n
               a=c                   ; A= address
+              pt=     3
               gosub   PUTPC         ; step over Text1
 xgotoFunction:
               abex    m             ; A[6:3]= XADR

@@ -16,6 +16,20 @@ OS4 has been tested and is known to work with MLDL-2000 and HP-41CL.
 OS4 also works on emulators and so far been tested successfully on
 i41CX+ and dbnut (from NutStudio tools).
 
+## Version 1C
+
+Bug fix release, November 2020.
+
+### Corrections
+
+* Running secondary functions from program memory that did not have
+  any semi-merged argument caused the execution of the instruction
+  byte inside the text wrapper, which was the function number. This
+  could cause all kinds of problems, but as they usually are low
+  numbered it was often a LBL. If the secondary function was a test
+  function that would skip the next line, it would not work as
+  intended.
+
 ## Version 1B
 
 Follow up release, May 2020.

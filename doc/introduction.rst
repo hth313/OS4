@@ -109,6 +109,26 @@ debugging. This has been a very useful tool chain in developing and
 testing OS4. VisualStudio Code has been used as the a main debugger
 front-end (user interface).
 
+Acknowledgments
+===============
+
+Some of the code sequences used in OS4 have been borrowed from, or is
+based on source code found elsewhere. This has been done in good faith
+as the routines are very much needed for this project.
+No permissions for this have been granted by the original authors or
+copyright owners.
+
+Part of the code is based on code that is copyright by Hewlett Packard
+Company. This includes code used for the HP-41 power on sequence, the
+search routine in function address tables (``ASRCH``), the code that
+deals with the assignment bitmap. Also the key dispatch routine
+``keyDispatch`` (originally named ``KEY-FC``) comes from the Time
+module and the buffer search routine borrows ideas from the Time module.
+
+The ``XBCDBIN`` routine to convert a floating point number number to
+binary (similar to ``BCDBIN`` found in mainframe, but with more useful
+range) is written by Ken Emery, reference PPCCJ V11N5P6.
+
 License
 =======
 

@@ -112,6 +112,7 @@ catalogEnd:   .equlab 0x4f88
 catalogRun:   .equlab 0x4f8a
 catalogReturn: .equlab 0x4f8c
 assignKeycode: .equlab 0x4f8e
+resetMyBank:  .equlab 0x4f90
 jumpC7:       .equlab 0x4d00
 jumpC6:       .equlab 0x4d01
 jumpC5:       .equlab 0x4d02

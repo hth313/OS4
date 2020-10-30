@@ -740,6 +740,19 @@ resetBank
    :end-before:  ;;; resetBank docend
    :lines: 1-3, 5-
 
+resetMyBank
+-----------
+
+.. index:: bank switching
+
+**Entry point:** ``4F90``
+
+.. literalinclude:: ../src/secondaryFunctions.s
+   :language: none
+   :start-after: ;;; resetMyBank docstart
+   :end-before:  ;;; resetMyBank docend
+
+
 secondaryAddress
 ----------------
 

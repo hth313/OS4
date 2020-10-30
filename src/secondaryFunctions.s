@@ -401,6 +401,23 @@ toBank1:      golong  enableBank1
 to_0x263a:    switchBank 1
               golong  0x263a
 
+;;; resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; resetMyBank - reset to primary bank (routine in bank 1)
+;;;
+;;; Call this routine to reset to primary bank. This takes the address
+;;; from the return stack and reset using a bank switch routine in that
+;;; page.
+;;;
+;;; In: page address on stack
+;;; Out: Primary bank selected, PT=2
+;;; Uses: C[6:3], active PT
+;;;
+;;; **********************************************************************
+;;; resetMyBank docend
+
+
 ;;; resetBank docstart
 ;;; **********************************************************************
 ;;;
@@ -438,7 +455,8 @@ resetBankM:   .macro
               .endm
 
               .section code1, reorder
-              .public resetBank
+              .public resetBank, resetMyBank
+resetMyBank:  c=stk
 resetBank:    resetBankM
 
               .section code2, reorder

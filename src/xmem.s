@@ -27,6 +27,7 @@
 ;;; getXAdr docend
 
               .public getXAdr
+              .section code, reorder
               .extern ensure41CX
 getXAdr:      m=c                   ; M.X= register number
               gosub   ensure41CX

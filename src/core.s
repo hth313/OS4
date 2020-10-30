@@ -898,6 +898,7 @@ BankSwitchers: .macro
               .extern catEmpty, catalog, catalogWithSize, displayingMessage
               .extern catalogStep, catalogBack, catalogEnd, catalogRun
               .extern catalogReturn, assignKeycode, resetMyBank
+              .extern postfix4095, XBCDBIN
               .public secondaryAddress_B1
 
               golong  activateShell ; 0x4f00
@@ -987,6 +988,8 @@ runSecondaryB2Location:
 assignKeycodeB2Location:
               nop                   ; filler for assignKeycode
               golong  resetMyBank   ; 0x4f90
+              golong  postfix4095   ; 0x4f92
+              golong  XBCDBIN       ; 0x4f94
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab

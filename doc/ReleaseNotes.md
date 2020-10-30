@@ -20,6 +20,12 @@ i41CX+ and dbnut (from NutStudio tools).
 
 Bug fix release, November 2020.
 
+## API version 1
+
+This version bumps the API version to 1. If you requre any of the newly
+added routines `resetMyBank`, `postfix4095` or `XBCDBIN` you need to
+ensure that you are running with at least API version 1.
+
 ### Corrections
 
 * Secondary functions without any semi-merged argument would not

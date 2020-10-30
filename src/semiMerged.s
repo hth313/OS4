@@ -1200,3 +1200,82 @@ mergeTextLiterals:
               gosub   PTBYTA        ; write postfix byte
 mergeTextLiterals10:
               golong  DFRST8        ; bring instruction line up
+
+;;; postfix4095 docstart
+;;; **********************************************************************
+;;;
+;;; postfix4095 - convert postfix operand to a value 0-4095
+;;;
+;;; This support routine takes a postfix operand and converts it to a
+;;; number in the range 0-4095 (12 bits, or exponent field). For a direct
+;;; argument the range is limited 0-127. Indirect arguments are needed for
+;;; the full range.
+;;;
+;;; In: ST= postfix operand
+;;; Out: C.X= numeric value of the operand
+;;; Uses: A, B, C, M, N, +3 sub levels
+;;; Note: may exit to ERRAD or ERRNE
+;;;
+;;; **********************************************************************
+;;; postfix4095 docend
+
+              .public postfix4095
+              .section code, reorder
+p10:          c=0     x
+              c=st
+              rtn
+postfix4095:  ?s7=1                 ; indirect?
+              gonc    p10           ; no
+              s7=0                  ; clear indirect bit
+              gosub   ADRFCH        ; get register value
+
+;;; * Fall into XBCDBIN to convert to binary
+
+;;; XBCDBIN docstart
+;;; **********************************************************************
+;;;
+;;; XBCDBIN - Convert small BCD number to binary
+;;;
+;;; The built-in BCDBIN cannot handle numbers larger than 999, this
+;;; routine can handle a range of 0-4095.
+;;; Originally by Ken Emery / Skwid, reference PPCCJ V11N5P6
+;;;
+;;; In: C= floating point number
+;;; Out: C.X= binary number
+;;; Uses: A, C, +1 sub level
+;;; Note: may exit to ERRAD or ERRNE
+;;;
+;;; **********************************************************************
+;;; XBCDBIN docend
+
+              .public XBCDBIN
+XBCDBIN:      a=c
+              a=a-1   s             ; check for alpha data
+              a=a-1   s
+              golc    ERRAD
+              ?a#0    xs            ; is the number < 1 ?
+              goc     20$           ; yes, return 0
+              ldi     4             ; check if larger than 9999
+              ?a<c    x
+              golnc   ERROF         ; if yes, overflow
+              ldi     2
+              acex    x
+              ?a<c    x
+              golnc   BCDBIN        ; within range for BCDBIN
+              rcr     13            ; save 1000's digit in A.S
+              a=c     s
+              rcr     10            ; prepare for GOTINT/INTINT
+              c=0     m
+              rcr     2             ; save a subroutine level
+              gosub   INTINT
+              gosub   INTINT
+              a=c     x             ; A.X= result so far
+              ldi     1000          ; prepare for adding 1000's
+              a=a-1   s
+10$:          a=a+c   x             ; loop to pump up the 1000's
+              a=a-1   s
+              gonc    10$
+              acex    x             ; C.X= result
+              rtn
+20$:          c=0     x
+              rtn

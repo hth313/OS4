@@ -24,7 +24,7 @@ copyright = '2020, Håkan Thörngren'
 author = 'Håkan Thörngren'
 
 # The full version, including alpha/beta/rc tags
-release = '1B'
+release = '1C'
 
 # The master toctree document.
 master_doc = 'index'

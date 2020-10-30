@@ -111,6 +111,21 @@ XFNRPU
    :start-after: ;;; XNFRPU docstart
    :end-before:  ;;; XNFRPU docend
 
+General utilities
+=================
+
+XBCDBIN
+-------
+
+.. index:: floating point to binary, XBCDBIN, BCDBIN
+
+**Entry point:** ``4F94``
+
+.. literalinclude:: ../src/semiMerged.s
+   :language: none
+   :start-after: ;;; XBCDBIN docstart
+   :end-before:  ;;; XBCDBIN docend
+
 Error handling
 ==============
 
@@ -694,6 +709,18 @@ dualArgument
    :start-after: ;;; dualArgument docstart
    :end-before:  ;;; dualArgument docend
 
+.. _postfix4095:
+
+postfix4095
+-----------
+
+**Entry point:** ``4F92``
+
+.. literalinclude:: ../src/semiMerged.s
+   :language: none
+   :start-after: ;;; postfix4095 docstart
+   :end-before:  ;;; postfix4095 docend
+
 Partial key sequences
 =====================
 
@@ -931,6 +958,9 @@ Extended memory
 
 getXAdr
 -------
+
+If your function takes a postfix argument you will probably want to
+use ``postfix4095`` together with ``getXAdr``, see :ref:`postfix4095`.
 
 **Entry point:** ``4F12``
 

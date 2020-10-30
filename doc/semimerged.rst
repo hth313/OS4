@@ -295,6 +295,36 @@ arguments are accepted or not for each of the two arguments.
 The argument bytes are returned in ``A[3:2]`` (first argument) and
 ``A[1:0]`` (second argument).
 
+.. index:: postfix operands; decoding
+
+Decoding postfix operands
+=========================
+
+Mainframe contains code to decode postfix operands, but it falls short
+in several ways and is not always suitable for your needs.
+
+The closest you will come to have a function that parses a postfix
+operand is ``TONSTF``, but it is meant to be used by single digit
+functions like ``TONE`` and ``FIX``. As a result, it will throw an
+error if you have a two-digit operand. The other built-in code that
+deals with operands are not available as subroutines.
+
+.. index:: BCDBIN, ADRFCH
+
+The two support routines related to this are ``ADRFCH`` and
+``BCDBIN``. ``ADRFCH`` handles reading register operands which is
+useful for indirect operands. If you use ``ADRFCH`` you will need to
+convert the read register value, which is a floating point number, to
+binary and ``BCDBIN`` is useful for this. However, ``BCDBIN`` cannot
+handle numbers larger than 999.
+
+OS4 provides two routines that help with decoding postfix operands.
+``postfix4095`` is similar to ``TONSTF`` but offers as much range as
+possible. For a direct operand it means 0--127 and for indirect it
+will handle 0--4095, see :ref:`postfix4095`.
+
+The second routine is ``XBCDBIN`` which is like ``BCDBIN``, but
+can handle a 12-bits range 0--4095.
 
 Rolling your own
 ================

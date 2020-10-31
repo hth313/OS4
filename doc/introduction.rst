@@ -115,8 +115,8 @@ Acknowledgments
 Some of the code sequences used in OS4 have been borrowed from, or is
 based on source code found elsewhere. This has been done in good faith
 as the routines are very much needed for this project.
-No permissions for this have been granted by the original authors or
-copyright owners.
+No permissions for this have been asked for, or been granted by the
+original authors or copyright owners.
 
 Part of the code is based on code that is copyright by Hewlett Packard
 Company. This includes code used for the HP-41 power on sequence, the

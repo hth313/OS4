@@ -115,6 +115,7 @@ assignKeycode: .equlab 0x4f8e
 resetMyBank:  .equlab 0x4f90
 postfix4095:  .equlab 0x4f92
 XBCDBIN:      .equlab 0x4f94
+pausingReset: .equlab 0x4f96
 jumpC7:       .equlab 0x4d00
 jumpC6:       .equlab 0x4d01
 jumpC5:       .equlab 0x4d02

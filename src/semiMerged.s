@@ -1234,7 +1234,7 @@ postfix4095:  ?s7=1                 ; indirect?
 ;;; XBCDBIN docstart
 ;;; **********************************************************************
 ;;;
-;;; XBCDBIN - Convert small BCD number to binary
+;;; XBCDBIN - convert small BCD number to binary
 ;;;
 ;;; The built-in BCDBIN cannot handle numbers larger than 999, this
 ;;; routine can handle a range of 0-4095.

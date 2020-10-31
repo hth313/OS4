@@ -395,6 +395,37 @@ pause:        cstex                 ; restore flags
               st=c                  ; put up SS0
               golong  0x7cc         ; PRT4 and join forces with RUN
 
+;;; pausingReset docstart
+;;; **********************************************************************
+;;;
+;;; pausingReset - test and reset OS4 pausing flag
+;;;
+;;; In: Nothing
+;;; Out: Returns to (P+1) if pause is running
+;;;      Returns to (P+2) if not OS4 pause in progress
+;;; Uses: A, C, B.X, active PT=12, +1 sub level
+;;;
+;;; **********************************************************************
+;;; pausingReset docend
+
+pausingReset: gosub   systemBuffer
+              goto    20$           ; no buffer
+              cstex
+              ?st=1   Flag_Pause    ; pause flag set?
+              gonc    10$           ; no
+              st=0    Flag_Pause    ; reset flag
+              goto    15$
+10$:          c=stk                 ; bump return address
+              c=c+1   m
+              stk=c
+15$:          c=data                ; read buffer header
+              cstex
+              data=c                ; no pause running now
+              c=0
+              dadd=c                ; select chip 0
+              rtn
+20$:          golong  RTNP2
+
 ;;; **********************************************************************
 ;;;
 ;;; In this section we store some smaller routines that we do not expect
@@ -990,6 +1021,7 @@ assignKeycodeB2Location:
               golong  resetMyBank   ; 0x4f90
               golong  postfix4095   ; 0x4f92
               golong  XBCDBIN       ; 0x4f94
+              golong  pausingReset  ; 0x4f96
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab

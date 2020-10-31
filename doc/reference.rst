@@ -126,6 +126,19 @@ XBCDBIN
    :start-after: ;;; XBCDBIN docstart
    :end-before:  ;;; XBCDBIN docend
 
+pausingReset
+------------
+
+.. index:: floating point to binary, XBCDBIN, BCDBIN
+
+**Entry point:** ``4F96``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; pausingReset docstart
+   :end-before:  ;;; pausingReset docend
+
+
 Error handling
 ==============
 

@@ -210,6 +210,7 @@ Flag_ArgumentDual:   .equ  0           ; Dual semi-merged argument in
                                        ; have priority and are active.
 Flag_DisplayOverride .equ  1           ; Set when message flag really means that
                                        ; we override the display.
+Flag_HideTopKeyAssign: .equ 2       ; Auto-assign on top keys disabled.
 Flag_Argument:       .equ  3           ; Semi-merged argument entry in progress.
 Flag_Pause:          .equ  4           ; Our own pause flag.
 Flag_SEC_PROXY:      .equ  5           ; Set when doing partial key for secondary

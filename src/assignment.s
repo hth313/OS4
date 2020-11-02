@@ -173,6 +173,8 @@ clearAssignment10:
 ;;;          A= contents of bitmap register
 ;;;          DADD= bitmap register selected
 ;;;          B.X= address of buffer header
+;;;      C.S set to 0, to allow for using 'c=c+1 s' in case gotos are
+;;;           not a good idea (due to bank handling)
 ;;; Uses: A[13:12], A.X, C, B.X, S0, S1, PT, DADD, +2 sub levels
 ;;;
 ;;; **********************************************************************
@@ -225,9 +227,11 @@ testAssignBit10:
               m=c                   ; M= mask (bit we are testing)
               c=c&a                 ; row,col bit set?
               ?c#0                  ; normally assigned?
-              golc    RTNP2_B2      ; yes, return to (P+2)
-              gosub   assignArea
-              rtn                   ; (P+1) no secondary assignments, return to (P+1)
+              gonc    8$
+              c=0
+              golong  RTNP2_B2      ; yes, return to (P+2)
+8$:           gosub   assignArea
+              goto    30$           ; (P+1) no secondary assignments, return to (P+1)
                                     ;   as not assigned
               b=a     x             ; B.X= address of buffer header
               a=0     x
@@ -244,7 +248,10 @@ testAssignBit10:
               goc     20$           ; secondary assigned, return to (P+3)
               ?s0=1                 ; do we still want bitmap result?
               rtnnc                 ; no, return to (P+1)
-20$:          golong  RTNP3_B2
+20$:          c=0
+              golong  RTNP3_B2
+30$:          c=0
+              rtn
 
 ;;; * Create assignment area.
               .section code2, reorder

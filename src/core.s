@@ -161,7 +161,12 @@ deepWake:     disoff                ; get the display to a known
 
 5$:           gosub   releaseShells
               goto    10$           ; no system buffer
-              acex    x             ; C.X= system header address
+              c=0                   ; make all bits set mask
+              c=c-1
+              pt=     1
+              lc      0             ; clear all flags except Flag_HideTopKeyAssign
+              lc      1 << Flag_HideTopKeyAssign
+              acex                  ; C.X= system header address
               dadd=c
               c=data
 ;;; Set flags at power on:
@@ -172,8 +177,7 @@ deepWake:     disoff                ; get the display to a known
 ;;; Flag_DisplayOverride = 0
 ;;; Flag_SEC_Argument    = 0
 ;;; Flag_IntervalTimer   = 0
-              pt=     1
-              c=0     wpt
+              c=c&a
               data=c
               gosub   releaseHostedBuffers
 10$:          gosub   LDSST0        ; release all I/O buffers

@@ -37,7 +37,7 @@
               .extern disableThisShell, unpack0, testAssignBit
               .extern secondaryAssignment_B2, secondaryAddress
               .extern resetBank, secondaryProgram, secondaryAddress_B1
-              .extern bufferScan20, exitTransientApp
+              .extern bufferScan20, exitTransientApp, RTNP2
 keyKeyboard:  c=regn  14            ; load status set 1/2
               rcr     1
               st=c
@@ -82,23 +82,45 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               goc     400$          ; yes, skip all reassigned tests
               ?a#0    s             ; user mode?
               goc     400$          ; no
+
+
+              ?s3=1                 ; program mode?
+              goc     222$          ; no, do not care about auto-assigns
+              gosub   systemBuffer  ; check global skip-auto assign flag
+              goto    222$          ; (P+1) should not happen, we are looking
+                                    ;    at keys for a shell so buffer exists
+              cstex
+              ?st=1   Flag_HideTopKeyAssign
+              gonc    221$          ; not hiding top key assignments
+              cstex
+              gosub   topKey        ; is a top key pressed?
+              goto    222$          ; (P+1) no
+              goto    28$           ; yes, we should not check for key assignment
+
+221$:         cstex
+222$:         switchBank 2
               c=m                   ; M normally contains shell scan state
               rcr     -4            ; The [2:0] field is busted, but we know
                                     ;   [12:6] is 0, so align [12:10] over [2:0]
               bcex                  ; preserve it in B
+              c=n                   ; get key code
+              a=c     x
               asr     x             ; A[1:0]= keycode, 0-79 form
               a=a+1   x             ; to 1-80 form
-              switchBank 2
               gosub   testAssignBit
-              goto    24$           ; (P+1) not reassigned
-              goto    23$           ; (P+2) normal reassigned
-              golong  secondaryASN  ; (P+3) secondary reassigned
-23$:          c=0     x
+              c=c+1   s             ; (P+1) not reassigned
+              c=c+1   s             ; (P+2) normal reassigned
+                                    ; (P+3) secondary reassigned
+              c=c-1   s             ; secondary reassigned?
+              golc    secondaryASN  ; yes
+              switchBank 1
+              c=c-1   s             ; normal reassigned?
+              gonc    24$           ; no
+              c=0     x             ; yes, let mainframe deal with it
               dadd=c
               golong  RAK60_B2
 
-24$:          switchBank 1
-              bcex                  ; not reassigned
+24$:          bcex                  ; not reassigned
               c=0     x             ; restore scan state to M
               dadd=c
               rcr     4
@@ -110,40 +132,24 @@ keyKeyboard:  c=regn  14            ; load status set 1/2
               c=n
               cxisa                 ; C.X= keyboard flags
               cstex
-              ?st=1   KeyAutoAssign ; use auto-assigns?
+              ?st=1   KeyAutoAssign ; uses auto-assigns?
 400$:         gonc    40$           ; no (also relay)
-
-              c=n
-              c=0     m
-              rcr     2             ; logical row to C.S
-              a=c     x             ; logical col to A.X
-              ldi     0x66          ; row 0 offset
-              c=c-1   s             ; row 0?
-              goc     25$           ; yes
-              pt=     0
-              lc      11            ; set up for row 1 test
-              ?c#0    s
-              gonc    25$           ; row 1
-              pt=     1
-              lc      7             ; shifted row 0 test
-              c=c+1   s
-              c=c+c   s             ; shifted?
-              gonc    40$           ; no
-              ?c#0    s             ; not shifted row 0?
-              goc     40$           ; not auto assigned
-25$:          c=a+c   x             ; C.X = implied local label
-              m=c                   ; save operand in M
-              a=c                   ; set up A[1:0] for search
+              gosub   topKey        ; is a top key pressed?
+              goto    40$           ; (P+1) no
+                                    ; (P+2) yes, C.X= operand
+28$:          a=c                   ; set up A[1:0] for search
               gosub   SEARCH
               ?c#0                  ; found?
               gonc    40$           ; no
 
-              rcr     -4
+              rcr     -3
               stk=c                 ; yes, save address on stack
               c=n
               gosub   appClearDataEntry ; clear data entry flag
+              bcex                  ; C[1:0]= RPN label
+              m=c                   ; M[1:0]= RPN label
               c=stk
-              rcr     4
+              rcr     3
               golong  PARS60        ; do auto assigned user language label
 
 30$:          c=n                   ; no key behavior defined
@@ -618,3 +624,31 @@ keyDispatch:  c=0     m
               .section code2
 RAK60_B2:     switchBank 1
               golong  RAK60
+
+;;; ************************************************************
+;;;
+;;; Test if a key is one of the top key with local assignment.
+;;;
+;;; ************************************************************
+
+              .section code
+topKey:       c=n
+              c=0     m
+              rcr     2             ; logical row to C.S
+              a=c     x             ; logical col to A.X
+              ldi     0x66          ; row 0 offset
+              c=c-1   s             ; row 0?
+              goc     25$           ; yes
+              pt=     0
+              lc      11            ; set up for row 1 test
+              ?c#0    s
+              gonc    25$           ; row 1
+              pt=     1
+              lc      7             ; shifted row 0 test
+              c=c+1   s
+              c=c+c   s             ; shifted?
+              rtnnc                 ; no
+              ?c#0    s             ; not shifted row 0?
+              rtnc                  ; not auto assigned
+25$:          c=a+c   x             ; C.X = implied local label
+              golong  RTNP2

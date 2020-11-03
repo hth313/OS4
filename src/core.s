@@ -934,6 +934,7 @@ BankSwitchers: .macro
               .extern catalogStep, catalogBack, catalogEnd, catalogRun
               .extern catalogReturn, assignKeycode, resetMyBank
               .extern postfix4095, XBCDBIN
+              .extern CXtoX, CtoXRcl, CtoXDrop, CtoXFill
               .public secondaryAddress_B1
 
               golong  activateShell ; 0x4f00
@@ -1022,10 +1023,23 @@ runSecondaryB2Location:
               enrom2                ; assignKeycode ; 0x4f8e
 assignKeycodeB2Location:
               nop                   ; filler for assignKeycode
+;;; * Added to API version 1
               golong  resetMyBank   ; 0x4f90
               golong  postfix4095   ; 0x4f92
               golong  XBCDBIN       ; 0x4f94
               golong  pausingReset  ; 0x4f96
+              enrom2                ; 0x4f98 CXtoX
+CXtoXB2Location:
+              nop                   ; filler for CXtoX
+              enrom2                ; 0x4f9a CtoXRcl
+CtoXRclB2Location:
+              nop                   ; filler for CtoXRcl
+              enrom2                ; 0x4f9c CtoXDrop
+CtoXDropB2Location:
+              nop                   ; filler for CtoXDrop
+              enrom2                ; 0x4f9e CtoXFill
+CtoXFillB2Location:
+              nop                   ; filler for CtoXFill
 
 ;;; Plain backing wit a jump, the routine handles it.
 backing       .macro  lab
@@ -1052,6 +1066,10 @@ backingCall   .macro lab
               backing assignSecondary
               backing clearSecondaryAssignments
               backing assignKeycode
+              backing CXtoX
+              backing CtoXRcl
+              backing CtoXDrop
+              backing CtoXFill
 
 ;;; Reserve some words for NoV-64
               .section NOV64

@@ -20,11 +20,19 @@ i41CX+ and dbnut (from NutStudio tools).
 
 Bug fix release, November 2020.
 
-## API version 1
+### API version 1
 
 This version bumps the API version to 1. If you requre any of the newly
-added routines `resetMyBank`, `postfix4095` or `XBCDBIN` you need to
-ensure that you are running with at least API version 1.
+added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
+`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop` or `AtoXFill` you need
+to ensure that you are running with at least API version 1.
+
+API version 1 also uses the previously not used system buffer flag
+`Flag_HideTopKeyAssign` which can be used to toggle top row key
+assignments to allow the single letter RPN program labels to be
+used. The Boost module provides functions to use this feature and it
+also provides a system shell (for its catalog, execute and assign
+enhancements), which must be in place for this to work.
 
 ### Corrections
 

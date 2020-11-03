@@ -126,6 +126,50 @@ XBCDBIN
    :start-after: ;;; XBCDBIN docstart
    :end-before:  ;;; XBCDBIN docend
 
+CXtoX
+-----
+.. index:: binary to floating point
+
+**Entry point:** ``4F98``
+
+.. literalinclude:: ../src/conversion.s
+   :language: none
+   :start-after: ;;; CXtoX docstart
+   :end-before:  ;;; CXtoX docend
+
+CtoXRcl
+-------
+
+**Entry point:** ``4F9a``
+
+.. literalinclude:: ../src/conversion.s
+   :language: none
+   :start-after: ;;; CtoXRcl docstart
+   :end-before:  ;;; CtoXRcl docend
+   :lines: 1-3, 6-
+
+CtoXDrop
+--------
+
+**Entry point:** ``4F9c``
+
+.. literalinclude:: ../src/conversion.s
+   :language: none
+   :start-after: ;;; CtoXRcl docstart
+   :end-before:  ;;; CtoXRcl docend
+   :lines: 1-2, 4, 6-
+
+CtoXFill
+--------
+
+**Entry point:** ``4F9e``
+
+.. literalinclude:: ../src/conversion.s
+   :language: none
+   :start-after: ;;; CtoXRcl docstart
+   :end-before:  ;;; CtoXRcl docend
+   :lines: 1-2, 5-
+
 pausingReset
 ------------
 
@@ -137,7 +181,6 @@ pausingReset
    :language: none
    :start-after: ;;; pausingReset docstart
    :end-before:  ;;; pausingReset docend
-
 
 Error handling
 ==============

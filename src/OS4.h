@@ -116,6 +116,10 @@ resetMyBank:  .equlab 0x4f90
 postfix4095:  .equlab 0x4f92
 XBCDBIN:      .equlab 0x4f94
 pausingReset: .equlab 0x4f96
+CXtoX:        .equlab 0x4f98
+CtoXRcl:      .equlab 0x4f9a
+CtoXDrop:     .equlab 0x4f9c
+CtoXFill:     .equlab 0x4f9e
 jumpC7:       .equlab 0x4d00
 jumpC6:       .equlab 0x4d01
 jumpC5:       .equlab 0x4d02

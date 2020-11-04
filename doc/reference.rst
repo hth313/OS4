@@ -187,7 +187,7 @@ Error handling
 
 .. index:: error handling
 
-These error routines are the same as found in the Extended functions
+These error routines are the same as found in the Extended Functions
 module and later 41CX. They are provided in OS4 as they do not exist
 in 41C and 41CV. Thus, if you rely on OS4 they are now available on
 all HP-41 variants.
@@ -389,6 +389,33 @@ findSecondaryAssignments
    :start-after: ;;; findSecondaryAssignments docstart
    :end-before:  ;;; findSecondaryAssignments docend
 
+.. index: assignment; remapping, remapping assignments
+
+mapAssignments
+--------------
+
+This routine is called ``RSTKCA`` by HP. The variant presented here is
+based on the one found in the Extended Functions module, enhanced with
+the ability to choose either assignments from global program label
+assignments or the key assignment registers when both are active. This
+is mentioned in the comments in the Extended Functions module, but
+that logic is actually not present in the code. The original comes
+from the Card Reader which has this ability. Apparently, the code was
+slightly stripped when moved but the comment was left as-is.
+
+Here it is presented in all its glory with the addition that it is now
+also handles secondary assignments and will rebuild those key
+assignments map too. If a secondary assignment happens to be shadowed
+by a primary assignment, as can be the result when loading primary
+assignments using functions that are unaware of secondary assignments,
+the secondary assignment is cleared.
+
+**Entry point:** ``4FA0``
+
+.. literalinclude:: ../src/assignment.s
+   :language: none
+   :start-after: ;;; mapAssignments docstart
+   :end-before:  ;;; mapAssignments docend
 
 Buffers
 =======

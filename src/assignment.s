@@ -598,3 +598,200 @@ assignKeycode:
               rcr     3             ; make normalized form
               c=c+1   x
 80$:          golong  enableBank1   ; return and restore bank 1
+
+;;; mapAssignments docstart
+;;; **********************************************************************
+;;;
+;;; mapAssignments - rebuild the key reassignment bit maps
+;;;
+;;; This is useful is key assignments are load from some external media
+;;; and as a way to rebuild the key assignment maps if they have been
+;;; disabled for the local auto assign labels.
+;;;
+;;; The procedure is as following:
+;;;  1. Clear the bitmap
+;;;  2. Restore the key reassignments of mainframe functions & XROM functions
+;;;  3. Restore key reassignments in alpha labels; if the key has already
+;;;     been assigned to another function:
+;;;    A. If it is after reading in a status track, clear the key code
+;;;       in the alpha label.
+;;;    B. If it is after reading in a program, find the key code somewhere
+;;;       else and clear it there.
+;;;  4. Clear secondary bitmaps.
+;;;  5. Restore secondary key assignments.
+;;;
+;;; In: S2=1 means we do 3A, status has been read in and we obey it.
+;;;     S2=0 means 3B, user program assignments takes precedence
+;;; Out: Nothing
+;;; Uses: A, C, B, N, M, PT, S7, DADD, +3 sub levels
+;;;
+;;; **********************************************************************
+;;; mapAssignments docend
+
+              .public mapAssignments
+              .section code2, reorder
+mapAssignments:
+              gosub   ENCP00
+              c=regn  15
+              c=0     m             ; clear bit map
+              c=0     s
+              regn=c  15
+              ldi     191
+;;; Get the key code from key reassignment record and set its bit
+;;; in bit map.
+RTKC10:       c=c+1   x
+              s7=     0
+              regn=c  10
+              a=c
+              c=regn  13
+              acex
+              ?a#c    x             ; reach chain head ?
+              gonc    RTKC30        ; yes, done with all those registers
+RTKC15:       dadd=c
+              c=data
+              a=c                   ; save C in A temp
+              c=0     x
+              dadd=c
+              acex                  ; restore C
+              c=c+1   s             ; still a key reassigment reg ?
+              gonc    RTKC30        ; no, done with all those registers
+              pt=     1
+              ?s7=1                 ; first key code ?
+              gonc    .+2           ; yes
+              rcr     6
+              ?c#0    wpt           ; is there a key code ?
+              gonc    RTKC20        ; no
+              a=c
+              gosub   TBITMA
+              gosub   SRBMAP        ; set the bit in the map
+RTKC20:       c=regn  10
+              ?s7=1                 ; done with second key code ?
+              goc     RTKC10        ; yes
+              s7=     1
+              goto    RTKC15
+RTKC30:       c=regn  9             ; get starting load addr
+              pt=     3
+              a=c     wpt
+              gosub   DECADA        ; point to previous END addr
+              gosub   DECADA
+              c=regn  10
+              acex    wpt
+              regn=c  10            ; save the addr in Reg.10
+RTKC40:       gosub   GTFEND
+RTKC45:       pt=     3
+              gosub   GTLINK
+              ?c#0    x             ; chain end ?
+              gonc    remapSecondary ; yes, do secondary key assignments
+RTKC50:       gosub   UPLINK
+              c=c+1   s             ; is it an END ?
+RTKC55:       gonc    RTKC45        ; yes
+              c=0     x
+              dadd=c
+              acex    wpt
+              regn=c  9             ; save link & addr in Reg.9
+              a=c     wpt
+              gosub   INCAD2        ; point to key code of alpha LBL
+              gosub   NXBYTA        ; get key code
+              acex    wpt
+              n=c
+              c=0     x
+              dadd=c
+              c=regn  13
+              m=c
+              a=0     xs
+              ?a#0    x             ; is there a key code ?
+              gonc    RUSR40        ; no
+              ?s2=1                 ; program assignment takes precedence?
+              gonc    RUSR20
+              c=n                   ; no, clear the global label assignment
+              a=c                   ; A[3:0]= address
+              c=0     x
+              gosub   PTBYTA        ; clear it
+              c=0     x             ; enable chip 0
+              dadd=c
+              goto    RUSR40
+RUSR20:       b=a     x
+              gosub   TBITMA        ; test the bit map
+              ?c#0                  ; is this bit set ?
+              gonc    RUSR30        ; no, just set it
+              abex    x             ; clear key code somewhere else
+              c=regn  10
+              rcr     10
+              bcex
+              s1=     1
+              gosub   GCPKC0
+              goto    RUSR40
+RUSR30:       gosub   SRBMAP        ; set bit map
+RUSR40:       c=regn  9
+              a=c
+              goto    RTKC55
+
+remapSecondary:
+              gosub   assignArea
+              goto    100$          ; no secondary assignments
+              a=c     x             ; A.X= address of first assignment register
+              c=data                ; read buffer header
+              rcr     7             ; C.S= number of assign registers
+              acex    x             ; C.X= address of first assignment register
+              dadd=c                ; select first assignment bitmap register
+              a=c                   ; A.S= number of assign registers
+                                    ; A.X= address of first assignment register
+              rcr     -3            ; C[5:3]= address of first assignment register
+              a=c     m             ; A[5:3]= address of first assignment register
+              c=0
+              c=c+1                 ; make non-zero
+              data=c                ; clear first bitmap register
+              a=a+1   x             ; A.X= address of second assignment register
+              acex
+              dadd=c
+              acex
+              data=c                ; clear second bitmap register
+              goto    40$           ; A.X= points to first assignment register
+                                    ; A[5:3]= address of first
+                                    ;         assignment bitmap register
+                                    ; A.S= number of assignment registers - 1
+
+10$:          c=data
+              ?s7=1                 ; first key code?
+              gonc    12$           ; yes
+              rcr     7
+12$:          pt=     1
+              ?c#0    wpt           ; is there a key code ?
+              gonc    20$           ; no
+              acex                  ; A.X= key code 1-80 form
+              n=c                   ; N= counters
+              gosub   testAssignBit
+              goto    15$           ; (P+1) not assigned (yet)
+              goto    30$           ; (P+2) primary assigned
+15$:          c=m
+              c=c|a
+              data=c
+              c=n
+              dadd=c                ; select current assignment register
+              a=c                   ; A= counters
+20$:          ?s7=1                 ; done with second key code?
+              goc     40$           ; yes
+              s7=1                  ; no
+              goto    10$
+
+30$:          c=n                   ; primary assignment exist
+              dadd=c                ;   disable the secondary assignment
+              a=c                   ; A= counters
+              c=data
+              pt=     1
+              ?s7=1                 ; in upper half?
+              gonc    31$           ; no, lower half
+              pt=     8
+31$:          lc      0
+              lc      0
+              data=c
+              goto    20$
+
+40$:          a=a+1   x
+              acex    x
+              dadd=c                ; select next register
+              acex    x
+              s7=0
+              a=a-1   s
+              gonc    10$
+100$:         golong  enableBank1

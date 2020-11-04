@@ -41,13 +41,6 @@ HP-41CL. It is also possible to use OS4 on HP-41 emulators.
 The OS4 image is a 2x4K module. Two banks occupies a single 4K
 page and it must be loaded to address page 4.
 
-This release
-============
-
-This version, 1A is meant for developers and users of Ladybug 1A. The
-Boost module is currently in development, but is available to early
-adopters.
-
 .. index:: memory; requirements
 
 Resource requirements
@@ -95,7 +88,7 @@ are some suggested reading:
 Document conventions
 --------------------
 
-Code examples are typically done in lower case as the author feels it
+Code examples are shown in lower case as the author feels it
 somewhat more relaxing to the eyes. If MCODE instructions are
 discussed in the text they are in upper case to make them stand out
 more.
@@ -123,7 +116,10 @@ Company. This includes code used for the HP-41 power on sequence, the
 search routine in function address tables (``ASRCH``), the code that
 deals with the assignment bitmap. Also the key dispatch routine
 ``keyDispatch`` (originally named ``KEY-FC``) comes from the Time
-module and the buffer search routine borrows ideas from the Time module.
+module and the buffer search routine borrows ideas from the Time
+module. The ``mapAssignments`` function (originally called ``RSTKCA``)
+comes from the Extended Functions module with additions presents in
+the Card Reader ROM.
 
 The ``XBCDBIN`` routine to convert a floating point number number to
 binary (similar to ``BCDBIN`` found in mainframe, but with more useful

@@ -454,6 +454,16 @@ ensureBuffer
    :end-before:  ;;; ensureBuffer docend
    :lines: 1-3, 5-
 
+ensureBufferWithTrailer
+------------------------
+
+**Entry point:** ``4FA2``
+
+.. literalinclude:: ../src/buffer.s
+   :language: none
+   :start-after: ;;; ensureBufferWithTrailer docstart
+   :end-before:  ;;; ensureBufferWithTrailer docend
+
 reclaimSystemBuffer
 -------------------
 

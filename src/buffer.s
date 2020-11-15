@@ -170,6 +170,7 @@ findBuffer:   dadd=c                ; select chip 0
 ;;; If not existing and cannot be created (not free space), return to (P+1)
 ;;; If found, return to (P+2) with:
 ;;;   A.X = address of buffer start register
+;;;   B.X = address of chain head (permanent .END.)
 ;;;   DADD = first address of buffer
 ;;;   C[13] part of buffer header incremented
 ;;;   C[12:7] = part of buffer header
@@ -193,6 +194,52 @@ ensureBuffer: gosub   findBuffer
               pt=     10
               lc      1             ; 1b0100000...
               data=c
+              goto    relayRTNP2
+
+;;; ensureBufferWithTrailer docstart
+;;; **********************************************************************
+;;;
+;;; ensureBufferWithTrailer - find or create an empty buffer
+;;;
+;;; Like ensureBuffer, but will create a buffer with a trailer register if
+;;; it does not previously exist. The trailer register is set to
+;;; 10000000000000.
+;;;
+;;; In: C.X - buffer ID
+;;; If not existing and cannot be created (not free space), return to (P+1)
+;;; If found, return to (P+2) with:
+;;;   A.X = address of buffer start register
+;;;   B.X = address of chain head (permanent .END.)
+;;;   DADD = first address of buffer
+;;; Uses: A[12], A.X, C, B.X, PT, DADD, +1 sub levels
+;;;
+;;; **********************************************************************
+;;; ensureBufferWithTrailer docend
+
+              .public ensureBufferWithTrailer
+ensureBufferWithTrailer:
+              gosub ensureBuffer
+              goto    10$           ; (P+1) need to create it
+              goto    relayRTNP2    ; (P+2) already exists
+10$:          a=a+1   x             ; point to trailer register to be
+              ?a<b    x             ; have we reched chainhead?
+              rtnnc                 ; yes, we are out of space
+              c=0                   ; build buffer header
+              c=c+1   s             ; 100000000...
+              acex    pt            ; 1b0000000... (where b is buffer number)
+              pt=     10
+              lc      2             ; 1b0200000...
+              data=c
+              acex
+              dadd=c
+              acex
+              c=0
+              c=c+1   s             ; C= 10000000000000
+              data=c
+              a=a-1   x             ; A.X= buffer header
+              acex
+              dadd=c                ; select buffer header
+              acex
               goto    relayRTNP2
 
 ;;; findSecondaryAssignments docstart

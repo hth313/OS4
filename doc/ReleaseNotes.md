@@ -24,8 +24,9 @@ Bug fix release, November 2020.
 
 This version bumps the API version to 1. If you requre any of the newly
 added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
-`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop` or `AtoXFill` you need
-to ensure that you are running with at least API version 1.
+`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`, or
+`ensureBufferWithTrailer` you need to ensure that you are running with
+at least API version 1.
 
 API version 1 also uses the previously not used system buffer flag
 `Flag_HideTopKeyAssign` which can be used to toggle top row key
@@ -45,8 +46,7 @@ enhancements), which must be in place for this to work.
   byte inside the text wrapper, which was the function number. This
   could cause all kinds of problems, but as they usually are low
   numbered it was often a LBL. If the secondary function was a test
-  function that would skip the next line, it would not work as
-  intended.
+  function that may skip the next line, it would not work as intended.
 
 * Secondary functions using default semi-merged operand did not work
   properly and ended up giving `NONEXISTENT` error.

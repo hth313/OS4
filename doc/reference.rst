@@ -173,7 +173,7 @@ CtoXFill
 pausingReset
 ------------
 
-.. index:: floating point to binary, XBCDBIN, BCDBIN
+.. index:: reset pause, pause; reset
 
 **Entry point:** ``4F96``
 
@@ -181,6 +181,18 @@ pausingReset
    :language: none
    :start-after: ;;; pausingReset docstart
    :end-before:  ;;; pausingReset docend
+
+getIndexX
+---------
+
+.. index:: register range
+
+**Entry point:** ``4FA4``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; getIndexX docstart
+   :end-before:  ;;; getIndexX docend
 
 Error handling
 ==============

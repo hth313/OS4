@@ -122,6 +122,7 @@ CtoXDrop:     .equlab 0x4f9c
 CtoXFill:     .equlab 0x4f9e
 mapAssignments: .equlab 0x4fa0
 ensureBufferWithTrailer: .equlab 0x4fa2
+getIndexX:    .equlab 0x4fa4
 jumpC7:       .equlab 0x4d00
 jumpC6:       .equlab 0x4d01
 jumpC5:       .equlab 0x4d02

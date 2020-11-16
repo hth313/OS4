@@ -24,9 +24,9 @@ Bug fix release, November 2020.
 
 This version bumps the API version to 1. If you requre any of the newly
 added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
-`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`, or
-`ensureBufferWithTrailer` you need to ensure that you are running with
-at least API version 1.
+`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`,
+`ensureBufferWithTrailer` or `getIndexX` you need to ensure that you
+are running with at least API version 1.
 
 API version 1 also uses the previously not used system buffer flag
 `Flag_HideTopKeyAssign` which can be used to toggle top row key

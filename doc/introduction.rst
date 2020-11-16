@@ -119,7 +119,8 @@ deals with the assignment bitmap. Also the key dispatch routine
 module and the buffer search routine borrows ideas from the Time
 module. The ``mapAssignments`` function (originally called ``RSTKCA``)
 comes from the Extended Functions module with additions presents in
-the Card Reader ROM.
+the Card Reader ROM. The range function GTINDX and friends codes from
+the Extended functions module (also part of HP-41CX).
 
 The ``XBCDBIN`` routine to convert a floating point number number to
 binary (similar to ``BCDBIN`` found in mainframe, but with more useful

@@ -11,7 +11,7 @@
 ;;;
 ;;; The final value is recalled to X, hiwch
 ;;;
-;;; In: A[2:0] - binary number
+;;; In: C[2:0] - binary number
 ;;; Out: X - floating point number
 ;;;
 ;;; **********************************************************************
@@ -29,7 +29,7 @@
 ;;; operation (CtoXFill) and update X after binary operation (CtoXDrop).
 ;;; The two latter also update L.
 ;;;
-;;; In: A - binary integer (all bits)
+;;; In: C - binary integer (all bits)
 ;;; Out: X - floating point number
 ;;; Assume: chip 0 selected
 ;;;

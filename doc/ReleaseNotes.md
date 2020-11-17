@@ -25,6 +25,8 @@ Bug fix release, November 2020.
 This version bumps the API version to 1. If you requre any of the newly
 added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
 `pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`,
+`ERRDE_resetMyBank`, `ERRNE_resetMyBank`, `ERRAD_resetMyBank`,
+`ERROF_resetMyBank`, `errorExit_resetMyBank`, `CHK_NO_S_resetMyBank`,
 `ensureBufferWithTrailer` or `getIndexX` you need to ensure that you
 are running with at least API version 1.
 

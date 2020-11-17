@@ -152,6 +152,12 @@ unpack0:      .equlab 0x4d28
 unpack:       .equlab 0x4d29
 XNFRC:        .equlab 0x4d30
 XNFRPU:       .equlab 0x4d34
+ERRDE_resetMyBank: .equlab 0x4d38
+ERRNE_resetMyBank: .equlab 0x4d3d
+ERRAD_resetMyBank: .equlab 0x4d42
+ERROF_resetMyBank: .equlab 0x4d47
+errorExit_resetMyBank: .equlab 0x4d4c
+CHK_NO_S_resetMyBank: .equlab 0x4d51
 #endif
 
 ;;; **********************************************************************

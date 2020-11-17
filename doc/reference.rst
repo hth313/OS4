@@ -254,6 +254,67 @@ noSysBuf
    :start-after: ;;; noSysBuf docstart
    :end-before:  ;;; noSysBuf docend
 
+ERRDE_resetMyBank
+-----------------
+
+**Entry point:** ``4D38``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ERRDE_resetMyBank docstart
+   :end-before:  ;;; ERRDE_resetMyBank docend
+
+ERRNE_resetMyBank
+-----------------
+
+**Entry point:** ``4D3D``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ERRNE_resetMyBank docstart
+   :end-before:  ;;; ERRNE_resetMyBank docend
+
+ERRAD_resetMyBank
+-----------------
+
+**Entry point:** ``4D42``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ERRAD_resetMyBank docstart
+   :end-before:  ;;; ERRAD_resetMyBank docend
+
+ERROF_resetMyBank
+-----------------
+
+**Entry point:** ``4D47``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; ERROF_resetMyBank docstart
+   :end-before:  ;;; ERROF_resetMyBank docend
+
+errorExit_resetMyBank
+---------------------
+
+**Entry point:** ``4D4C``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; errorExit_resetMyBank docstart
+   :end-before:  ;;; errorExit_resetMyBank docend
+
+CHK_NO_S_resetMyBank
+--------------------
+
+**Entry point:** ``4D51``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; CHK_NO_S_resetMyBank docstart
+   :end-before:  ;;; CHK_NO_S_resetMyBank docend
+
+
 Ensure environment
 ==================
 

@@ -654,6 +654,136 @@ XNFRC:        gosub   shellDisplay
 XNFRPU:       gosub   shellDisplay
               golong  NFRPU
 
+;;; ERRDE_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; ERRDE_resetMyBank - reset the bank of the caller and exit to ERRDE
+;;;
+;;; Use this routine to exit back to mainframe, giving a DATA ERROR
+;;; message.
+;;;
+;;; Calling sequence:
+;;;      <some test>
+;;;      gsubc   ERRDE_resetMyBank
+;;;
+;;; **********************************************************************
+;;; ERRDE_resetMyBank docend
+
+              .public ERRDE_resetMyBank
+ERRDE_resetMyBank:
+	      c=stk
+	      gosub   resetBank
+	      golong  ERRDE
+
+;;; ERRNE_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; ERRNE_resetMyBank - reset the bank of the caller and exit to ERRNE
+;;;
+;;; Use this routine to exit back to mainframe, giving a NONEXISTENT
+;;; message.
+;;;
+;;; Calling sequence:
+;;;      <some test>
+;;;      gsubc   ERRNE_resetMyBank
+;;;
+;;; **********************************************************************
+;;; ERRNE_resetMyBank docend
+
+              .public ERRNE_resetMyBank
+ERRNE_resetMyBank:
+	      c=stk
+	      gosub   resetBank
+	      golong  ERRNE
+
+;;; ERRAD_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; ERRAD_resetMyBank - reset the bank of the caller and exit to ERRAD
+;;;
+;;; Use this routine to exit back to mainframe, giving a ALPHA DATA
+;;; message.
+;;;
+;;; Calling sequence:
+;;;      <some test>
+;;;      gsubc   ERRAD_resetMyBank
+;;;
+;;; **********************************************************************
+;;; ERRAD_resetMyBank docend
+
+              .public ERRAD_resetMyBank
+ERRAD_resetMyBank:
+	      c=stk
+	      gosub   resetBank
+	      golong  ERRAD
+
+;;; ERROF_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; ERROF_resetMyBank - reset the bank of the caller and exit to ERROF
+;;;
+;;; Use this routine to exit back to mainframe, giving a OUT OF RANGE
+;;; message.
+;;;
+;;; Calling sequence:
+;;;      <some test>
+;;;      gsubc   ERROF_resetMyBank
+;;;
+;;; **********************************************************************
+;;; ERROF_resetMyBank docend
+
+              .public ERROF_resetMyBank
+ERROF_resetMyBank:
+	      c=stk
+	      gosub   resetBank
+	      golong  ERROF
+
+;;; errorExit_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; errorExit_resetMyBank - reset the bank of the caller and exit to errorExit
+;;;
+;;; Use this routine to exit back to mainframe, finalizing a custom error
+;;; message.
+;;;
+;;; Calling sequence:
+;;;      <some test>
+;;;      gsubc   ERROF_resetMyBank
+;;;
+;;; **********************************************************************
+;;; errorExit_resetMyBank docend
+
+              .public errorExit_resetMyBank
+errorExit_resetMyBank:
+	      c=stk
+	      gosub   resetBank
+	      golong  errorExit
+
+;;; CHK_NO_S_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; CHK_NO_S_resetMyBank - test for alpha data
+;;;
+;;; This is the CHK_NO_S routine in a variant that will reset the bank for
+;;; caller if it exits to display ALPHA DATA
+;;;
+;;; In C - floating point number
+;;; Out: C - floating point number
+;;;      decimal mode set
+;;;
+;;; **********************************************************************
+;;; CHK_NO_S_resetMyBank docend
+
+	      .public CHK_NO_S_resetMyBank
+CHK_NO_S_resetMyBank:
+	      setdec
+	      ?c#0    s
+              rtn nc
+              c=c+1   s
+              gonc    ERRAD_resetMyBank
+              c=c-1   s
+              rtn
+
 ;;; noRoom docstart
 ;;; **********************************************************************
 ;;;

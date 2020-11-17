@@ -398,3 +398,59 @@ OS4 uses this technique to inspect secondary FATs which may be located in
 other banks than the primary. However, OS4 only uses the ``ENBNK1``
 routine as it uses the bank switch routine in the secondary FAT header
 to enable other banks.
+
+
+Error exits with banks
+======================
+
+.. index:: banks; error exists
+
+Many functions need to perform some sanity checking on input and exit
+using appropriate error message routines to notify the user if
+something is wrong with the input. One such example is ``ERRDE`` which
+displays ``DATA ERROR``.
+
+Typically you perform such sanity checking of input early in your
+function, as there is no point of doing any work if some input is
+bad. However, jumping to an error exit like his leaves the current
+bank of your module page selected. This is a problem if your
+function is in some other bank than the first one, as you should
+always leave the first bank enabled when you are not in control.
+
+This can of course be solved by switching bank and then jumping to the
+error handler, but that is in reality somewhat tricky. To make it
+simple, OS4 provides a set of routines that display normal error
+messages and restores the bank of your module for you. In your
+function you can do something like this:
+
+.. code-block:: ca65
+
+                    .name "EXAMPLE"
+   EXAMPLE:         ...
+                    ?a#c  x               ; some test
+                    gsubc   ERRDE_resetMyBank
+
+Note that instead of jumping to the error handler, it uses a ``GOSUB``
+(with carry set condition in this example) to the error exit
+routine. The called routine pops the return stack to get the page
+number of your function. It then inspects the module page and calls
+the defined bank switch entry point ``ENBNK1`` to enable bank 1 in
+your page, then it jumps to the normal ``ERRDE`` routine.
+
+See :ref:`error-exit-from-banks` for existing error exit routines.
+
+Function exit
+-------------
+
+A related routine ``resetMyBank`` exists. It resets your bank and
+returns. This can be used as a normal exit from your secondary bank
+instead of using a ``RTN`` instruction. As with the error handlers
+above you need to use a ``GOSUB`` instruction:
+
+.. code-block:: ca65
+
+   done:            gosub   resetMyBank   ; reset my bank and return
+
+The ``resetMyBank`` first pops the return address to get your module
+page, enables bank 1 for you by calling your ``ENBNK1`` and then it
+returns using the next return address on the stack.

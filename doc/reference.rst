@@ -194,6 +194,8 @@ getIndexX
    :start-after: ;;; getIndexX docstart
    :end-before:  ;;; getIndexX docend
 
+.. _error-exit-from-banks:
+
 Error handling
 ==============
 

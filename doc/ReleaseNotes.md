@@ -27,8 +27,9 @@ added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
 `pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`,
 `ERRDE_resetMyBank`, `ERRNE_resetMyBank`, `ERRAD_resetMyBank`,
 `ERROF_resetMyBank`, `errorExit_resetMyBank`, `CHK_NO_S_resetMyBank`,
-`ensureBufferWithTrailer` or `getIndexX` you need to ensure that you
-are running with at least API version 1.
+`SKP_YESNO_resetMyBank`, `SKP_resetMyBank`, `NOSKP_YESNO_resetMyBank`,
+`NOSKP_resetMyBank` `ensureBufferWithTrailer` or `getIndexX` you need
+to ensure that you are running with at least API version 1.
 
 API version 1 also uses the previously not used system buffer flag
 `Flag_HideTopKeyAssign` which can be used to toggle top row key

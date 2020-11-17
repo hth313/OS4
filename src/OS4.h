@@ -158,6 +158,10 @@ ERRAD_resetMyBank: .equlab 0x4d42
 ERROF_resetMyBank: .equlab 0x4d47
 errorExit_resetMyBank: .equlab 0x4d4c
 CHK_NO_S_resetMyBank: .equlab 0x4d51
+SKP_YESNO_resetMyBank: .equlab 0x4d58
+SKP_resetMyBank: .equlab 0x4d59
+NOSKP_YESNO_resetMyBank: .equlab 0x4d5e
+NOSKP_resetMyBank: .equlab 0x4d5f
 #endif
 
 ;;; **********************************************************************

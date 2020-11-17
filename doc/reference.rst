@@ -111,6 +111,42 @@ XFNRPU
    :start-after: ;;; XNFRPU docstart
    :end-before:  ;;; XNFRPU docend
 
+resetMyBank
+-----------
+
+.. index:: bank switching
+
+**Entry point:** ``4F90``
+
+.. literalinclude:: ../src/secondaryFunctions.s
+   :language: none
+   :start-after: ;;; resetMyBank docstart
+   :end-before:  ;;; resetMyBank docend
+
+SKP_resetMyBank
+---------------
+
+.. index:: skip line; bank switching, yes/no test; bank switching
+
+**Entry point:** ``4D59``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; SKP_resetMyBank docstart
+   :end-before:  ;;; SKP_resetMyBank docend
+
+NOSKP_resetMyBank
+-----------------
+
+**Entry point:** ``4D5F``
+
+.. literalinclude:: ../src/core.s
+   :language: none
+   :start-after: ;;; NOSKP_resetMyBank docstart
+   :end-before:  ;;; NOSKP_resetMyBank docend
+
+
+
 General utilities
 =================
 
@@ -934,19 +970,6 @@ resetBank
    :start-after: ;;; resetBank docstart
    :end-before:  ;;; resetBank docend
    :lines: 1-3, 5-
-
-resetMyBank
------------
-
-.. index:: bank switching
-
-**Entry point:** ``4F90``
-
-.. literalinclude:: ../src/secondaryFunctions.s
-   :language: none
-   :start-after: ;;; resetMyBank docstart
-   :end-before:  ;;; resetMyBank docend
-
 
 secondaryAddress
 ----------------

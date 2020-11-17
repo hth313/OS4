@@ -784,6 +784,50 @@ CHK_NO_S_resetMyBank:
               c=c-1   s
               rtn
 
+;;; SKP_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; SKP_resetMyBank - reset callers bank and then exit to SKP
+;;;
+;;; This is the conditional exit routine that skips next RPN program
+;;; line, or in run-mode prints NO depending on S7.
+;;;
+;;; The alternative entry point SKP_YESNO_resetMyBank resets S7 to make
+;;; it print NO in run-mode.
+;;;
+;;; **********************************************************************
+;;; SKP_resetMyBank docend
+
+              .public SKP_YESNO_resetMyBank, SKP_resetMyBank
+SKP_YESNO_resetMyBank:
+              s7=0
+SKP_resetMyBank:
+              c=stk
+              gosub   resetBank
+              golong  SKP
+
+;;; NOSKP_resetMyBank docstart
+;;; **********************************************************************
+;;;
+;;; NOSKP_resetMyBank - reset callers bank and then exit to SKP
+;;;
+;;; This is the conditional exit routine that exectes next RPN program
+;;; line, or in run-mode prints YES depending on S7.
+;;;
+;;; The alternative entry point NOSKP_YESNO_resetMyBank resets S7 to make
+;;; it print YES in run-mode.
+;;;
+;;; **********************************************************************
+;;; NOSKP_resetMyBank docend
+
+              .public NOSKP_YESNO_resetMyBank, NOSKP_resetMyBank
+NOSKP_YESNO_resetMyBank:
+              s7=0
+NOSKP_resetMyBank:
+              c=stk
+              gosub   resetBank
+              golong  NOSKP
+
 ;;; noRoom docstart
 ;;; **********************************************************************
 ;;;

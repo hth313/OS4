@@ -671,9 +671,9 @@ XNFRPU:       gosub   shellDisplay
 
               .public ERRDE_resetMyBank
 ERRDE_resetMyBank:
-	      c=stk
-	      gosub   resetBank
-	      golong  ERRDE
+              c=stk
+              gosub   resetBank
+              golong  ERRDE
 
 ;;; ERRNE_resetMyBank docstart
 ;;; **********************************************************************
@@ -692,9 +692,9 @@ ERRDE_resetMyBank:
 
               .public ERRNE_resetMyBank
 ERRNE_resetMyBank:
-	      c=stk
-	      gosub   resetBank
-	      golong  ERRNE
+              c=stk
+              gosub   resetBank
+              golong  ERRNE
 
 ;;; ERRAD_resetMyBank docstart
 ;;; **********************************************************************
@@ -713,9 +713,9 @@ ERRNE_resetMyBank:
 
               .public ERRAD_resetMyBank
 ERRAD_resetMyBank:
-	      c=stk
-	      gosub   resetBank
-	      golong  ERRAD
+              c=stk
+              gosub   resetBank
+              golong  ERRAD
 
 ;;; ERROF_resetMyBank docstart
 ;;; **********************************************************************
@@ -734,9 +734,9 @@ ERRAD_resetMyBank:
 
               .public ERROF_resetMyBank
 ERROF_resetMyBank:
-	      c=stk
-	      gosub   resetBank
-	      golong  ERROF
+              c=stk
+              gosub   resetBank
+              golong  ERROF
 
 ;;; errorExit_resetMyBank docstart
 ;;; **********************************************************************
@@ -755,9 +755,9 @@ ERROF_resetMyBank:
 
               .public errorExit_resetMyBank
 errorExit_resetMyBank:
-	      c=stk
-	      gosub   resetBank
-	      golong  errorExit
+              c=stk
+              gosub   resetBank
+              golong  errorExit
 
 ;;; CHK_NO_S_resetMyBank docstart
 ;;; **********************************************************************
@@ -774,10 +774,10 @@ errorExit_resetMyBank:
 ;;; **********************************************************************
 ;;; CHK_NO_S_resetMyBank docend
 
-	      .public CHK_NO_S_resetMyBank
+              .public CHK_NO_S_resetMyBank
 CHK_NO_S_resetMyBank:
-	      setdec
-	      ?c#0    s
+              setdec
+              ?c#0    s
               rtn nc
               c=c+1   s
               gonc    ERRAD_resetMyBank

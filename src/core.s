@@ -809,7 +809,7 @@ SKP_resetMyBank:
 ;;; NOSKP_resetMyBank docstart
 ;;; **********************************************************************
 ;;;
-;;; NOSKP_resetMyBank - reset callers bank and then exit to SKP
+;;; NOSKP_resetMyBank - reset callers bank and then exit to NOSKP
 ;;;
 ;;; This is the conditional exit routine that exectes next RPN program
 ;;; line, or in run-mode prints YES depending on S7.
@@ -1262,8 +1262,8 @@ backingCall   .macro lab
 
 ;;; Reserved tail identificatios.
 tail:         .macro
-              .con    2             ; B
-              .con    '1'           ; 1
+              .con    1             ; A
+              .con    '2'           ; 2
               .con    0x200 + '4'   ; 4 (banked)
               .con    0x0f          ; O
               .con    0             ; to be replaced by checksum

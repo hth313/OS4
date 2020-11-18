@@ -16,27 +16,14 @@ OS4 has been tested and is known to work with MLDL-2000 and HP-41CL.
 OS4 also works on emulators and so far been tested successfully on
 i41CX+ and dbnut (from NutStudio tools).
 
-## Version 1C
+## Version 2A
 
-Bug fix release, November 2020.
+New API version 1 and some corrections, November 2020.
 
 ### API version 1
 
-This version bumps the API version to 1. If you requre any of the newly
-added routines `resetMyBank`, `postfix4095`, `XBCDBIN`,
-`pausingReset`, `AXtoX`, `AtoXRcl`, `AtoXDrop`, `AtoXFill`,
-`ERRDE_resetMyBank`, `ERRNE_resetMyBank`, `ERRAD_resetMyBank`,
-`ERROF_resetMyBank`, `errorExit_resetMyBank`, `CHK_NO_S_resetMyBank`,
-`SKP_YESNO_resetMyBank`, `SKP_resetMyBank`, `NOSKP_YESNO_resetMyBank`,
-`NOSKP_resetMyBank` `ensureBufferWithTrailer` or `getIndexX` you need
-to ensure that you are running with at least API version 1.
-
-API version 1 also uses the previously not used system buffer flag
-`Flag_HideTopKeyAssign` which can be used to toggle top row key
-assignments to allow the single letter RPN program labels to be
-used. The Boost module provides functions to use this feature and it
-also provides a system shell (for its catalog, execute and assign
-enhancements), which must be in place for this to work.
+This version bumps the API version to 1.
+Refer to [API updates](API.html) for more information.
 
 ### Corrections
 

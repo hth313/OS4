@@ -6,3 +6,4 @@
 doc/_static/lcd*.svg
 doc/_static/*.pdf
 doc/_build/
+doc/*.html

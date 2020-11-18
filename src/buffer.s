@@ -218,7 +218,7 @@ ensureBuffer: gosub   findBuffer
 
               .public ensureBufferWithTrailer
 ensureBufferWithTrailer:
-              gosub ensureBuffer
+              gosub   findBuffer
               goto    10$           ; (P+1) need to create it
               goto    relayRTNP2    ; (P+2) already exists
 10$:          a=a+1   x             ; point to trailer register to be

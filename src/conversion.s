@@ -31,7 +31,6 @@
 ;;;
 ;;; In: C - binary integer (all bits)
 ;;; Out: X - floating point number
-;;; Assume: chip 0 selected
 ;;;
 ;;; **********************************************************************
 ;;; CtoXRcl docend
@@ -51,6 +50,7 @@ CtoX10:       pt=     13            ; digit counter
               setdec
               m=c                   ; M= number to convert
               clrabc
+              dadd=c                ; select chip 0
               n=c                   ; N= 0
 
 10$:          c=m                   ; loop start, get input

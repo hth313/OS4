@@ -513,6 +513,8 @@ growBuffer10: gosub   buffer1
               pt=     0             ; fill the opened area with F0000...
               c=g
               c=0     xs
+              ?c#0    x             ; actually not opening any new space?
+              gonc    25$           ; yes
 
               a=c     x             ; A.X= number of registers opened
 
@@ -529,7 +531,7 @@ growBuffer10: gosub   buffer1
               data=c
               ?a<b    x
               goc    20$
-              c=b     m
+25$:          c=b     m
               rcr     3
               dadd=c
               a=c     x             ; A.X= buffer header address

@@ -5,7 +5,7 @@ Semi-merged functions
 .. index:: functions; semi-merged, semi-merged functions
 
 Semi-merged function are prompting XROM functions that take postfix
-arguments. This is much like many built-in functions, i.e. ``RCL``.
+arguments. This is much like many built-in functions, e.g. ``RCL``.
 
 Instructions such as ``RCL`` are made up from two parts, the instruction
 and its postfix argument. On the HP-41 they are displayed in programs

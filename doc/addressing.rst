@@ -65,14 +65,14 @@ field. Finally the ``GOTOC`` instruction jumps to the address in
 ``C[6:3]`` (the stack address plus one in this case).
 
 This style is used in many MCODE programs to handle returns with
-different outcome, i.e. to signal a failure condition by returning to
+different outcome, e.g. to signal a failure condition by returning to
 the normal return address and the success case returns one step
 ahead. This works as almost every instruction (including short
 branches) is a single word on the Nut CPU.
 
 As the stack is only four levels deep we need to take care
 not nesting subroutines too deep. If you study existing code,
-i.e. mainframe code, you will find that the number of subroutine
+e.g. mainframe code, you will find that the number of subroutine
 levels used is often documented. Should you nest too deep, you will
 end up jumping to address 0 which is not entirely harmful as that is
 where we end when starting execution, though the code will not work

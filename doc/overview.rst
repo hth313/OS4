@@ -87,7 +87,7 @@ The message system can be used to notify such things as that a new
 command is keyed in (which should clear the RPN return stack), or
 that the ``CAT`` function was entered with a catalog number that is
 not known. A message can then be sent to ask if there are anyone who
-wants to act on it, i.e. ``CAT 23``. Any plug-in module can register a
+wants to act on it, e.g. ``CAT 23``. Any plug-in module can register a
 handler and act on any message.
 
 The main software repository contains a list of known messages and this list
@@ -198,7 +198,7 @@ One potential problem is modules that introspect other banked
 modules. Such introspection is possible by using defined bank switch
 entry points that banked modules should have.
 If two such modules are loaded to the same bank switch pair,
-i.e page 8 and 9, it may not work as expected as when one module
+e.g page 8 and 9, it may not work as expected as when one module
 switch bank, the other module also switch bank.
 
 This is also very much the case for OS4 which is bank switch and OS4
@@ -207,7 +207,7 @@ functions that may be in other banks. As page 4 is not bank switch
 together with application pages, it is kind of safe, but this of
 course depends on the memory system used.
 
-Implementing very non-standard bank switch, i.e. leaving secondary
+Implementing very non-standard bank switch, e.g. leaving secondary
 banks active while no in control is quite fragile due to the different
 memory systems. While you *may* get such setup to work in a given
 setup, it may fail when a user loads your module image to another

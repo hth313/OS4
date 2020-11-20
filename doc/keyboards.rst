@@ -187,7 +187,7 @@ like a lot of overhead. OS4 provides a way of creating anonymous
 execute direct functions that are only present inside that mode.
 
 From the user point of view, it works like any execute direct
-function, or special key press, i.e. pressing the "C" key to clear the
+function, or special key press, e.g. pressing the "C" key to clear the
 current entry in a busy waiting catalog. In both cases, there is no
 preview of the function and it is not programmable.
 

@@ -44,7 +44,7 @@ underscores.
 
 The function name is written to the LCD followed by a
 blank and prompt underscores are added by a call to a ``NEXT``
-routine where its numeric suffix tells now many underscores to add, i.e.
+routine where its numeric suffix tells now many underscores to add, e.g.
 ``NEXT2`` adds two underscores. The ``NEXT`` routine will not return
 until a key is pressed and the calculator goes to sleep.
 A partial key sequence flag is also set to indicate that the
@@ -60,7 +60,7 @@ other key was pressed. This makes it easy to decode back-arrow key and
 dispatch on different classes of keys.
 
 If you accept the input you append what was keyed to the LCD, which
-can be one or more characters, i.e. the top rows keys often
+can be one or more characters, e.g. the top rows keys often
 act as ``01``--``10`` when pressed. If further input is needed you call
 the appropriate ``NEXT`` routine to output the number of underscores
 desired.
@@ -94,7 +94,7 @@ program it is non-programmable.
    alpha register. This was used for file names in the HP-IL mass
    storage and Extended Functions/Memory modules. As they take input
    from the alpha register they can be made programmable. They are also more
-   flexible as they allowed for dual input, i.e. specifying a program
+   flexible as they allowed for dual input, e.g. specifying a program
    but storing it in a file under a different name.
 
 Prompting XROM functions work up to a point. There is no built-in
@@ -174,7 +174,7 @@ OS4 alters the return address kept on the stack for the next key
 processing to point to your own key handler code.
 
 When the prompt has been fully filled in you should jump to one of the
-null test entry points, i.e. ``NULT_``, ``NULT_3`` or ``NULT_4`` to do
+null test entry points, e.g. ``NULT_``, ``NULT_3`` or ``NULT_4`` to do
 null testing and if key is released in time execute the function.
 
 Execution is done the normal way by actually running the function. As
@@ -206,7 +206,7 @@ Design considerations
 ---------------------
 
 Some extension modules (like CCD) show prompt underscores immediately
-for more than one field, i.e. the two arguments of an ``XROM``.
+for more than one field, e.g. the two arguments of an ``XROM``.
 This may be seen as user friendly, but existing base functionality
 like ``ASN`` do not present up front that it will also prompt for a
 key once you entered the function name. In addition, the
@@ -247,7 +247,7 @@ Some prompt support functionality can be found in the Boost
 module. The ``parseNumber`` routine can be used for requesting decimal
 numbers. This can prompt for a given number of digits and has an
 accept predicate, making it possible to check the input to be in a
-specific range, i.e. 0--511 or 1--31. Impossible input is detected as
+specific range, e.g. 0--511 or 1--31. Impossible input is detected as
 soon as possible, resulting in refused input and a display blink.
 
 .. code-block:: ca65

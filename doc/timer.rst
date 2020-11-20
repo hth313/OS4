@@ -5,11 +5,11 @@ Interval timer
 .. index:: timer
 
 The interval timer in the Time module can be borrowed by applications
-to provide timeouts or recurring timed events, i.e. a clock.
+to provide timeouts or recurring timed events, e.g. a clock.
 
-It is primarily intended for transient applications, i.e. waiting for
+It is primarily intended for transient applications, e.g. waiting for
 a fixed amount of time for a key press. Another use is for animating
-the display, i.e. to show a blinking cursor. It can also be used to
+the display, e.g. to show a blinking cursor. It can also be used to
 display periodic updates of some external hardware readouts, like GPS
 coordinates or other external measurements.
 

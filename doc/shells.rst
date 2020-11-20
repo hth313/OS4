@@ -200,10 +200,10 @@ flicker that results by first having the standard default display of X
 being replaced by the desired view.
 
 A custom display routine can be used to visualize the floating point
-value in a different way, i.e. attaching some unit, display as ratio,
+value in a different way, e.g. attaching some unit, display as ratio,
 change the number of display digits in certain situations, or just
 anything in your imagination. It can also be used for visualizing
-numbers that are stored on a custom stack, i.e. integers (Ladybug
+numbers that are stored on a custom stack, e.g. integers (Ladybug
 module) or complex numbers. You could even make an application that
 shows Roman numerals.
 

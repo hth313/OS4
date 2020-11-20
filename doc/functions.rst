@@ -30,7 +30,7 @@ Ordinary functions
 ------------------
 
 An ordinary function is one that goes through the NULL check and does
-not put up a prompt, i.e. ``SIN``. They can either be programmable or
+not put up a prompt, e.g. ``SIN``. They can either be programmable or
 non-programmable. This is controlled by whether the first instruction
 address (internally called XADR) is a ``NOP`` instruction (opcode ``0x000``)
 or not.
@@ -43,7 +43,7 @@ Execute direct functions
 
 
 Execute direct functions (XKD) are use for functions that act
-immediately on key down, i.e. ``SHIFT``, ``SST`` and ``R/S``. A
+immediately on key down, e.g. ``SHIFT``, ``SST`` and ``R/S``. A
 function is marked as being XKD by starting with two ``NOP``
 instructions (opcode ``0x000``).
 
@@ -158,7 +158,7 @@ Semi-merged functions
 .. index:: functions; semi-merged, semi-merged functions
 
 Many operations in the HP-41 consist of a function and a postfix
-argument, i.e. ``FIX 4`` or ``RCL IND Z``. When pressed, the operand will
+argument, e.g. ``FIX 4`` or ``RCL IND Z``. When pressed, the operand will
 output one or more underscores to be filled in with the argument. The
 base operating system allows XROM instructions to be defined as
 prompting too, but it cannot represent them in program memory. It is
@@ -196,7 +196,7 @@ functions are called XXROM.
 
 You can see such XXROM functions as having a numeric identity in the
 same way as an XROM, though the function number has a wider range
-0--4095, i.e. ``XXROM 7,689`` would be the 690th secondary function in a
+0--4095, e.g. ``XXROM 7,689`` would be the 690th secondary function in a
 module with XROM identifier 7 (the numbers start from 0).
 
 .. note::
@@ -219,7 +219,7 @@ built-in function would do.
 
 The actual assignment information is kept inside the system buffer. If
 you assign a secondary function to a key and remove the module, the
-key will display as an XXROM, i.e. ``XXROM 7,45`` indicating which
+key will display as an XXROM, e.g. ``XXROM 7,45`` indicating which
 function it is and that it is not present.
 
 Secondary functions can also be entered in programs and they will be

@@ -14,7 +14,7 @@ allow for independent bank switching of page groups. The HP-41CL and
 MLDL-2000 support this. Other MLDLs and module emulation hardware from
 long ago will probably not be able to support OS4.
 
-.. index:: Clonix
+.. index:: Clonix, NoV modules
 
 .. note::
    Clonix and NoV modules will require an update of its firmware to a

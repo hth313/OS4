@@ -28,14 +28,14 @@ Refer to [API updates](API.html) for more information.
 ### Corrections
 
 * Secondary functions without any semi-merged argument would not
-  display properly in program mode. It could go and display DATA ERROR
+  display properly in program mode. It could go and display `DATA ERROR`
   or do weird things rather than showing the instruction.
 
 * Running secondary functions from program memory that did not have
   any semi-merged argument caused the execution of the instruction
   byte inside the text wrapper, which was the function number. This
   could cause all kinds of problems, but as they usually are low
-  numbered it was often a LBL. If the secondary function was a test
+  numbered it was often a `LBL`. If the secondary function was a test
   function that may skip the next line, it would not work as intended.
 
 * Secondary functions using default semi-merged operand did not work

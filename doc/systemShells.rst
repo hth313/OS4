@@ -16,12 +16,12 @@ to not only assign by name, but also by XROM numbers or two byte
 synthetic assignments.
 
 System shells are stored in the shell stack and are consulted in their
-stacking order. This way the one higher up in the stack has priority
+stacking order. A system shell higher up in the stack has priority
 over one lower down. In contrast to application shells, where the
 topmost shell is consulted and the rest are ignored, system shells are
-consulted in order until a shell that handles the key press are
+consulted in order until a shell that handles the key press is
 found. Thus, system shells merge their functionality while an
-application shell shadows the all other applications.
+application shell shadows other applications.
 
 Display handler
 ===============

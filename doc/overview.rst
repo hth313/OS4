@@ -29,7 +29,7 @@ with anything else that requires page 4. This includes:
    is present.
 
 #. Modules using Library#4. This is a popular library that resides in
-   page 4 is incompatible with OS4. This also includes any modules
+   page 4 and it is incompatible with OS4. This also includes any modules
    that rely on Library#4.
 
 Page 4 has only a single (officially) defined entry point and that is
@@ -38,9 +38,8 @@ HP-41 wakes up (no matter if it is deep or light sleep) and when it is
 about to go back to light sleep again. The normal case is that page 4
 is empty, in which case it executes as NOP which will cause an
 immediate return if called with a ``GOSUB`` instruction.
-If OS4 is loaded there is actual code here that takes control. It is not
-a complete take over, as it reuses as much as possible of the already
-existing built-in functionality.
+If OS4 is loaded there is actual code here that takes control to
+enhance the built-in behavior.
 
 There are no poll vectors at the top of page 4 as in normal plug-in
 modules.
@@ -53,14 +52,14 @@ Shells
 A new concept provided is a *shell* which provides
 a way of installing new keyboard and display behaviors.
 Such behaviors can be activated by the user to turn the
-calculator into something different compared to the default. This
+calculator into something different compared to normal behavior. This
 transformation can be anything from mild to very dramatic.
 
 A shell keyboard definition changes the standard keyboard and is
 also active outside user mode. In user mode it is possible to make
 assignments as usual and also have the scan for local alpha labels in
-the current program of the two top key rows. A shell may specify if it
-wants the scan for local alpha labels in the current RPN program, or
+the current program of the two top key rows. A shell may specify whether it
+wants the scan for local alpha labels in the current RPN program or
 not.
 
 Shells make it possible to replace the standard keyboard with
@@ -73,22 +72,22 @@ Message system
 .. index:: message system
 
 A new internal message handler system is also provided. In some way it
-can be seen as somewhat related to poll vectors, but it is more
+can be seen somewhat related to poll vectors, but it is more
 flexible and more dynamic. Message handler descriptors are stored in
 the same stack as the shell descriptors.
 
 It is possible for a message originator to send (broadcast)
 messages to anyone that are interested in a particular event. It also
 allows for collaboration between the message originator and the
-receivers. Messages can be about anything of interest and is in no way
+Receivers. Messages can be about anything of interest and is in no way
 tied to the keyboard or display.
 
 The message system can be used to notify such things as that a new
 command is keyed in (which should clear the RPN return stack), or
-that the ``CAT`` function was entered with a catalog number that is
+that the ``CAT`` function is entered with a catalog number that is
 not known. A message can then be sent to ask if there are anyone who
 wants to act on it, e.g. ``CAT 23``. Any plug-in module can register a
-handler and act on any message.
+handler and can act on any message.
 
 The main software repository contains a list of known messages and this list
 can be added to as needed.
@@ -112,9 +111,9 @@ greatly expands the number of functions in a 4K address page. You can
 have up to 4096 additional functions (which would be very hard to fit
 into 16K words).
 
-These extra functions may reside in banked pages. They can be on
+These extra functions can reside in banked pages, be on
 redefined keyboard layouts (shell keyboards),
-they will display in program mode and they can be assigned to keys.
+show in program mode and they can be assigned to keys.
 If you use an extension to the ``XEQ`` and ``ASN`` keys, you can access them
 by name as any other function. In fact, they will in almost every
 way act as any ordinary FAT function.
@@ -132,8 +131,8 @@ to be stored into a program.
 OS4 provides a concept called semi-merged functions, which makes it
 possible for plug-in modules to have functions with prompting behavior
 that can be stored in programs.
-You enter such functions and fill in the postfix argument prompt the
-normal way. This work both outside as will as in program mode where
+You enter such function and fill in the postfix argument prompt the
+normal way. This works both outside as will as in program mode where
 the function will be properly recorded as a program step (two
 actually, see below). They will also display and execute correctly
 (with some caveats).
@@ -142,8 +141,8 @@ Built-in support for ordinary style postfix operands are provided.
 Full custom prompting behavior is also possible, but you will need to provide
 additional code on your own for such alternative behavior.
 Custom behavior needs to provide all expected behavior, such as
-recording, displaying and proper execution of the function. This is a
-lot of work, but possible. The ordinary postfix operand semi-merged
+recording, displaying and proper execution of the function. This may
+be non-trivial, but is possible. The ordinary postfix operand semi-merged
 functions are very easy to define.
 
 In addition, secondary FAT functions can also have semi-merged behavior, including
@@ -178,7 +177,7 @@ more memory to be used by the system. Most recently introduced memory
 systems allow for up to  four banks, this includes the MLDL-2000,
 Clonix and HP-41CL.
 
-The 1LG9 only act on bank switch instruction executed from *within*
+The 1LG9 only acts on bank switch instruction executed from *within*
 its own memory. The MLDL-2000 and HP-41CL mimics this behavior by
 pairing, so that page 8 and 9 are bank switched together, then pages
 following are paired in the same way. The original Clonix module on
@@ -187,40 +186,40 @@ manifests itself depends on the size of the Clonix module and more
 specifically which pages it is configured to serve.
 
 As a result of this, a banked module may or may not affect other
-modules, depending on which memory hardware and in part also how it is
+modules, depending on the memory hardware used and in part also how it is
 configured. While this may sound a bit scary, in normal situations
 this is not a problem as banked software is typically written so that
 secondary banks are only active in a temporary fashion and the bank is
 restored to the primary bank when control is given back to the
 operating system.
 
-One potential problem is modules that introspect other banked
+One potential problem is a module that introspects other banked
 modules. Such introspection is possible by using defined bank switch
 entry points that banked modules should have.
 If two such modules are loaded to the same bank switch pair,
 e.g page 8 and 9, it may not work as expected as when one module
-switch bank, the other module also switch bank.
+switch bank, the other module will normally also switch bank.
 
-This is also very much the case for OS4 which is bank switch and OS4
+This is also very much the case for OS4 which is bank switched and OS4
 does introspect banked application modules to access secondary
 functions that may be in other banks. As page 4 is not bank switch
 together with application pages, it is kind of safe, but this of
-course depends on the memory system used.
+course ultimately depends on the memory system used.
 
 Implementing very non-standard bank switch, e.g. leaving secondary
-banks active while no in control is quite fragile due to the different
-memory systems. While you *may* get such setup to work in a given
-setup, it may fail when a user loads your module image to another
+banks active while not in control is quite fragile due to the different
+memory systems. While you *may* get such setup to work, it may fail
+when a user loads your module image to another
 memory system or calculator configuration. Thus, it is probably safest
-to avoid such practices.
+to avoid such practice.
 
 Catalogs
 ========
 
-The original HP-41C mainframe provided three catalogs (1--3) to show
+The original HP-41C mainframe provides three catalogs (1--3) to show
 user programs, functions in plug-in modules and built-in
 functions respectively. While you are in a catalog, you can stop,
-restart and then step it manually. When the catalog is stopped the
+restart and then step it manually. When such catalog is stopped the
 HP-41 goes to light sleep and consumes less battery power. If you
 press an undefined key, like starting numeric entry, the catalog
 exits and the pressed key is obeyed.
@@ -247,7 +246,7 @@ catalogs. This includes going to sleep consuming less power while
 waiting for a key press and ability to terminate the catalog and
 perform the action of an undefined (by the catalog) key press. New
 catalogs can even be implemented by different modules and accessed
-using the same catalog key.
+using the catalog key.
 
 
 Reserving identities
@@ -265,5 +264,5 @@ and over the years hundreds of modules have been made.
 As OS4 lists identities for extension points and hosted buffers in a
 source repository on Github, there is a single central place where
 they are defined. If you want to reserve such identities, simply edit
-the OS4 header file and issue a pull request to reserve some identity,
-avoiding potential clashes.
+the OS4 header file and issue a pull request to reserve the identity,
+avoiding potential future clashes.

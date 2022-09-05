@@ -4,8 +4,8 @@ Shells
 
 .. index:: shells
 
-A new concept provided is a shell which provides a way of installing
-new keyboard and display behaviors.
+A new concept introduced by OS is a *shell* which provides a way of
+installing new keyboard and display behaviors.
 
 The shell keyboard replaces the standard keyboard layout and allows
 for complete redefinition of keys. You can use standard functions,
@@ -14,7 +14,7 @@ default view of the X register to something that suits the current
 shell better.
 
 Both the keyboard replacement and display routines are optional and
-allows for overriding one of them, while using the default behavior
+allows for overriding one of them, while keeping the default behavior
 of the other.
 
 By providing several MCODE functions, bind them on a custom keyboard
@@ -44,7 +44,7 @@ usual way, to customize the calculator further.
    combat computer. In such cases you may want to disable certain
    things that may distract the operator. Back in the days, OS4 would
    probably have been a great asset for such purposes. However, today
-   we are probably more inclined to broaden rather than restrict the
+   we are probably more interested in broaden rather than restrict the
    capabilities of the HP-41.
 
 
@@ -53,22 +53,23 @@ Shell stack
 
 .. index:: shells; stack
 
-The shells are stored in a shell stack. If you activate an
-application shell it pushed on top of the stack, shadowing all
-applications below it. When you exit an application, the one
-immediately below becomes active again, all the way down to the
+The shells are stored in the shell stack in the system buffer. If you
+activate an application shell it is pushed on top of the stack,
+shadowing all applications below it. When you exit an application, the
+one immediately below becomes active again, all the way down to the
 standard behavior.
 
-There are four kind of entities stored in the shell stack. Even though
-they are pushed on the stack, they are kept
-together based on its kind. Pushing a shell means it is stored on top
-of other shells of the same kind.
+There are four different kind of entities stored in the shell
+stack. Even though they are different they are pushed on the same
+stack. Pushing a shell means it is stored on top of other shells of
+the same kind.
 
 You can think of a shell as defining a keyboard layout. Such keyboard
 layout does not need to have a meaning for every key. If a key that is
-not handled is pressed, the next shell on the stack is inspected.
+not defined is pressed, the next shell on the stack is inspected.
 However, among the applications, only the topmost one is given the
-chance to handle a key press, shadowed applications are ignored.
+chance to handle a key press. The other applications are shadowed by
+the top one and are ignored.
 
 .. figure:: _static/shells.*
 
@@ -80,8 +81,8 @@ Shell kinds
 
 .. index:: shells; kind
 
-There are four kinds of shells and they have different purposes and
-follow somewhat different rules.
+There are four kinds of entities on the shell stack. They have
+different purposes and follow somewhat different rules.
 
 Application shells
 ------------------
@@ -90,8 +91,8 @@ Application shells
 
 The most fundamental shell type is the *application shell*. They live
 near the top of the shell stack. Only the topmost application shell on
-the stack is consulted for interpreting the keyboard and the display
-behavior. Any application shell below the top one are ignored, but are
+the stack is consulted when interpreting the keyboard and the display
+behavior. Any application shell below the top one is ignored, but are
 kept to preserve the ordering to allow the user go "back" to a
 previous application when leaving the currently active one.
 
@@ -126,29 +127,32 @@ System shells
 
 The third shell variant is a *system shell*. System shells are located
 below all application shells in the shell stack. All system shells
-are active and each one is always consulted in the stacking order
+are active and each one is consulted in the stacking order
 until a handler is found. They are typically used for
-replacing single (or a few) keys, providing alternative or additional
+replacing single (or a few) keys, providing alternative base
 functionality. One example is a replacement for the assign (``ASN``)
-function that could be implemented using a system shell.
+key which can be implemented using a system shell.
 
 Extension handlers
 ------------------
 
 .. index:: extension handlers
 
-The final entity that lives in the shell stack is *extension
+The fourth and final entity that lives in the shell stack are *extension
 handlers*. They are very different from the shells as they
 implement a generic message system. There are no keyboard or display
 behavior associated with them. Events are routed to message handlers
 which act on a given message.
+
+Extension handlers are somewhat related to poll vectors, but these
+handlers are more flexible.
 
 Shell structure
 ===============
 
 .. index:: shells; structure
 
-A shell is defined by a structure that consists of several elements.
+A shell is defined by a structure which consists of several elements.
 It is defined as follows:
 
 .. code-block:: ca65
@@ -187,7 +191,7 @@ This points to the custom display handler that overrides the default
 display of the stack X register. This is called to replace the
 built-in provided display of X when appropriate. To get a steadier
 display it is recommended that functions you implement in your
-application also ends by updating the display on their own. This is
+application also ends by updating the display of their own. This is
 done by calling the ``shellDisplay`` routine, which this takes care of
 all possible situations. For example, if a user program is running we do
 not want to alter the display. Furthermore, the application which your
@@ -227,8 +231,8 @@ layout. This keyboard definition is the replaced standard keyboard.
 User keys
 ---------
 
-This field points to structure that defines the keyboard
-layout. This keyboard definition is the replaced user keyboard.
+This field points to structure that defines the keyboard layout in
+user mode. This keyboard definition is the replaced user keyboard.
 Normally you will set this to the same value as standard keys.
 
 Alpha keys
@@ -256,8 +260,8 @@ timeout event. This field is only valid for application shells.
 
 Set this field to 0 if no timeout handler is provided.
 
-An example
-----------
+Example
+-------
 
 A Time-Value-Money style shell provides a keyboard with some keys
 replaced. Its shell definition could look as follows:
@@ -381,11 +385,11 @@ that a shell in theory can be located at any address in the 64K memory
 space.
 
 Not every address is actually possible. First of all it must be
-aligned to an even 4-bit word address. This limitation is imposed by
-the API, not the shell descriptor itself as it can actually handle
+aligned to an even 4 address. This limitation is imposed by
+the API, not the shell descriptor itself as it can handle
 unaligned addresses. Second, modules can be removed or moved to a
 different page while the calculator is off. To handle this the page
-numbers 0 and 1 (which actually points to the mainframe OS pages)
+numbers 0 and 1 (which points to the mainframe OS pages)
 have special meanings in the reconfiguration process. No shell can
 point to these pages. The reconfiguration is executed when the
 calculator is turned on, see further below.
@@ -409,7 +413,7 @@ in case two modules happen to use the same page address for different
 shells.
 
 An example descriptor is ``AC00410`` (hex number). The ``AC00`` is
-the actual address of the shell descriptor. ``4`` says it is an
+the address of the shell descriptor. ``4`` says it is an
 application. Finally ``10`` is 16 decimal, which means it belong to a
 module with XROM 16, which is currently plugged into page address
 ``A000``.
@@ -421,19 +425,19 @@ Activation
 
 Once you have created a shell structure, activating the shell is done
 by calling ``activateShell``. This routine takes a packed pointer to
-the shell structure (which is why it needs to be aligned on an even
+the shell structure (this is why it needs to be aligned on an even
 address by 4).
 
 Activation means that a shell descriptor is stored on the shell stack
 at the topmost location among existing shells of the same kind. It
-essentially means it becomes the first shell to be consulted of its
-kind.
+essentially means that it becomes the first shell of its kind to be
+consulted.
 
 You can activate a shell multiple times. Doing so means that it will
 get moved to become the topmost shell of its kind. In other words, if
-you activate an application A and then activate other applications
-they will shadow application A. Activating application A again at this
-point means it is moved up ahead of the applications that shadows it,
+you activate an application A and then activate another application,
+it will shadow application A. Activating application A again at this
+point means it is moved up ahead of the applications that shadowed it,
 making A the active application.
 
 Deactivation
@@ -442,7 +446,7 @@ Deactivation
 .. index:: shells; deactivation, deactivation; of shells
 
 You can exit a shell using the ``exitShell`` routine. This will
-deactivate the shell, bringing any previously shadowed shell in focus
+deactivate the shell, and bring any previously shadowed shell in focus
 again.
 
 Reclaim at power on

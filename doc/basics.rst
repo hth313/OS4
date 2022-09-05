@@ -3,7 +3,7 @@ Basics
 ******
 
 In this chapter we go through some concepts that are used internally
-in OS4. This is not a primer on MCODE programming or the Nut CPU, you
+in OS4. This is not a primer on MCODE programming or the Nut CPU, as you
 are expected to be familiar with MCODE programming.
 
 Addressing
@@ -18,14 +18,14 @@ nothing magic about having such 4K blocks in the Nut architecture, it
 is just a way of dividing up the memory to allow for modular
 extensibility.
 
-Each memory location holds a 10-bit word and most instructions are
-single word. The only exceptions are the absolute jump and go
+Each memory location holds a 10-bit word and most instructions are a
+single word. The main exceptions are the absolute jump and go
 subroutine instructions which takes two words. However, the good news
 is that they are able to reach any fixed location in the 16-bit
-address space. (The ``POWOFF`` instruction needs to be followed by
-a ``NOP``, so it can be seen as taking two words as well).
+address space. Other two work instructions are ``POWOFF`` which ``LDI``
+which is followed by a constant that is loaded to register.
 
-As the Nut CPU has notoriously bad addressing capabilities, the only
+As the Nut CPU has very limited addressing capabilities, the only
 way to read data from the ROM space is using the ``CXISA`` instruction
 which expects an address in the ``[6:3]`` field of the C register.
 
@@ -73,12 +73,12 @@ Return status
 
 A routine may need to deal with possible error conditions.  For
 flexibility it may be better to return with some error condition rather
-than displaying an error message. The caller may have another way of
+than displaying an error message. The caller may have a better way of
 dealing with a failure than showing an error message.
 
 Due to the nature of the Nut CPU it turns out that it is often easy to
 do this by returning to different locations rather than returning
-some kind of error code. At the call site it looks like this:
+some kind of error code. At a call site it may look like this:
 
 .. code-block:: ca65
 
@@ -86,9 +86,9 @@ some kind of error code. At the call site it looks like this:
                  goto    noBuffer      ; (P+1) not found
    foundBuffer:  ...
 
-We call this ``(P+n)`` and this works well thanks that almost all
-instructions are single word (including short jumps) and we most often
-want to branch to some alternative location to handle the case.
+We call this ``(P+n)`` and this works well thanks that almost every
+instruction is single word (including short jumps) and we most often
+want to branch to some alternative location to handle the error case.
 
 The caller will just ``RTN`` to get to ``(P+1)``, and the success case
 ``(P+2)`` means it needs to return to the following location, which
@@ -109,8 +109,8 @@ Buffer advice
 
 .. index:: buffers; advice
 
-I/O buffers, or just buffers for short, were defined from the beginning
-in the HP-41 mainframe. However, they were first used by the Time
+I/O buffers, or just buffers for short, were defined from the very beginning
+of the HP-41 mainframe. However, they were first used by the Time
 module, about two years after the introduction of the HP-41.
 
 A buffer can have any size from a single register up to 255
@@ -123,7 +123,7 @@ both nibbles, or ``AA`` in hex.
 
 The following two nibbles, a byte (eight bits) is the size of the
 buffer. The buffer header is included in this count. Eight bits limits
-the size to 255 (as the size 0 has no useful meaning).
+the size to 255 (as a zero sized buffer is impossible).
 
 Even though the buffer number was defined to be a double word like
 ``AA``, the information carried in the first nibble is only zero
@@ -139,13 +139,13 @@ Non-null registers
 
 .. index:: buffers; null registers, null registers; in buffers
 
-The Time module buffer code take precautions to never store a zero
-value inside a buffer too. This is due to a 67/97 card reader bug
+The Time module buffer code takes precautions to never store a zero
+value inside a buffer. This is due to a 67/97 card reader bug
 which I have not been able to find out what it means. I suspect that the
 card reader (at least early versions) may scan for free registers
 looking at individual registers also inside buffers.
 
-As a result, you should probably avoid storing empty registers inside
+As a result, you should probably avoid having empty registers inside
 the buffer to avoid potential memory corruption.
 
 System buffer
@@ -154,12 +154,12 @@ System buffer
 .. index:: buffers; system, system buffer
 
 The OS4 module needs to store its own state somewhere.
-The mainframe code typically uses the 0--15 RAM address
+The mainframe code typically uses the 0--15 RAM address as a
 status area for such purposes, so that space already occupied. The
 safest way to find some free memory is to use a buffer and the OS4
 module allocates a system buffer with number 15.
 
-The advantages of using a buffer are that it is a safe area and it can
+The advantage of using a buffer is that it is a safe area and that it can
 grow (and shrink) dynamically as needed, rather than being fixed.
 
 The disadvantages of using a buffer are that it takes a little bit
@@ -212,12 +212,12 @@ solution is to increment the key code by one, giving the 1--80 form,
 which makes it possible to tell an inactive assignment apart from an
 active assignment.
 
-Internal key tables are just an array of function codes where we take
+The internal key tables are just arrays of function codes that take
 advantage of the extra two bits in a ROM word to decode a special
 meanings, like a data entry key or a function that ends digit entry or
-not. As we want to allow storing also XROM functions on keyboard, the
+not. As we want to allow using XROM functions on keyboards. The
 actual encoding used by OS4 differs somewhat from the ones used in the
-operating system.
+mainframe operating system.
 
 If most of the keys are given a meaning it makes sense to define a
 keyboard like an array indexed in 0--79 form, just like the built in
@@ -243,9 +243,9 @@ return. This exit point enables stack lift (sets the internal push
 flag, which is CPU flag 11) and falls into ``NFRC``.
 
 If you used up all four levels of CPU stack, you must exit back using
-a ``GOLONG`` instruction instead. By design, XKD functions (seldom
-used functions that execute immediately on key down) does not have
+a ``GOLONG`` instruction instead. By design, XKD functions (which
+execute immediately on key down) does not have
 ``NFRPU`` pushed on the stack, so they also must always ``GOLONG``
 back. Such functions may want to return back to ``NFRKB`` instead as
 it waits for key release and resets the keyboard (useful as it acted
-immediately on key down).
+immediately on the key down).

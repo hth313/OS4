@@ -25,17 +25,15 @@ When not processing key presses, ``ptemp2`` is preserved in a status
 register (in chip 0) and ``ptemp1`` is rebuilt each time as it
 contains information about what kind of key was just pressed.
 The address of the code that will handle the next key press is kept on
-the top of the processor stack. Combined, these can be seen as a
-continuation, or put another way, the information context needed to
-process the next key press is saved for future use.
+the top of the processor stack. Together these are the context
+needed to process the next key.
 
 Display prompt
 ==============
 
 Functions that prompt for input have bits set in the function name
-header to tell it is a prompting function.
-This also tells the code that is decoding which function to
-run that it first needs to prompt for an argument before it can
+header to indicate that it is a prompting function.
+This also tells that the function needs to prompt for an argument before it can
 actually run. At this point, the function code is saved in a status
 register and the upper bits are stored in the ``ptemp2`` state
 byte. The value of these bits informs what class of prompting function
@@ -46,14 +44,14 @@ The function name is written to the LCD followed by a
 blank and prompt underscores are added by a call to a ``NEXT``
 routine where its numeric suffix tells now many underscores to add, e.g.
 ``NEXT2`` adds two underscores. The ``NEXT`` routine will not return
-until a key is pressed and the calculator goes to sleep.
+until a key is pressed and the calculator goes to light sleep.
 A partial key sequence flag is also set to indicate that the
 calculator is processing a prompt. The return address to the caller of
 ``NEXT`` is kept on the processor stack while the calculator is in
 light sleep waiting for the next key press.
 
 Before giving control back, all underscores are removed from the
-display then it returns to the address following the call to ``NEXT``
+display. Then it returns to the address following the call to ``NEXT``
 if back-arrow key was pressed, or to the following address if some
 other key was pressed. This makes it easy to decode back-arrow key and
 ``ptemp1`` is set up in the ``ST`` flag register, making it easy to
@@ -69,7 +67,7 @@ Rolling your own
 ================
 
 For certain functions it is desirable to use the prompt mechanism, but
-there are several problems as with prompting XROM functions which requires
+there are several problems with prompting XROM functions which requires
 some care. The operating system is quite permissive in allowing
 prompting XROMs, but there are limitations on what actually works in
 practice.
@@ -108,13 +106,13 @@ prompting XROM functions:
 #. If the function is allowed to prompt for a stack register, the
    XROM function being built becomes corrupted.
 
-#. The printer will also get confused and print the wrong function
+#. The printer will get confused and print the wrong function
    postfix.
 
 .. note::
 
    The semi-merged postfix mechanism contains code that works around
-   the problem with entered stack registers corrupting the instruction.
+   the problem with entering stack registers corrupting the instruction.
 
 Custom prompting
 ================
@@ -142,10 +140,9 @@ that mark it as non-programmable and possibly also XKD).
                  .con    0x101         ; A
    myASN:        nop                   ; non-programmable
                  gosub   partialKey    ; marker partial key takeover
-                 goto    assign        ; when executed, argument is done and we will
-                                       ;   perform the actual assignment
+                 goto    assign        ; actual execution of ASN
                  goto    abortASN      ; <-
-                 ...                   ; normal processing
+                 ...                   ; normal argument processing
 
    assign:                             ; actual run behavior after prompt done
 
@@ -187,7 +184,7 @@ code that performs the function.
 
 What about the collected prompt input data? Normally, alpha input is in
 the Q register and a numeric operand is in ``A.X``. If you want
-something else you need to store it somewhere before you called the
+something else you need to store it somewhere before you call the
 null test handler code. As the Q registers is available for prompt
 arguments, it can be a good choice.
 
@@ -229,7 +226,7 @@ your XROM function it is possible to do so, but normal limitations
 apply. The bug with stack operands exists (unless you use a corrected
 mainframe ROM). The function must be non-programmable and your function
 cannot be a secondary functions. The ``CAT'`` catalog replacement
-function in the Boost module is currently implemented this way.
+function in the Boost module is currently implemented in this way.
 
 If you take over prompt handling but in the end make use of existing
 functionality in mainframe it will not work properly with secondary

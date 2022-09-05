@@ -3,9 +3,9 @@ Introduction
 ************
 
 Welcome to the OS4 module for the HP-41 calculator!
-OS4 is a powerful extension module which removes several limitations
-that were originally designed into the HP-41 mainframe (the name used
-by HP for the HP-41 firmware).
+OS4 is a powerful extension module which removes several of the design
+limitations in the HP-41 mainframe (the name used by HP for the HP-41
+firmware).
 
 OS4 is a support module and requires other extension modules to expose
 its capabilities to the user. Examples of such modules are Ladybug and
@@ -47,7 +47,7 @@ Resource requirements
 =====================
 
 OS4 allocates some space from the free memory pool. How much is taken
-depends on what you actually do with it, but expect 2-7 registers for
+depends on what you actually do with it, but expect 2--7 registers for
 modest use.
 
 Apart from this, OS4 does not impose any restrictions on the
@@ -62,7 +62,7 @@ Using this guide
 If you only want to use OS4 because another module requires it, simply
 load the module image to page 4 and put this guide aside.
 
-This guide is aimed to MCODE developers that want to explore and
+This guide is intended for MCODE developers who want to explore and
 develop modules using OS4. It can also be of interest to those
 that want to know how it works internally or want to study how to
 write HP-41 MCODE.
@@ -81,23 +81,24 @@ are some suggested reading:
 * The *Owner's Manuals* supplied with the HP-41, Hewlett Packard Company
 * *MCODE Programming for Beginners*, Ken Emery, 1985
 * *Extend your HP-41*, W Mier-Jedrzejowicz, 1985
-* NutStudio Tools Documentation
+* Calypsi Nut Tools Documentation
 * A programmer's handbook, Poul Kaarup
 * The VASM listings (annotated mainframe source code)
 
 Document conventions
---------------------
+====================
 
 Code examples are shown in lower case as the author feels it
 somewhat more relaxing to the eyes. If MCODE instructions are
 discussed in the text they are in upper case to make them stand out
 more.
 
-The development tools used in this guide is NutStudio tools which
+The development tools used in this guide is the
+`Calypsi tools <https://www.calypsi.cc>`_  which
 contains a macro assembler, a linker, a librarian and a debugger. The
 debugger includes a simulator and a comprehensive scripting
 abilities. The assembler and linker fully supports generating banked
-modules and can generate ELF/DWARF images to allow for source level
+modules and generatea ELF/DWARF images to allow for source level
 debugging. This has been a very useful tool chain in developing and
 testing OS4. VisualStudio Code has been used as the a main debugger
 front-end (user interface).
@@ -118,7 +119,7 @@ deals with the assignment bitmap. Also the key dispatch routine
 ``keyDispatch`` (originally named ``KEY-FC``) comes from the Time
 module and the buffer search routine borrows ideas from the Time
 module. The ``mapAssignments`` function (originally called ``RSTKCA``)
-comes from the Extended Functions module with additions presents in
+comes from the Extended Functions module with additions from
 the Card Reader ROM. The range function GTINDX and friends codes from
 the Extended functions module (also part of HP-41CX).
 
@@ -134,7 +135,7 @@ open source license.
 
 MIT License
 
-Copyright (c) 2020 Håkan Thörngren
+Copyright (c) 2020-2022 Håkan Thörngren
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -73,7 +73,8 @@ This version number is API related and is not the same as the version
 of the OS4 release.
 
 You can either load the version number defined in ``OS4.h``, or
-better, the API version your software requires.
+better, the API version your software requires. The ``API.html`` guide
+documents how the API has evolved over time.
 
 .. note::
 
@@ -81,6 +82,19 @@ better, the API version your software requires.
    then your software will automatically demand a later version of OS4
    if you upgrade OS4, even if you do not actually use any of the
    additional features provided with that version.
+
+.. note::
+
+   Copying the current API number and inserting it manually at the
+   time you developed your module means that you lock to the version
+   that you had at hand at the time. This gives an easy way to find a
+   "floor" without digging into the actual API changes and you can
+   refine this as needed later if you make use of more recent updates
+   to OS4. Thus, you may initially request a more recent API version
+   than actually needed, but over time this will tend to converge to
+   your actual needs and not force unnecessary demands for the user on
+   updating OS4 just because you updated your OS4 header files and
+   fixed some minor issues in your own module.
 
 This API version number consists of two parts. The lower 8 bits are an
 increasing number that is bumped whenever new entry points are added,

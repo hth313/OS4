@@ -62,7 +62,7 @@ do. Here we get the address from top of the stack into
 the mantissa field which is wider. For practical reasons [#FFFF]_ this
 gives identical result as if we had used the more narrow address
 field. Finally the ``GOTOC`` instruction jumps to the address in
-``C[6:3]`` (the stack address plus one in this case).
+``C[6:3]`` (the return address on the stack plus one in this case).
 
 This style is used in many MCODE programs to handle returns with
 different outcome, e.g. to signal a failure condition by returning to
@@ -73,10 +73,10 @@ branches) is a single word on the Nut CPU.
 As the stack is only four levels deep we need to take care
 not nesting subroutines too deep. If you study existing code,
 e.g. mainframe code, you will find that the number of subroutine
-levels used is often documented. Should you nest too deep, you will
+levels used is often carefully documented. Should you nest too deep, you will
 end up jumping to address 0 which is not entirely harmful as that is
 where we end when starting execution, though the code will not work
-the way it was supposed.
+the way it was intended.
 
 RAM
 ===
@@ -103,7 +103,7 @@ copy, as we can copy in the opposite direction) the address back the
 
 While the RAM chip allows for direct addressing inside the current
 16-register window, we can almost never use it as the memory system is
-quite flexible in how it partitions things, which makes it impossible to
+quite flexible in how it locates things, which makes it impossible to
 know how an arbitrary address translates to a fixed offset inside the
 current 16-register RAM chip.
 
@@ -124,7 +124,7 @@ register.
    This was done in a tricky way by storing a buffer below the key
    assignment registers (which is the only fixed location outside
    chip 0). However, it cannot normally be there, so a lot of measures
-   were taken to not leave it there under normal operation.
+   were taken not to leave it there under normal operation.
 
 .. rubric:: Footnotes
 .. [#FFFF]
@@ -135,4 +135,4 @@ register.
    memory space, where there normally is a module checksum.
    Even if we should affect all nibbles in the mantissa field, it is
    rarely a problem anyway as there seldom is anything kept there of
-   value in cases where we work on the address part of the field.
+   value in situations when we work on the address part of the field.

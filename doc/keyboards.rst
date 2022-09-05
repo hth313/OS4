@@ -10,7 +10,7 @@ In this chapter we will look at how to define keyboards. A keyboard is
 essentially a mapping of a key code to a function. The key code is in
 0--79 form, which means that we transform a key press to an index
 starting from 0 and ending with 79. There are no gaps in this
-sequence, so it can become a simple array lookup.
+sequence, so it becomes a simple array lookup.
 
 OS4 allows for two ways to define a keyboard. By using a full
 definition of all 80 keys or a linear search table.
@@ -27,7 +27,7 @@ keyboards.
 
 As with the built-in keyboards, a single ROM word is used to describe
 the function bound to a key. In order to cover XXROM function an
-extension record is also used.
+extension record is used.
 
 The function value 0 means that the key is not defined by this
 keyboard. Scanning to the end of a linear table without find the key
@@ -107,7 +107,7 @@ Sparse keyboard tables
 .. index:: keyboards; sparse
 
 Sparse keyboard tables are useful when only a few keys are
-defined. They are just a simple linear search table where each entry
+defined. They are a simple linear search table where each entry
 is a key code (0--79 form) followed by its function definition.
 
 As usual you need to align the table as it will be pointed to from another
@@ -200,8 +200,8 @@ preview of the function and it is not programmable.
    implemented in very different ways.
 
 OS4 provides a way to generate a special execute direct function form
-that are well suited for this purpose. They only work with sparse keyboards,
-which is not a huge limitation as such transient applications
+that is well suited for this purpose. They only work with sparse keyboards,
+which is not a huge limitation as a transient applications
 typically only binds perhaps 5-10 functions. Here is an example of how
 a catalog keyboard can look like:
 
@@ -240,7 +240,7 @@ a catalog keyboard can look like:
 
 All such functions have the special value ``KeyXKD`` and the key table
 is immediately followed by a table of packed pointers to the key
-handler routines. The OS4 key table scanner simply counts the number
+handler routines. The OS4 key table scanner counts the number
 of ``KeyXKD`` values seen while scanning the table. If the key pressed
 is ``KeyXKD``, the accumulated count is added to the start of the
 execute direct pointer table to determine the correct handler.
@@ -256,5 +256,5 @@ there are "real" functions intermixed in the sparse key table.
    something similar on a full keyboard would either means that we
    would need to scan the up to 80 entries long table, or have a
    second table of the same size, which would be rather wasteful. It
-   is also typical that transient applications where this is useful
+   is also typical that transient applications where this is most useful,
    only defines a small number of keys.

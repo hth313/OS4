@@ -238,7 +238,7 @@ Error handling
 .. index:: error handling
 
 These error routines are the same as found in the Extended Functions
-module and later 41CX. They are provided in OS4 as they do not exist
+module and later 41CX. They are provided by OS4 as they do not exist
 in 41C and 41CV. Thus, if you rely on OS4 they are now available on
 all HP-41 variants.
 
@@ -515,11 +515,9 @@ from the Card Reader which has this ability. Apparently, the code was
 slightly stripped when moved but the comment was left as-is.
 
 Here it is presented in all its glory with the addition that it is now
-also handles secondary assignments and will rebuild those key
-assignments map too. If a secondary assignment happens to be shadowed
-by a primary assignment, as can be the result when loading primary
-assignments using functions that are unaware of secondary assignments,
-the secondary assignment is cleared.
+also handles secondary assignments and will also rebuild their key
+assignment maps. If a secondary assignment happens to be shadowed
+by a primary assignment, the secondary assignment is cleared.
 
 **Entry point:** ``4FA0``
 
@@ -891,7 +889,7 @@ These functions define semi-merged prompting functions.
 .. note::
    A call to these routines are expected to appear first in a
    function. The OS4 code inspects the start of potential such
-   functions and expects it to look in a particular way.
+   functions and expects it to look in a specified way.
 
 argument
 --------

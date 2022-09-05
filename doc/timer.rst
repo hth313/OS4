@@ -40,7 +40,7 @@ Timeout
 
 For an application this is an entry in the shell descriptor. As
 mentioned, you need to stop the timer when you decide you do not want
-any further timeouts with ``clearTimeout``.
+any further timeouts by calling ``clearTimeout``.
 
 Partial key sequence
 --------------------

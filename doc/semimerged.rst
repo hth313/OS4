@@ -21,11 +21,11 @@ Postfix operands
 .. index:: functions; postfix operands, postfix operands
 
 As we cannot alter the mainframe there is no way we can store a fully
-merged XROM function in a program step. What we can do is storing it
+merged XROM function in a program step. What we can do is store it
 in two parts, first the XROM function and then its argument. As the
 argument can be any byte, it is not possible to store it raw by
 itself, as it may grab following bytes making the program impossible
-to view and edit, and it can even corrupt program memory.
+to view and edit. It would soon cause corrupted program memory.
 
 With semi-merged functions  we wrap the postfix byte using a text
 literal. This means that there are actually two program steps:
@@ -37,7 +37,7 @@ literal. This means that there are actually two program steps:
    12 "$"
    13 ...
 
-Note that the ``SL 36`` instruction is fully shown as a merged
+Note that the ``SL 36`` instruction is shown as a fully merged
 instruction, but it is followed by its wrapped postfix byte (36
 corresponds to ASCII $).
 
@@ -58,7 +58,7 @@ When executed, the text literal is simply skipped and has no effect
 on the alpha register.
 
 .. note::
-   It is intentional that the postfix byte is shown. While it can be
+   It is intentional that the postfix byte is shown. While it could be
    possible to hide it somewhat, it is judged to be better to actually
    show what is going on. This provides better control over program
    memory editing, as the postfix part actually does take a program
@@ -128,7 +128,8 @@ function first followed by the two postfix operands. In program
 memory a dual semi-merged program step is shown infix with the
 function name between its two operands. A bit in the control word
 can be used to specify that it should be followed by a question mark,
-meant to indicate that it will optionally skip the next program line.
+meant to indicate that it will optionally skip over the next
+program line.
 
 When entered the function is always displayed first followed by the
 prompt underscores:
@@ -154,7 +155,7 @@ they will various characters, often with all segments on.
 
 .. image:: _static/lcd-less-than-program-5.*
 
-If we now back stop to the previous line we can see the decorated
+If we now back step to the previous line we can see the fully decorated
 function. In this case it is somewhat too long for the display
 making the line number scroll off the display:
 
@@ -189,7 +190,7 @@ bank.
 As a secondary function uses a text literal to indicate which function
 it is, a dual secondary function requires a text literal with three
 bytes. The first byte is the secondary function number, the remaining
-two are the arguments. OS4 will merge all wrapped text literals
+two are the postfix arguments. OS4 will merge all wrapped text literals
 to a single three character text literal in this case.
 
 
@@ -214,7 +215,7 @@ The first two ``NOP`` instructions signal that this is a
 non-programmable execute direct function (XKD).
 
 Even though this is marked as a non-programmable function it can be
-entered in a program. What happens is that when ``argument`` detects
+entered in a program. What happens is that when ``argument`` routine detects
 that it is executed in program mode, it inserts the appropriate
 program steps and alters the display to make it look as if it was
 entered in the program and is now prompting for its argument.
@@ -240,12 +241,12 @@ as it acts immediately on key press and it will not go through the
 
 .. note ::
    If you have the 41CL, there is an updated mainframe firmware
-   available that corrects this bug.
+   available which corrects this bug.
 
 The ``argument`` routine is what makes this function become
-semi-merged, or at least half of it. As mentioned, the purpose of this
+semi-merged, or at least half of the story. As mentioned, the purpose of this
 routine is to put the calculator in the proper state to prompt for an
-argument for the semi-merged function. It is followed by a control
+argument to the semi-merged function. It is followed by a control
 word which is the default postfix argument byte for this function and
 the upper bits are used to signal if we accept direct stack arguments
 or not.
@@ -266,9 +267,9 @@ function prelude. It consists of a hook that is called in program mode
 for each program line. This hook does two things. First, it detects
 when we are entering a semi-merged argument and will ensure the
 display looks right and the program memory is written to in the
-correct way, forming the text literal and also prune it if the default
+correct way, forming the text literal and omit it if the default
 argument is entered. Second, when not entering a program step it will
-display semi-merged program steps in the decorated fashion.
+display semi-merged program steps in its decorated fashion.
 
 Dual arguments
 --------------
@@ -285,11 +286,11 @@ argument variant. A prelude looks something like this:
                  .con    SEMI_MERGED_QMARK
                  ...
 
-The routine changes to be ``dualArgument`` and there is no longer a
-default postfix argument. This word now only holds flags as defined in
+The called routine is changed to be ``dualArgument`` and there is no longer a
+default postfix argument. That word now holds flags as defined in
 the ``OS4.h``. The function above is marked to have a trailing
 question mark in the name to indicate that this function optionally
-skips a step. There are also flag bits that allow for telling if stack
+skips a step. There are also flag bits to tell whether stack
 arguments are accepted or not for each of the two arguments.
 
 The argument bytes are returned in ``A[3:2]`` (first argument) and
@@ -301,13 +302,13 @@ Decoding postfix operands
 =========================
 
 Mainframe contains code to decode postfix operands, but it falls short
-in several ways and is not always suitable for your needs.
+in several ways and is not always suitable.
 
 The closest you will come to have a function that parses a postfix
 operand is ``TONSTF``, but it is meant to be used by single digit
 functions like ``TONE`` and ``FIX``. As a result, it will throw an
 error if you have a two-digit operand. The other built-in code that
-deals with operands are not available as subroutines.
+deals with operands are not available as callable subroutines.
 
 .. index:: BCDBIN, ADRFCH
 
@@ -315,13 +316,13 @@ The two support routines related to this are ``ADRFCH`` and
 ``BCDBIN``. ``ADRFCH`` handles reading register operands which is
 useful for indirect operands. If you use ``ADRFCH`` you will need to
 convert the read register value, which is a floating point number, to
-binary and ``BCDBIN`` is useful for this. However, ``BCDBIN`` cannot
+binary. ``BCDBIN`` is useful for this, however, ``BCDBIN`` cannot
 handle numbers larger than 999.
 
 OS4 provides two routines that help with decoding postfix operands.
-``postfix4095`` is similar to ``TONSTF`` but offers as much range as
-possible. For a direct operand it means 0--127 and for indirect it
-will handle 0--4095, see :ref:`postfix4095`.
+``postfix4095`` is similar to ``TONSTF`` but handles a much wider range.
+For a direct operand it means 0--127 and for indirect it
+a handle 0--4095, see :ref:`postfix4095`.
 
 The second routine is ``XBCDBIN`` which is like ``BCDBIN``, but
 can handle a 12-bits range 0--4095.

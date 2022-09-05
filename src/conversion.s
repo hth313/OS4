@@ -9,7 +9,7 @@
 ;;;
 ;;; CXtoX - convert small binary number to floating point in X
 ;;;
-;;; The final value is recalled to X, hiwch
+;;; The final value is recalled to X, which
 ;;;
 ;;; In: C[2:0] - binary number
 ;;; Out: X - floating point number

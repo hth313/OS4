@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to OS4's documentation!
-===============================
+OS4 system extension for the HP-41 calculator
+=============================================
 
 .. toctree::
    :maxdepth: 2

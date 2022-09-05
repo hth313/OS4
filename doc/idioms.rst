@@ -21,9 +21,9 @@ Error returns
 Often we want to tell whether a routine succeeded or if there was an
 error. When we want to report an error we can use one of the error
 exit routines provided by mainframe. Such exits are ``ERRDE`` for
-showing ``DATA ERROR``, and some other routines for other standard
+showing ``DATA ERROR``, and some other routines for the other standard
 error messages. OS4 also provides some additional error handler
-routines with other messages.
+routines with additional messages.
 
 A routine typically becomes more flexible if it does not exit with an
 error message, but rather returns in a way to signal an error,
@@ -31,11 +31,11 @@ delegating the error handling to the caller. This makes the routine
 more flexible as a caller can take other actions on the error
 condition than just exiting with an error message.
 
-Normally we would return an error value, like zero which is easy to
+We can return an error value, like zero which is easy to
 test for by the caller. On the Nut CPU there is an alternative idiom by
-returning to different locations depending on whether there was an
+returning to a different location depending on whether there was an
 error or success (or even different classes of results). This is
-rather unusual, but works exceptionally well on the Nut instruction
+somewhat unusual, but works exceptionally well on the Nut instruction
 set for two reasons. First, almost all instructions are of the same size (one
 word). Second, it is is very easy to handle returns to different
 locations. A simple return is just the ``RTN`` instruction, or one of the
@@ -43,7 +43,8 @@ conditional ``RTNC`` or ``RTNNC`` instructions. Returning to an incremented
 location is also very simple as shown below.
 
 If we want to return back that we failed, we return to something
-called ``(P+1)``. This is fancy for doing a normal return. If we
+called ``(P+1)``. This is fancy for doing a normal return to the
+instruction following the call instruction. If we
 succeed, we return to ``(P+2)``, which means that we skip past the
 normal return address by one.
 
@@ -60,10 +61,8 @@ What it means is that a caller may look as follows
 
 In the actual ``findBuffer`` routine, we test for various error
 conditions, such as if running out of the buffer area or finding the
-permanent ``.END.``. In the code we can test various conditions, like
-if we stepped to the register with ``.END.`` or found an unused register. In
-such cases we can do a test and conditionally return, which will take
-us to ``(P+1)`` of the caller:
+permanent ``.END.``. In such cases we can do a test and conditionally
+return, which will take us to ``(P+1)`` of the caller:
 
 .. code-block:: ca65
 
@@ -87,11 +86,11 @@ This is done in the following way:
 
 The ``GOTOC`` instruction is very useful here as it simply loads the
 program counter with ``C[6:3]``, meaning we take the address field of
-C and jump to it, which is exactly what we want to do here.
+C and load it to PC, which is exactly what we want to do here.
 
 As can be seen, a single conditional ``RTN`` instruction can handle errors,
 and a short three word sequence will allow us to return to ``(P+2)``. On the
-caller side, a single word branch (``GOTO``) will take us somewhere to
+caller side, a short branch (``GOTO``) will take us somewhere to
 deal with the error condition. There are no error value or flags
 passed back, nor any tests needed at the call site. It gets very small
 and simple.
@@ -102,7 +101,8 @@ that does not employ this technique, but rather returning 0 or setting
 a flag (as in the HP-IL module).
 
 The main advantage of the return to different locations idiom is that
-it saves an instruction on each call site.
+it saves an instruction on each call site. It often simplifies the
+routine returning the error result as well.
 
 A disadvantage is that you need to act on the condition immediately.
 Another problem is that you cannot use the ``C[6:3]`` field to carry
@@ -115,7 +115,8 @@ Call backs
 
 A similar technique can be used for implementing call backs. We can
 make a call and keep a call back pointer at ``(P+1)``. In fact, we
-can easily have multiple call backs by just adding pointers.
+can easily have multiple call backs by just adding additional return
+locations.
 
 .. code-block:: ca65
 
@@ -154,8 +155,8 @@ Later we can call a routine using:
 
 Here we make use of having the base call back pointer in
 ``M[6:3]``. Note that it trashes part of the C register. However,
-making any page relative call (3-word) also destroys most of C
-register.
+making a page relative call (3-word pseudo call) also destroys most of
+the C register.
 
 The final return from ``routine`` is made by jumping back to its
 ``callBackN`` routine.
@@ -166,7 +167,7 @@ Code pointers
 
 .. index:: packed pointers, pointers; packed
 
-As a ROM word is only 10 bits long. We are lacking a few bits to make
+As a ROM word is only 10 bits long and we lack a few bits to make
 a full 16-bit code pointer. Instead of using two words, we can get
 away with only using 10 bits by observing two things.
 
@@ -174,8 +175,8 @@ First, the code that are providing the code pointer is in a page
 relocatable module. Normally, we do not know which page we will be
 executing from. This can be found at run-time using the ``PCTOC`` in
 the operating system. In practice, it is often easier to leave it to
-the called routine to figure it out (as it has the return address to
-it on the stack).
+the called routine to figure the page address out (as it has the
+return address pointing to it on the stack).
 
 Second, with the page sort of taken care of, we have 12 bits to represent
 using 10 bits. We can do this by aligning the code so that the
@@ -248,7 +249,7 @@ Our invocation of routine would then become:
    handler1:     do-stuff ...
                  rtn
 
-Our routine for a start look as before, as we still want to keep
+The start of the routine looks as before, as we still want to keep
 track of the ``(P+1)`` pointer, it is just what is stored at those
 addresses that changed, not the ``(P+1)`` itself.
 
@@ -260,9 +261,9 @@ addresses that changed, not the ``(P+1)`` itself.
                  ...
                  gosub callBackAdr2
 
-What is different is the actual call back helper, here it is named
+What is different is the actual call back helper. Here it is named
 differently to distinguish it from the previous, as we may want to
-have both variant around.
+have both variants around.
 
 
 .. code-block:: ca65
@@ -303,7 +304,7 @@ first address of the page where there is data (XROM identity and FAT):
 The alternative would be to store a real pointer that points to a
 ``RTN`` instruction. We can then omit the 2 words to test above, but
 on the other hand we would need to provide a ``RTN`` instruction that
-is aligned, so it would perhaps not save so much. In this case it is a
+is aligned, so the savings are neglectable. In this case it is a
 matter of taste, and having 0 as empty value is easier for the user
 and is perhaps somewhat more natural.
 

@@ -4,17 +4,17 @@ Secondary functions
 
 .. index:: functions, secondary, secondary functions
 
-Secondary functions are additional XROM functions allows for up to
+Secondary functions are additional XROM functions which allows for up to
 4096 additional functions that can be used if the provided 64
 primary functions are not enough.
 
 The ``XEQ'`` replacement function in the Boost module can be used to
-access secondary functions by name, just as any other function. The
+access secondary functions by name, like any other function. The
 replacement ``ASN'`` function also allows them to be assigned to keys
-in essentially the same way as ordinary XROM functions.
+in essentially the same way as with ordinary XROM functions.
 
 Storing secondary functions in programs is also possible using the
-semi-merged functionality, they can also have postfix arguments
+semi-merged functionality. They can also have postfix arguments
 in programs.
 
 It can be worth pointing out that once you have set up the secondary
@@ -38,7 +38,7 @@ the same bank.
 
 Each secondary FAT header table has an ordinary prefix XROM function
 associated with it. This function is used to represent secondary
-functions in RPN programs. As a result each secondary FAT table can
+functions in RPN programs. As a result of this, each secondary FAT table can
 hold up to 256 secondary functions.
 
 .. figure:: _static/secondaryFat.*
@@ -48,7 +48,7 @@ Execution by name
 
 .. index:: functions, execution by name
 
-To find a secondary function by name, a similar routine to ``ASRCH`` in
+To find a secondary function by name, a similar routine to ``ASRCH`` in the
 mainframe is needed. As it is not possible to alter ``ASRCH`` which is in
 mainframe ROM, OS4 provides a similar function that is aware of
 secondary FATs. Execution by name is done by ``XEQ`` and the easiest
@@ -71,10 +71,10 @@ function identity and finally 2 nibbles for the key code. There is no
 leading ``F0`` marker in this register as all nibbles are needed for
 the assignments. This works as they are stored inside the system buffer.
 
-As with the ordinary assignments there are bitmaps secondary
-assignments for fast lookup if a key is assigned. These are also
+As with the ordinary assignments there are also bitmaps for the secondary
+assignments for fast lookup to see if a key is assigned. These are also
 stored in the OS4 system buffer, consuming two additional
-registers when the first assignment is created.
+registers when the first secondary assignment is created.
 
 Assignments are easily created using the ``ASN'`` function in the
 Boost module, which is OS4 aware. This works very similar to the
@@ -82,18 +82,18 @@ already discussed ``XEQ'`` function. ``ASN'`` can handle assignments
 of both primary and secondary functions.
 
 As the OS4 module controls the keyboard it will also look for
-assignments when appropriate. This will look for both primary and
+assignments when appropriate. It will look for both primary and
 secondary assignments and if both are present, the primary assignment
-takes precedence. Normally they are no collisions, but in case you
-load keys from storage medium you may get duplicate assignments. This
+takes precedence. Normally they are no collisions, but if the user
+loads keys from storage medium there may be duplicate assignments. This
 is because such mechanisms predates OS4 and only knows about primary
 assignments.
 
-This has a couple of caveats. If you manage to remove such assignments
+There are a couple of things to consider. If the user manages to remove such assignments
 outside the control of OS4 (by using another load key assignments that
 replaces the current ones), the secondary assignments that were
 shadowed will appear again. Loading keys from storage this way will
-not reclaim the memory used for (shadowed) secondary  assignments.
+not reclaim the memory used for secondary  assignments.
 Replacing keys this way only works on primary assignments. The
 secondary assignments are always retained in a merge keys fashion in
 such cases.
@@ -101,6 +101,9 @@ such cases.
 As a workaround, the function ``CLKYSEC`` in the Boost module can be
 used to remove all secondary assignments. It simply calls the
 ``clearSecondaryAssignments`` routine in the OS4 API.
+
+Module removal
+==============
 
 A secondary assignment that belongs to a module which is removed shows
 up as ``XXROM ii,kkk`` if the key is pressed and held.
@@ -110,7 +113,7 @@ up as ``XXROM ii,kkk`` if the key is pressed and held.
    Secondary function on assigned keys are only searched for when
    there is at least one shell in the shell stack. If you have secondary
    assignments and remove every application and system shell from the
-   stack, secondary assignments become invisible. This is unlikely to
+   stack, secondary assignments will become invisible. This is unlikely to
    happen in reality as you need to have the ``ASN'`` function from
    the Boost module (or similar) to create them and it will always put
    a system shell on the shell stack.
@@ -121,7 +124,7 @@ In RPN programs
 .. index:: secondary functions; in programs
 
 In program mode a normal XROM works as a prefix for representing
-secondary functions. This is followed by a text literal that holds the
+secondary functions. This is followed by a text literal that holds an
 adjusted secondary function index. This index is based on the
 secondary FAT it belongs to (0--255). Each secondary FAT header table
 has such paired XROM that acts as the prefix for it.
@@ -157,10 +160,10 @@ also when the module is removed.
 
 .. note::
    A secondary function bound to a key that belongs to a module that is
-   not plugged in cannot be entered in a program. This is also because the
-   use of a XROM prefix function requires the secondary FAT to
-   determine which XROM acts as prefix and also the base index for
-   that table.
+   not plugged in cannot be entered in a program. This is because the
+   use of a XROM prefix function requires the secondary FAT to be
+   present in order to determine which XROM acts as prefix and also
+   the base index for that table.
 
 Defining
 ========
@@ -182,14 +185,14 @@ Secondary FAT structure
 
 .. index:: functions; secondary FAT, secondary FAT
 
-The secondary FAT structure is different compared to the ordinary FAT and
+The secondary FAT structure is different compared to the primary FAT and
 consists of several parts:
 
 #. A root pointer to the secondary FAT start is a packed pointer
    located at address ``0xFC2`` in the module page. As this location may
    contain other data in modules that are not OS4 aware, the module page
    image must also mark in the module ID field that this location
-   has a valid root pointer, this is described next.
+   has a valid root pointer.
 
 #. The module identity area consists of 4 words located at
    ``0xFFB``--``0xFFE`` in the module page. It forms a four letter
@@ -209,13 +212,14 @@ consists of several parts:
 #. The actual secondary FAT is pointed to from the secondary FAT
    header. This FAT is defined in the same way as the ordinary XROM
    FAT. It can be located in any bank, but all functions in it must be
-   (or at least start) in the same bank. This bank is enabled by the
+   (or at least start) in the same bank as the header. This bank is enabled by the
    bank switch routine in the secondary FAT header that points to it.
 
-The bank switch routine should either be ``RTN`` for a primary bank,
-or one of the ``ENROM`` instructions followed by a ``RTN``. That
-``RTN`` instruction must be located at the following address in the
-bank it enables. No registers should be affected by this code snippet.
+#. The bank switch routine should either be ``RTN`` for a primary
+   bank, or one of the ``ENROM`` instructions followed by a
+   ``RTN``. That ``RTN`` instruction must be located at the following
+   address in the bank it enables. No registers should be affected by
+   this code snippet.
 
 Root pointer
 ------------
@@ -253,7 +257,7 @@ area in the word immediately before the checksum:
                  .con    1             ; A
                  .con    '1'           ; 1
                  .con    0x20f         ; O (tagged for having banks)
-                 .con    0x202         ; B (tagged as having secondaries)
+                 .con    0x202         ; B (tagged as having secondary FAT)
                  .con    0             ; checksum position
 
 Secondary FAT header
@@ -261,7 +265,7 @@ Secondary FAT header
 
 .. index:: secondary FAT header
 
-The secondary FAT header are small records that must be in the primary
+The secondary FAT headers are small records that must be in the primary
 bank. They form a linked list starting from root pointer. The first
 word points to the next secondary FAT header record and the last one
 has this word set to 0.
@@ -295,20 +299,20 @@ The second field is the number of entries in the secondary FAT we
 describe. This is used for range checking.
 
 The prefix XROM field is the function number in the main XROM of this
-module that serves as the prefix XROM used in programs.
+module that serves as the prefix XROM used in RPN programs.
 
 .. index:: secondary FAT; reserving identities
 
 The start index is the function number of the first secondary function
 stored in this table. Each prefix XROM can serve up to 256 functions
-and we have a full range of 4096 secondary functions. Thus, we may
+and we have a full range of 4096 secondary functions. In practice we may
 just step this by 256 for each secondary FAT header, which reserves
 space for adding more functions later without affecting any index in
 other tables. We essentially leave gaps for future secondary function
 to be appended to the overall secondary function table.
 
 A packed pointer to the actual FAT follows. The actual FAT pointed to
-can be located in any bank. The next address holds a code snippet that
+can be located in any bank. The next address holds a code snippet which
 enables the bank it is located in.
 If it is located in the primary bank, no change is needed so it
 can just return. To switch bank you need to use the appropriate
@@ -325,6 +329,11 @@ using some clever code arrangement. The easiest way is to use the
                  .section Code\n
                  .shadow 10$
                  .endm
+
+.. note::
+
+   After your bank switch routine you should use another section
+   directive to control where the code the follows is stored.
 
 Secondary FAT table
 -------------------
@@ -354,7 +363,7 @@ The linked list of FAT secondary FAT headers allows for binding XROM
 prefixes to a range of secondary functions. These prefix XROM
 functions are needed when secondary functions are stored in
 programs. To save space in RPN program memory, a single byte is used
-as the identity, which means that you should not have more than 256
+as the identity, which means that you can not have more than 256
 secondary functions in each FAT. Allowing more functions to be handled
 by a single XROM prefix would cost an extra byte of program memory for
 each secondary function. It was judged better to use an couple of such
@@ -397,8 +406,7 @@ and may then use the bank switch routines above to switch bank.
 OS4 uses this technique to inspect secondary FATs which may be located in
 other banks than the primary. However, OS4 only uses the ``ENBNK1``
 routine as it uses the bank switch routine in the secondary FAT header
-to enable other banks.
-
+to enable secondary banks.
 
 Error exits with banks
 ======================
@@ -406,7 +414,7 @@ Error exits with banks
 .. index:: banks; error exists
 
 Many functions need to perform some sanity checking on input and exit
-using appropriate error message routines to notify the user if
+using an error message routine to notify the user if
 something is wrong with the input. One such example is ``ERRDE`` which
 displays ``DATA ERROR``.
 
@@ -418,9 +426,9 @@ function is in some other bank than the first one, as you should
 always leave the first bank enabled when you are not in control.
 
 This can of course be solved by switching bank and then jumping to the
-error handler, but that is in reality somewhat tricky. To make it
+error handler, but it is somewhat tricky. To make it
 simple, OS4 provides a set of routines that display normal error
-messages and restores the bank of your module for you. In your
+messages and then switch to the primary bank. In your
 function you can do something like this:
 
 .. code-block:: ca65
@@ -434,17 +442,17 @@ Note that instead of jumping to the error handler, it uses a ``GOSUB``
 (with carry set condition in this example) to the error exit
 routine. The called routine pops the return stack to get the page
 number of your function. It then inspects the module page and calls
-the defined bank switch entry point ``ENBNK1`` to enable bank 1 in
-your page, then it jumps to the normal ``ERRDE`` routine.
+the defined bank switch entry point ``ENBNK1`` to enable bank 1,
+then it jumps to the normal ``ERRDE`` routine.
 
 See :ref:`error-exit-from-banks` for existing error exit routines.
 
 Function exit
 -------------
 
-A related routine ``resetMyBank`` exists. It resets your bank and
-returns. This can be used as a normal exit from your secondary bank
-instead of using a ``RTN`` instruction. As with the error handlers
+For normal returns the ``resetMyBank`` routine which enables the
+primary bank and returns, rather than using an ``RTN`` instruction
+which does not restore the primary bank. As with the error handlers
 above you need to use a ``GOSUB`` instruction:
 
 .. code-block:: ca65

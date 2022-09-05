@@ -21,19 +21,19 @@ Classes of functions
 ====================
 
 There are three main classes of functions, ordinary functions,
-prompting functions and execute direct functions.
+prompting functions and execute direct functions (XKD).
 
-In addition there is data entry keys (including backspace), which we
+In addition there are data entry keys (including backspace), which we
 will not cover here.
 
 Ordinary functions
 ------------------
 
 An ordinary function is one that goes through the NULL check and does
-not put up a prompt, e.g. ``SIN``. They can either be programmable or
-non-programmable. This is controlled by whether the first instruction
-address (internally called XADR) is a ``NOP`` instruction (opcode ``0x000``)
-or not.
+not put up a prompt, e.g. ``SIN``. It can either be programmable or
+non-programmable. This is controlled by the first instruction
+address (internally called XADR) whether it is a ``NOP`` instruction
+(opcode ``0x000``) or not.
 
 Execute direct functions
 ------------------------
@@ -58,7 +58,7 @@ Prompting functions
 .. index:: functions; prompting, prompting functions
 
 A prompting function has some upper bits set in its name header. This
-specifies what class of prompting function it belongs to. A prompting function
+specifies which class of prompting function it belongs to. A prompting function
 does not go through any NULL check, instead its name is displayed
 together with one or more prompt underscores.
 
@@ -89,17 +89,17 @@ Execution by token is done from inside a program or when bound to a
 key on the keyboard.
 
 It can be worth knowing that execution by name actually is a two-step
-process. The first step locates the function by its name by scanning
+process. The first step finds the function by its name by scanning
 the catalogs (more on this later) and the second step executes the
 function by its execution token.
 
-If the function found by name is an MCODE function is, it is first to
+If the function found by name is an MCODE function is, it is first
 checked if it is "execute direct" (XKD). If it is, the function is
 immediately invoked. The usual return address to mainframe  (``NFRPU``
 at address ``0x00c0``) is not pushed onto the stack in this case. If
 it is not XKD, the function name is displayed, which serves two
 purposes. If it is a prompting function we want it together with the
-prompt. If not, we want the name in the display becomes visible if the
+prompt. If not, we want the name in the display to be shown if the
 user keeps the key pressed, which is the "talking key" feature. If the
 key is kept down for 0.5 seconds, the function invocation is aborted
 and ``NULL`` is displayed.
@@ -108,8 +108,8 @@ If the function passes the NULL check it is executed by its
 execution token, not by its name. That might sound a bit confusing,
 but what actually happens is that even though we know the execution
 address (XADR in mainframe terminology), we only use that for showing
-the name of the function and deciding what class it belongs to. The
-actual XADR is only used for execution if the function is XKD. All
+the name of the function and deciding what class it belongs to. That
+XADR is only used for execution if the function is XKD. All
 other functions are executed by its execution token, even when you
 type it by name.
 
@@ -134,8 +134,8 @@ Search order
 .. index:: functions; search order, search order
 
 Searching a function by name is done in catalog order. User programs
-in catalog are searched first, followed by plug-in modules (XROMs) in
-address order [#page3]_ and finally the built-in functions in
+in catalog 1 are searched first, followed by plug-in modules (XROMs) in
+catalog 2 in address order [#page3]_ and finally the built-in functions in
 catalog 3.
 
 OS4 extends the search by also searching for secondary functions. This
@@ -168,7 +168,7 @@ of doing alpha input to functions such as ``PRP`` in the printer
 ROM. Later the Extended Functions module provided means of reading
 such arguments from the alpha register.
 
-The OS4 module provides a way for XROM to prompt for arguments and
+The OS4 module provides a way for XROM functions to prompt for arguments and
 represent them as program steps. It is not possible to fully
 merge such program steps, but OS4 allows you to get partly there.
 In program memory the XROM is followed by an alpha literal that
@@ -200,8 +200,8 @@ same way as an XROM, though the function number has a wider range
 module with XROM identifier 7 (the numbers start from 0).
 
 .. note::
-   The numeric series are separate, so you have up to 64 primary and
-   4096 secondary functions in a module.
+   The numeric XROM and XXROM series are separate, so you have up to
+   64 primary and 4096 secondary functions in a module.
 
 With the Boost module, you can key the name of the secondary
 function from its ``XEQ'`` instruction which is available
@@ -239,7 +239,7 @@ normal function.
    You need the Boost module to obtain the ``XEQ'`` and ``ASN'``
    replacement functions to access secondary functions. The routines
    that look up secondary functions by name or its numeric identity
-   are in OS4.
+   are provided by OS4.
 
 What is up
 ==========
@@ -248,7 +248,7 @@ What is up
 
 In the book "HP-41 MCODE Programming for Beginners" appendix B
 (page 132) lists what is up on function entry. Secondary functions
-diverge a bit from what is listed there and the list is probably a bit
+diverge a bit from what is listed there and that list is probably a bit
 too detailed anyway. The following is what you can rely on:
 
 #. CPU is set to hex mode.
@@ -262,9 +262,9 @@ Internal representation
 .. index:: functions; internal representation
 
 Finally we will take a look at the ways that are used to represent the
-function internally. This is probably not anything you normally need
+functions internally. This is probably not anything you normally need
 to bother so much about, but in some situations it can be good to know.
-It also gives an improved understanding for how it works.
+It also gives further understanding for how it works.
 
 By address
 ----------
@@ -287,12 +287,12 @@ function is non-programmable or XKD. The example above is an ordinary
 non-programmable function.
 
 For secondary functions the address of the XADR is not enough. We also
-need to keep the bank it is located in, so the XADR for a secondary
+need to know the bank it is located in, so the XADR for a secondary
 function is actually two addresses. The bank is represented by a
 pointer to the bank switcher routine associated with the secondary
-FAT header which points the secondary FAT the function belongs
-to. This allows for switching to the correct bank before accessing the
-first locations.
+FAT header (which points the secondary FAT the function belongs
+to). This allows for switching to the correct bank to access the FAT
+and the function itself.
 
 By execution token
 ------------------
@@ -308,11 +308,11 @@ token. Secondary functions have a couple of different representations:
    This is also how they are stored in program memory.
 
 During keyboard execution the needed information, such as XADR,
-bank switcher and secondary function number are stored in the M
-register or other temporary places.
+bank switcher and secondary function number are kept in the M
+register or some other temporary location.
 
 .. rubric:: Footnotes
 .. [#page3]
-   The HP-41CX extended the plug-in module range by adding things in
+   The HP-41CX extended the plug-in module range by adding functions in
    page 3. The search is from page 5 to 15, but on an HP-41CX page 3
    is additionally searched after page 15.

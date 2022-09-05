@@ -40,8 +40,8 @@ is banked and if it has secondary functions.
 
 .. glossary:: Mainframe
 
-The name HP used internally for the HP-41 firmware. (Normally it means
-a very powerful computer.)
+The name HP used internally for the HP-41 firmware. Normally it means
+a very large (and at the time it was modern) powerful computer.
 
 .. glossary:: MCODE
 
@@ -116,7 +116,7 @@ keyboard behavior and be active at all time.
 
 .. glossary:: Transient application
 
-A temporary mode like a catalog or updating clock display.
+A temporary mode similar to a catalog or updating clock display.
 
 .. glossary:: XADR
 
@@ -124,8 +124,8 @@ The first execution address in a function.
 
 .. glossary:: XKD
 
-Execute direction function. If bound or assigned to a key executes
-on key press down.
+Execute direction function. If bound or assigned to a key, it executes
+on key press down (without NULL test).
 
 .. glossary:: XXROM function
 
